@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Claude Code
+.claude/
+
+# Build artifacts
+build/
+dist/
+*.spec.bak
+
+# App outputs
+/generated_zone_path.png
+
+# Personal EverQuest log files (keep samples/ ones tracked)
+eqlog_*.txt
+ARCHIVE*eqlog_*.txt
+!samples/sample_eqlog_*.txt
+
+# Working / scratch artifacts
+combined_run_output.txt
+zone_centers_extracted.csv

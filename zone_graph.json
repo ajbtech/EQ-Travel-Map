@@ -1,0 +1,1341 @@
+{
+  "aliases": {
+    "Arena (PvP) area": "The Arena",
+    "Cazic-Thule": "Cazic Thule",
+    "City of Thurgadin": "Thurgadin",
+    "Eastern Plains of Karana": "East Karana",
+    "Eastern Wastelands": "Eastern Wastes",
+    "Everfrost": "Everfrost Peaks",
+    "Guk": "Upper Guk",
+    "Howling Stones": "Charasis (H. Stones)",
+    "Infected Paw": "Splitpaw Lair",
+    "Kael Drakkel": "Kael Drakkal",
+    "Kithicor Woods": "Kithicor Forest",
+    "Lost Temple of Cazic-Thule": "Cazic Thule",
+    "Northern Plains of Karana": "North Karana",
+    "Permafrost Caverns": "Permafrost Keep",
+    "Plane of Air": "Plane of Sky",
+    "Ruins of Old Guk": "Lower Guk",
+    "Southern Plains of Karana": "South Karana",
+    "Swamp Of No Hope": "Swamp of No Hope",
+    "The Burning Wood": "Burning Wood",
+    "The City of Mist": "City of Mist",
+    "The Emerald Jungle": "Emerald Jungle",
+    "The Nektulos Forest": "Nektulos Forest",
+    "The Overthere": "Overthere",
+    "The Wakening Lands": "Wakening Land",
+    "Warrens": "The Warrens",
+    "Western Plains of Karana": "West Karana"
+  },
+  "description": "Zone adjacency graph transcribed from the local Project 1999 zone_map.png. Edges represent non-directional visible map connections between zones.",
+  "edges": [
+    {
+      "from": "Erudin Palace",
+      "to": "Erudin"
+    },
+    {
+      "from": "Erudin",
+      "to": "Erudin Docks"
+    },
+    {
+      "from": "Erudin",
+      "to": "Toxxulia Forest"
+    },
+    {
+      "from": "Erudin Docks",
+      "to": "Erud's Crossing"
+    },
+    {
+      "from": "Toxxulia Forest",
+      "to": "Kerra Isle"
+    },
+    {
+      "from": "Toxxulia Forest",
+      "to": "Paineel"
+    },
+    {
+      "from": "Paineel",
+      "to": "The Warrens"
+    },
+    {
+      "from": "The Warrens",
+      "to": "Stonebrunt Mtns."
+    },
+    {
+      "from": "Paineel",
+      "to": "The Hole"
+    },
+    {
+      "from": "Halas",
+      "to": "Everfrost Peaks"
+    },
+    {
+      "from": "Everfrost Peaks",
+      "to": "Permafrost Keep"
+    },
+    {
+      "from": "Everfrost Peaks",
+      "to": "Blackburrow"
+    },
+    {
+      "from": "Blackburrow",
+      "to": "Qeynos Hills"
+    },
+    {
+      "from": "Surefall Glade",
+      "to": "Qeynos Hills"
+    },
+    {
+      "from": "Qeynos Hills",
+      "to": "North Qeynos"
+    },
+    {
+      "from": "Qeynos Hills",
+      "to": "West Karana"
+    },
+    {
+      "from": "North Qeynos",
+      "to": "South Qeynos"
+    },
+    {
+      "from": "North Qeynos",
+      "to": "Qeynos Catacombs"
+    },
+    {
+      "from": "South Qeynos",
+      "to": "Qeynos Catacombs"
+    },
+    {
+      "from": "West Karana",
+      "to": "North Karana"
+    },
+    {
+      "from": "North Karana",
+      "to": "East Karana"
+    },
+    {
+      "from": "North Karana",
+      "to": "South Karana"
+    },
+    {
+      "from": "South Karana",
+      "to": "Splitpaw Lair"
+    },
+    {
+      "from": "South Karana",
+      "to": "Lake Rathetear"
+    },
+    {
+      "from": "East Karana",
+      "to": "Gorge of King Xorbb"
+    },
+    {
+      "from": "East Karana",
+      "to": "Highpass Hold"
+    },
+    {
+      "from": "Gorge of King Xorbb",
+      "to": "Runnyeye Citadel"
+    },
+    {
+      "from": "Runnyeye Citadel",
+      "to": "Misty Thicket"
+    },
+    {
+      "from": "Misty Thicket",
+      "to": "Rivervale"
+    },
+    {
+      "from": "Highpass Keep",
+      "to": "Highpass Hold"
+    },
+    {
+      "from": "Rivervale",
+      "to": "Kithicor Forest"
+    },
+    {
+      "from": "Highpass Hold",
+      "to": "Kithicor Forest"
+    },
+    {
+      "from": "Kithicor Forest",
+      "to": "West Commonlands"
+    },
+    {
+      "from": "West Commonlands",
+      "to": "East Commonlands"
+    },
+    {
+      "from": "West Commonlands",
+      "to": "Befallen"
+    },
+    {
+      "from": "East Commonlands",
+      "to": "West Freeport"
+    },
+    {
+      "from": "East Commonlands",
+      "to": "Northern Desert of Ro"
+    },
+    {
+      "from": "North Freeport",
+      "to": "West Freeport"
+    },
+    {
+      "from": "West Freeport",
+      "to": "East Freeport"
+    },
+    {
+      "from": "East Freeport",
+      "to": "Northern Desert of Ro"
+    },
+    {
+      "from": "Northern Desert of Ro",
+      "to": "Oasis of Marr"
+    },
+    {
+      "from": "Oasis of Marr",
+      "to": "Southern Desert of Ro"
+    },
+    {
+      "from": "Southern Desert of Ro",
+      "to": "Innothule Swamp"
+    },
+    {
+      "from": "Innothule Swamp",
+      "to": "Grobb"
+    },
+    {
+      "from": "Innothule Swamp",
+      "to": "Upper Guk"
+    },
+    {
+      "from": "Upper Guk",
+      "to": "Lower Guk"
+    },
+    {
+      "from": "Innothule Swamp",
+      "to": "The Feerrott"
+    },
+    {
+      "from": "The Feerrott",
+      "to": "Oggok"
+    },
+    {
+      "from": "The Feerrott",
+      "to": "Cazic Thule"
+    },
+    {
+      "from": "The Feerrott",
+      "to": "Rathe Mountains"
+    },
+    {
+      "from": "Rathe Mountains",
+      "to": "Lake Rathetear"
+    },
+    {
+      "from": "Lake Rathetear",
+      "to": "The Arena"
+    },
+    {
+      "from": "The Feerrott",
+      "to": "Plane of Fear"
+    },
+    {
+      "from": "East Commonlands",
+      "to": "Nektulos Forest"
+    },
+    {
+      "from": "Nektulos Forest",
+      "to": "Lavastorm Mountains"
+    },
+    {
+      "from": "Nektulos Forest",
+      "to": "Neriak Foreign Quarter"
+    },
+    {
+      "from": "Neriak Foreign Quarter",
+      "to": "Neriak Commons"
+    },
+    {
+      "from": "Neriak Commons",
+      "to": "Neriak Third Gate"
+    },
+    {
+      "from": "Lavastorm Mountains",
+      "to": "Nagafen's Lair"
+    },
+    {
+      "from": "Lavastorm Mountains",
+      "to": "Solusek's Eye"
+    },
+    {
+      "from": "Lavastorm Mountains",
+      "to": "Temple of Sol. Ro"
+    },
+    {
+      "from": "Lavastorm Mountains",
+      "to": "Najena"
+    },
+    {
+      "from": "East Freeport",
+      "to": "Plane of Sky"
+    },
+    {
+      "from": "East Freeport",
+      "to": "Ocean of Tears"
+    },
+    {
+      "from": "Ocean of Tears",
+      "to": "Butcherblock Mountains"
+    },
+    {
+      "from": "Erud's Crossing",
+      "to": "Ocean of Tears"
+    },
+    {
+      "from": "Butcherblock Mountains",
+      "to": "Timorous Deep"
+    },
+    {
+      "from": "Iceclad Ocean",
+      "to": "Ocean of Tears"
+    },
+    {
+      "from": "Butcherblock Mountains",
+      "to": "South Kaladim"
+    },
+    {
+      "from": "South Kaladim",
+      "to": "North Kaladim"
+    },
+    {
+      "from": "Butcherblock Mountains",
+      "to": "Dagnor's Cauldron"
+    },
+    {
+      "from": "Butcherblock Mountains",
+      "to": "Greater Faydark"
+    },
+    {
+      "from": "Greater Faydark",
+      "to": "Crushbone"
+    },
+    {
+      "from": "Greater Faydark",
+      "to": "North Felwithe"
+    },
+    {
+      "from": "North Felwithe",
+      "to": "South Felwithe"
+    },
+    {
+      "from": "Greater Faydark",
+      "to": "Lesser Faydark"
+    },
+    {
+      "from": "Dagnor's Cauldron",
+      "to": "Kedge Keep"
+    },
+    {
+      "from": "Dagnor's Cauldron",
+      "to": "Estate of Unrest"
+    },
+    {
+      "from": "Lesser Faydark",
+      "to": "Steamfont Mountains"
+    },
+    {
+      "from": "Lesser Faydark",
+      "to": "Castle Mistmoore"
+    },
+    {
+      "from": "Steamfont Mountains",
+      "to": "Ak'Anon"
+    },
+    {
+      "from": "Veeshan's Peak",
+      "to": "Skyfire Mountains"
+    },
+    {
+      "from": "Skyfire Mountains",
+      "to": "Overthere"
+    },
+    {
+      "from": "Skyfire Mountains",
+      "to": "Burning Wood"
+    },
+    {
+      "from": "Burning Wood",
+      "to": "Chardok"
+    },
+    {
+      "from": "Burning Wood",
+      "to": "Dreadlands"
+    },
+    {
+      "from": "Burning Wood",
+      "to": "Frontier Mountains"
+    },
+    {
+      "from": "Temple of Droga",
+      "to": "Mines of Nurga"
+    },
+    {
+      "from": "Temple of Droga",
+      "to": "Frontier Mountains"
+    },
+    {
+      "from": "Charasis (H. Stones)",
+      "to": "Overthere"
+    },
+    {
+      "from": "Overthere",
+      "to": "Frontier Mountains"
+    },
+    {
+      "from": "Overthere",
+      "to": "Warsliks Woods"
+    },
+    {
+      "from": "Frontier Mountains",
+      "to": "Dreadlands"
+    },
+    {
+      "from": "Frontier Mountains",
+      "to": "Lake of Ill Omen"
+    },
+    {
+      "from": "Dreadlands",
+      "to": "Karnor's Castle"
+    },
+    {
+      "from": "Dreadlands",
+      "to": "Firiona Vie"
+    },
+    {
+      "from": "Crypt of Dalnir",
+      "to": "Warsliks Woods"
+    },
+    {
+      "from": "Warsliks Woods",
+      "to": "Lake of Ill Omen"
+    },
+    {
+      "from": "Warsliks Woods",
+      "to": "West Cabilis"
+    },
+    {
+      "from": "Warsliks Woods",
+      "to": "Field of Bone"
+    },
+    {
+      "from": "Lake of Ill Omen",
+      "to": "West Cabilis"
+    },
+    {
+      "from": "Lake of Ill Omen",
+      "to": "Firiona Vie"
+    },
+    {
+      "from": "Lake of Ill Omen",
+      "to": "Swamp of No Hope"
+    },
+    {
+      "from": "West Cabilis",
+      "to": "East Cabilis"
+    },
+    {
+      "from": "East Cabilis",
+      "to": "Field of Bone"
+    },
+    {
+      "from": "East Cabilis",
+      "to": "Swamp of No Hope"
+    },
+    {
+      "from": "Field of Bone",
+      "to": "Kurn's Tower"
+    },
+    {
+      "from": "Field of Bone",
+      "to": "Swamp of No Hope"
+    },
+    {
+      "from": "Field of Bone",
+      "to": "Kaesora"
+    },
+    {
+      "from": "Field of Bone",
+      "to": "Emerald Jungle"
+    },
+    {
+      "from": "Firiona Vie",
+      "to": "Swamp of No Hope"
+    },
+    {
+      "from": "Swamp of No Hope",
+      "to": "Trakanon's Teeth"
+    },
+    {
+      "from": "Emerald Jungle",
+      "to": "City of Mist"
+    },
+    {
+      "from": "Emerald Jungle",
+      "to": "Kaesora"
+    },
+    {
+      "from": "Emerald Jungle",
+      "to": "Trakanon's Teeth"
+    },
+    {
+      "from": "Trakanon's Teeth",
+      "to": "Old Sebilis"
+    },
+    {
+      "from": "Dragon Necropolis",
+      "to": "Western Wastes"
+    },
+    {
+      "from": "Western Wastes",
+      "to": "Siren's Grotto"
+    },
+    {
+      "from": "Western Wastes",
+      "to": "Temple of Veeshan"
+    },
+    {
+      "from": "Siren's Grotto",
+      "to": "Cobalt Scar"
+    },
+    {
+      "from": "Cobalt Scar",
+      "to": "Skyshrine"
+    },
+    {
+      "from": "Temple of Veeshan",
+      "to": "Plane of Mischief"
+    },
+    {
+      "from": "Plane of Mischief",
+      "to": "Cobalt Scar"
+    },
+    {
+      "from": "Skyshrine",
+      "to": "Wakening Land"
+    },
+    {
+      "from": "Wakening Land",
+      "to": "Kael Drakkal"
+    },
+    {
+      "from": "Wakening Land",
+      "to": "Plane of Growth"
+    },
+    {
+      "from": "Wakening Land",
+      "to": "Eastern Wastes"
+    },
+    {
+      "from": "Velketor's Labyrinth",
+      "to": "Great Divide"
+    },
+    {
+      "from": "Icewell Keep",
+      "to": "Thurgadin"
+    },
+    {
+      "from": "Thurgadin",
+      "to": "Great Divide"
+    },
+    {
+      "from": "Icewell Keep",
+      "to": "Great Divide"
+    },
+    {
+      "from": "Great Divide",
+      "to": "Eastern Wastes"
+    },
+    {
+      "from": "Eastern Wastes",
+      "to": "Kael Drakkal"
+    },
+    {
+      "from": "Eastern Wastes",
+      "to": "Crystal Cavern"
+    },
+    {
+      "from": "Eastern Wastes",
+      "to": "Sleeper's Tomb"
+    },
+    {
+      "from": "Eastern Wastes",
+      "to": "Iceclad Ocean"
+    },
+    {
+      "from": "Iceclad Ocean",
+      "to": "Tower of Frozen Shadow"
+    },
+    {
+      "from": "Northern Desert of Ro",
+      "to": "Iceclad Ocean"
+    },
+    {
+      "from": "South Qeynos",
+      "to": "Erud's Crossing"
+    },
+    {
+      "from": "Oasis of Marr",
+      "to": "Timorous Deep"
+    },
+    {
+      "from": "Timorous Deep",
+      "to": "Firiona Vie"
+    },
+    {
+      "from": "Timorous Deep",
+      "to": "Overthere"
+    },
+    {
+      "from": "Erud's Crossing",
+      "to": "Erudin"
+    }
+  ],
+  "nodes": {
+    "Ak'Anon": {
+      "center": [
+        2242,
+        474
+      ]
+    },
+    "Befallen": {
+      "center": [
+        1261,
+        542
+      ]
+    },
+    "Blackburrow": {
+      "center": [
+        736,
+        390
+      ]
+    },
+    "Burning Wood": {
+      "center": [
+        1941,
+        1188
+      ]
+    },
+    "Butcherblock Mountains": {
+      "center": [
+        2008,
+        248
+      ]
+    },
+    "Castle Mistmoore": {
+      "center": [
+        2117,
+        474
+      ]
+    },
+    "Cazic Thule": {
+      "center": [
+        1245,
+        846
+      ]
+    },
+    "Charasis (H. Stones)": {
+      "center": [
+        2169,
+        918
+      ]
+    },
+    "Chardok": {
+      "center": [
+        1981,
+        1118
+      ]
+    },
+    "City of Mist": {
+      "center": [
+        2600,
+        990
+      ]
+    },
+    "Cobalt Scar": {
+      "center": [
+        878,
+        1361
+      ]
+    },
+    "Crushbone": {
+      "center": [
+        2086,
+        172
+      ]
+    },
+    "Crypt of Dalnir": {
+      "center": [
+        2241,
+        995
+      ]
+    },
+    "Crystal Cavern": {
+      "center": [
+        1220,
+        1252
+      ]
+    },
+    "Dagnor's Cauldron": {
+      "center": [
+        2012,
+        400
+      ]
+    },
+    "Dragon Necropolis": {
+      "center": [
+        810,
+        1206
+      ]
+    },
+    "Dreadlands": {
+      "center": [
+        2131,
+        1217
+      ]
+    },
+    "East Cabilis": {
+      "center": [
+        2400,
+        1110
+      ]
+    },
+    "East Commonlands": {
+      "center": [
+        1376,
+        465
+      ]
+    },
+    "East Freeport": {
+      "center": [
+        1521,
+        465
+      ]
+    },
+    "East Karana": {
+      "center": [
+        960,
+        464
+      ]
+    },
+    "Eastern Wastes": {
+      "center": [
+        1220,
+        1322
+      ]
+    },
+    "Emerald Jungle": {
+      "center": [
+        2600,
+        1068
+      ]
+    },
+    "Erud's Crossing": {
+      "center": [
+        437,
+        631
+      ]
+    },
+    "Erudin": {
+      "center": [
+        166,
+        665
+      ]
+    },
+    "Erudin Docks": {
+      "center": [
+        241,
+        665
+      ]
+    },
+    "Erudin Palace": {
+      "center": [
+        90,
+        665
+      ]
+    },
+    "Estate of Unrest": {
+      "center": [
+        1984,
+        472
+      ]
+    },
+    "Everfrost Peaks": {
+      "center": [
+        766,
+        207
+      ]
+    },
+    "Field of Bone": {
+      "center": [
+        2465,
+        1075
+      ]
+    },
+    "Firiona Vie": {
+      "center": [
+        2363,
+        1190
+      ]
+    },
+    "Frontier Mountains": {
+      "center": [
+        2140,
+        1090
+      ]
+    },
+    "Gorge of King Xorbb": {
+      "center": [
+        960,
+        390
+      ]
+    },
+    "Great Divide": {
+      "center": [
+        1108,
+        1282
+      ]
+    },
+    "Greater Faydark": {
+      "center": [
+        2086,
+        248
+      ]
+    },
+    "Grobb": {
+      "center": [
+        1520,
+        846
+      ]
+    },
+    "Halas": {
+      "center": [
+        736,
+        135
+      ]
+    },
+    "Highpass Hold": {
+      "center": [
+        1125,
+        465
+      ]
+    },
+    "Highpass Keep": {
+      "center": [
+        1125,
+        390
+      ]
+    },
+    "Iceclad Ocean": {
+      "center": [
+        1335,
+        1322
+      ]
+    },
+    "Icewell Keep": {
+      "center": [
+        1107,
+        1142
+      ]
+    },
+    "Innothule Swamp": {
+      "center": [
+        1518,
+        768
+      ]
+    },
+    "Kael Drakkal": {
+      "center": [
+        1108,
+        1355
+      ]
+    },
+    "Kaesora": {
+      "center": [
+        2524,
+        1087
+      ]
+    },
+    "Karnor's Castle": {
+      "center": [
+        2130,
+        1278
+      ]
+    },
+    "Kedge Keep": {
+      "center": [
+        1930,
+        400
+      ]
+    },
+    "Kerra Isle": {
+      "center": [
+        90,
+        738
+      ]
+    },
+    "Kithicor Forest": {
+      "center": [
+        1202,
+        465
+      ]
+    },
+    "Kurn's Tower": {
+      "center": [
+        2465,
+        992
+      ]
+    },
+    "Lake Rathetear": {
+      "center": [
+        884,
+        763
+      ]
+    },
+    "Lake of Ill Omen": {
+      "center": [
+        2241,
+        1152
+      ]
+    },
+    "Lavastorm Mountains": {
+      "center": [
+        1390,
+        150
+      ]
+    },
+    "Lesser Faydark": {
+      "center": [
+        2086,
+        400
+      ]
+    },
+    "Lower Guk": {
+      "center": [
+        1670,
+        758
+      ]
+    },
+    "Mines of Nurga": {
+      "center": [
+        2070,
+        1107
+      ]
+    },
+    "Misty Thicket": {
+      "center": [
+        1125,
+        315
+      ]
+    },
+    "Nagafen's Lair": {
+      "center": [
+        1314,
+        100
+      ]
+    },
+    "Najena": {
+      "center": [
+        1468,
+        184
+      ]
+    },
+    "Nektulos Forest": {
+      "center": [
+        1390,
+        265
+      ]
+    },
+    "Neriak Commons": {
+      "center": [
+        1540,
+        265
+      ]
+    },
+    "Neriak Foreign Quarter": {
+      "center": [
+        1468,
+        265
+      ]
+    },
+    "Neriak Third Gate": {
+      "center": [
+        1540,
+        185
+      ]
+    },
+    "North Felwithe": {
+      "center": [
+        2164,
+        248
+      ]
+    },
+    "North Freeport": {
+      "center": [
+        1450,
+        390
+      ]
+    },
+    "North Kaladim": {
+      "center": [
+        2008,
+        96
+      ]
+    },
+    "North Karana": {
+      "center": [
+        869,
+        465
+      ]
+    },
+    "North Qeynos": {
+      "center": [
+        660,
+        505
+      ]
+    },
+    "Northern Desert of Ro": {
+      "center": [
+        1518,
+        538
+      ]
+    },
+    "Oasis of Marr": {
+      "center": [
+        1520,
+        612
+      ]
+    },
+    "Ocean of Tears": {
+      "center": [
+        1782,
+        247
+      ]
+    },
+    "Oggok": {
+      "center": [
+        1158,
+        690
+      ]
+    },
+    "Old Sebilis": {
+      "center": [
+        2603,
+        1240
+      ]
+    },
+    "Overthere": {
+      "center": [
+        2140,
+        995
+      ]
+    },
+    "Paineel": {
+      "center": [
+        166,
+        878
+      ]
+    },
+    "Permafrost Keep": {
+      "center": [
+        842,
+        142
+      ]
+    },
+    "Plane of Fear": {
+      "center": [
+        1160,
+        848
+      ]
+    },
+    "Plane of Growth": {
+      "center": [
+        1031,
+        1464
+      ]
+    },
+    "Plane of Hate": {
+      "center": [
+        2503,
+        249
+      ]
+    },
+    "Plane of Mischief": {
+      "center": [
+        949,
+        1105
+      ]
+    },
+    "Plane of Sky": {
+      "center": [
+        1604,
+        390
+      ]
+    },
+    "Qeynos Catacombs": {
+      "center": [
+        735,
+        543
+      ]
+    },
+    "Qeynos Hills": {
+      "center": [
+        660,
+        438
+      ]
+    },
+    "Rathe Mountains": {
+      "center": [
+        958,
+        765
+      ]
+    },
+    "Rivervale": {
+      "center": [
+        1202,
+        390
+      ]
+    },
+    "Runnyeye Citadel": {
+      "center": [
+        1050,
+        315
+      ]
+    },
+    "Siren's Grotto": {
+      "center": [
+        878,
+        1283
+      ]
+    },
+    "Skyfire Mountains": {
+      "center": [
+        1941,
+        995
+      ]
+    },
+    "Skyshrine": {
+      "center": [
+        954,
+        1361
+      ]
+    },
+    "Sleeper's Tomb": {
+      "center": [
+        1220,
+        1389
+      ]
+    },
+    "Solusek's Eye": {
+      "center": [
+        1314,
+        183
+      ]
+    },
+    "South Felwithe": {
+      "center": [
+        2164,
+        326
+      ]
+    },
+    "South Kaladim": {
+      "center": [
+        2008,
+        172
+      ]
+    },
+    "South Karana": {
+      "center": [
+        884,
+        609
+      ]
+    },
+    "South Qeynos": {
+      "center": [
+        660,
+        580
+      ]
+    },
+    "Southern Desert of Ro": {
+      "center": [
+        1520,
+        681
+      ]
+    },
+    "Splitpaw Lair": {
+      "center": [
+        810,
+        610
+      ]
+    },
+    "Steamfont Mountains": {
+      "center": [
+        2242,
+        400
+      ]
+    },
+    "Stonebrunt Mtns.": {
+      "center": [
+        317,
+        878
+      ]
+    },
+    "Surefall Glade": {
+      "center": [
+        586,
+        392
+      ]
+    },
+    "Swamp of No Hope": {
+      "center": [
+        2476,
+        1155
+      ]
+    },
+    "Temple of Droga": {
+      "center": [
+        2070,
+        1033
+      ]
+    },
+    "Temple of Sol. Ro": {
+      "center": [
+        1468,
+        105
+      ]
+    },
+    "Temple of Veeshan": {
+      "center": [
+        948,
+        1206
+      ]
+    },
+    "The Arena": {
+      "center": [
+        810,
+        765
+      ]
+    },
+    "The Feerrott": {
+      "center": [
+        1201,
+        768
+      ]
+    },
+    "The Hole": {
+      "center": [
+        166,
+        960
+      ]
+    },
+    "The Warrens": {
+      "center": [
+        242,
+        878
+      ]
+    },
+    "Thurgadin": {
+      "center": [
+        1107,
+        1212
+      ]
+    },
+    "Timorous Deep": {
+      "center": [
+        2000,
+        728
+      ]
+    },
+    "Tower of Frozen Shadow": {
+      "center": [
+        1325,
+        1390
+      ]
+    },
+    "Toxxulia Forest": {
+      "center": [
+        166,
+        738
+      ]
+    },
+    "Trakanon's Teeth": {
+      "center": [
+        2600,
+        1148
+      ]
+    },
+    "Upper Guk": {
+      "center": [
+        1594,
+        782
+      ]
+    },
+    "Veeshan's Peak": {
+      "center": [
+        1940,
+        918
+      ]
+    },
+    "Velketor's Labyrinth": {
+      "center": [
+        1031,
+        1284
+      ]
+    },
+    "Wakening Land": {
+      "center": [
+        1031,
+        1361
+      ]
+    },
+    "Warsliks Woods": {
+      "center": [
+        2241,
+        1078
+      ]
+    },
+    "West Cabilis": {
+      "center": [
+        2320,
+        1112
+      ]
+    },
+    "West Commonlands": {
+      "center": [
+        1291,
+        465
+      ]
+    },
+    "West Freeport": {
+      "center": [
+        1450,
+        465
+      ]
+    },
+    "West Karana": {
+      "center": [
+        765,
+        465
+      ]
+    },
+    "Western Wastes": {
+      "center": [
+        878,
+        1206
+      ]
+    }
+  },
+  "schema_version": 1,
+  "source": "zone_map.png"
+}

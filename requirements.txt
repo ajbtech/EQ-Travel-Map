@@ -1,0 +1,4 @@
+pyside6>=6.6
+pillow>=9.0
+matplotlib>=3.5
+pytest>=7.0

@@ -1,0 +1,274 @@
+/*
+ * EQ Travel Map theme.
+ *
+ * Loaded by ui.app._load_stylesheet, which substitutes {stone} and {canvas}
+ * with absolute file:// paths to the project assets. Slice values are tuned
+ * for eq_canvas.png at 1773x887 with rivets ~150px from each corner.
+ */
+
+/* === Window body: stone tablet with beveled edge =========================
+   Beveled stone 9-patch is applied via QFrame children (inputStoneFrame /
+   progressStoneFrame), not the QWidget views themselves, because plain
+   QWidget doesn't inset child layouts by border-width. The Results view
+   carries its own per-component bevels and stays transparent. */
+
+QWidget#inputView,
+QWidget#progressView,
+QWidget#resultsView {{
+    background: transparent;
+}}
+
+QFrame#inputStoneFrame,
+QFrame#progressStoneFrame {{
+    border-image: url({beveled_stone}) 108 108 108 108 repeat repeat;
+    border-width: 18px;
+    padding: 0;
+}}
+
+/* === Parchment panels: 9-slice canvas with rivets in the corners ========= */
+
+ParchmentPanel {{
+    border-image: url({canvas}) 200 200 200 200 stretch stretch;
+    border-width: 50px;
+    background: transparent;
+    min-width: 540px;
+    min-height: 240px;
+}}
+
+/* Parchment title: dark brown ink, painted on parchment, sits at the top
+   of the parchment in views where the title goes inside the canvas. */
+QLabel#parchmentTitle {{
+    color: #2a1c0e;
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 22pt;
+    font-weight: bold;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+}}
+
+/* Wide horizontal summary parchment on the Results view.
+   Override border-width so the visible 9-panel decoration is ~25% thinner
+   (50 -> 37). Height drops from 125 -> 95 to free vertical space for the
+   map; content is rendered via ParchmentPanel.set_fill_child so it uses
+   the full widget rect rather than the inner contents area. */
+ParchmentPanel#summaryParchment {{
+    border-image: url({canvas}) 200 200 200 200 stretch stretch;
+    border-width: 37px;
+    min-width: 800px;
+    min-height: 95px;
+    max-height: 95px;
+}}
+
+/* === Stone-framed map (Results view) ===================================== */
+
+QFrame#mapFrame {{
+    border-image: url({beveled_stone}) 108 108 108 108 repeat repeat;
+    border-width: 18px;
+    padding: 0;
+}}
+
+QFrame#buttonFrame {{
+    border-image: url({beveled_stone}) 108 108 108 108 repeat repeat;
+    border-width: 18px;
+    padding: 0;
+}}
+
+QFrame#summaryStoneFrame {{
+    border-image: url({beveled_stone}) 108 108 108 108 repeat repeat;
+    border-width: 18px;
+    padding: 0;
+}}
+
+/* === Form labels and inputs on parchment ================================= */
+
+QLabel#formLabel {{
+    color: #2a1c0e;
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 11pt;
+    font-weight: bold;
+    background: transparent;
+}}
+
+QLineEdit#formInput {{
+    background: rgba(241, 226, 184, 235);
+    border: 2px inset #6c4a1f;
+    color: #2a1c0e;
+    padding: 5px 9px;
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 11pt;
+    selection-background-color: #6c4a1f;
+    selection-color: #f1e2b8;
+}}
+
+QLineEdit#formInput:focus {{
+    border: 2px inset #c2a060;
+    background: rgba(247, 236, 205, 245);
+}}
+
+/* === Progress view text ================================================== */
+
+QLabel#progressCharacter {{
+    color: #2a1c0e;
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 14pt;
+    font-weight: bold;
+    background: transparent;
+}}
+
+QLabel#progressDetail {{
+    color: #3a2814;
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 11pt;
+    background: transparent;
+}}
+
+/* === Summary panel ======================================================= */
+
+QLabel#summaryHeading {{
+    color: #2a1c0e;
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 14pt;
+    font-weight: bold;
+    background: transparent;
+}}
+
+QPlainTextEdit#summaryText {{
+    background: rgba(241, 226, 184, 220);
+    border: 2px inset #6c4a1f;
+    color: #2a1c0e;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 10pt;
+    padding: 6px;
+    selection-background-color: #6c4a1f;
+    selection-color: #f1e2b8;
+}}
+
+/* Three-column summary on the Results view: no background/border so the
+   parchment shows through; columns share the same parchment and hug
+   the parchment top via QSizePolicy.Maximum + AlignTop on the label. */
+QLabel#summaryColumn {{
+    background: transparent;
+    border: none;
+    color: #2a1c0e;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 8pt;
+    padding: 0;
+    selection-background-color: #6c4a1f;
+    selection-color: #f1e2b8;
+}}
+
+/* === Map canvas placeholder text ========================================= */
+
+QLabel#mapCanvas {{
+    color: #2a1c0e;
+    background: transparent;
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 10pt;
+    font-style: italic;
+}}
+
+/* === Bronze buttons ====================================================== */
+
+QPushButton#bronzeButton {{
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #c8a667, stop:0.45 #a07e3f, stop:1 #6e4f25
+    );
+    border: 3px outset #b89358;
+    border-radius: 0;
+    color: #f7eccd;
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 11pt;
+    font-weight: bold;
+    padding: 7px 22px;
+    min-height: 28px;
+}}
+
+QPushButton#bronzeButton:hover {{
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #d8b677, stop:0.45 #b08e4f, stop:1 #7e5f35
+    );
+    border: 3px outset #d2b070;
+}}
+
+QPushButton#bronzeButton:pressed {{
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #6e4f25, stop:0.55 #a07e3f, stop:1 #c8a667
+    );
+    border: 3px inset #b89358;
+    padding: 8px 21px 6px 23px;
+}}
+
+QPushButton#bronzeButton:disabled {{
+    background-color: #807060;
+    border: 3px outset #807060;
+    color: #c0b8a8;
+}}
+
+/* === Stone-groove progress bar with rune-blue fill ======================= */
+
+QProgressBar#stoneProgress {{
+    background: #2c2620;
+    border: 2px inset #6c6358;
+    border-radius: 0;
+    text-align: center;
+    color: #f7eccd;
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 10pt;
+    min-height: 18px;
+}}
+
+QProgressBar#stoneProgress::chunk {{
+    background: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #6fdbe8, stop:0.5 #3aa6c8, stop:1 #1e6f8a
+    );
+    border: none;
+}}
+
+/* === Scrollbars on summary text ========================================== */
+
+QScrollBar:vertical {{
+    background: rgba(46, 38, 28, 200);
+    width: 12px;
+    margin: 0;
+    border: 1px inset #6c6358;
+}}
+
+QScrollBar::handle:vertical {{
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 #8b6e3a, stop:0.5 #c8a667, stop:1 #6e5325
+    );
+    border: 1px outset #b89358;
+    min-height: 24px;
+}}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {{
+    height: 0;
+    background: transparent;
+}}
+
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {{
+    background: transparent;
+}}
+
+/* === Message box (errors) — keep styled, don't fall back to system look == */
+
+QMessageBox {{
+    background-image: url({stone});
+    background-repeat: repeat;
+    border: 4px outset #6c6358;
+    color: #f1ead8;
+    font-family: "Georgia", "Times New Roman", serif;
+}}
+
+QMessageBox QLabel {{
+    color: #f1ead8;
+    font-size: 11pt;
+}}

@@ -1,0 +1,16 @@
+Qt 6 and PySide6 are used by this application under the GNU Lesser General
+Public License, version 3 (LGPL-3.0).
+
+The full text of the LGPL-3.0 license is available at:
+    https://www.gnu.org/licenses/lgpl-3.0.txt
+
+The corresponding source for Qt is available at:
+    https://download.qt.io/
+
+The corresponding source for PySide6 is available at:
+    https://code.qt.io/cgit/pyside/pyside-setup.git/
+
+You are entitled to obtain, modify, and re-link the LGPL-licensed components
+of this application with versions of your own choosing. The Qt DLLs and
+PySide6 bindings shipped with this application are dynamically linked and
+can be replaced in the application's installation directory.

@@ -1,0 +1,58 @@
+from collections import Counter
+from dataclasses import dataclass
+
+import eq_display
+import zone_graph
+
+
+@dataclass(frozen=True)
+class MapLine:
+    start_loc: tuple[float, float]
+    end_loc: tuple[float, float]
+    percent: float
+
+
+@dataclass(frozen=True)
+class MapDot:
+    loc: tuple[float, float]
+    percent: float
+
+
+def build_map_events(zone_list):
+    known_zone_list = get_known_zones(zone_list)
+    if len(known_zone_list) == 0:
+        return []
+
+    last_zone = ""
+    last_loc = None
+    zone_count = len(known_zone_list)
+    percent_inc = 1 / zone_count
+    percent = 0
+    draw_events = []
+    zone_visit_counts = {}
+    zone_total_counts = Counter(known_zone_list)
+
+    for zone in known_zone_list:
+        zone_visit_counts[zone] = zone_visit_counts.get(zone, 0) + 1
+        loc = eq_display.get_shifted_zone_center(
+            zone,
+            zone_visit_counts[zone],
+            zone_total_counts[zone],
+        )
+        if last_zone != "":
+            if zone_graph.are_adjacent(last_zone, zone):
+                draw_events.append(MapLine(last_loc, loc, percent))
+                percent += percent_inc
+            elif not zone_graph.is_same_zone(last_zone, zone):
+                # Ports, deaths, and logging gaps can jump across the graph;
+                # mark the destination without drawing an impossible line.
+                draw_events.append(MapDot(loc, percent))
+                percent += percent_inc
+        last_zone = zone
+        last_loc = loc
+
+    return draw_events
+
+
+def get_known_zones(zone_list):
+    return [zone for zone in zone_list if eq_display.has_zone_center(zone)]
