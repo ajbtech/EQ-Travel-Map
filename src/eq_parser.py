@@ -49,7 +49,7 @@ DEFAULT_LOG_FOLDER_PATH = _detect_default_log_folder()
 DEFAULT_MAP_OUTPUT_PATH = Path.home() / "everquest_travel_map.png"
 
 
-def draw_zone_path(my_zone_list, output_path=None, summary_lines=None):
+def draw_zone_path(my_zone_list, output_path=None):
     zone_list = my_zone_list.get_raw_eq_list()
 
     if len(zone_list) == 0:
@@ -61,11 +61,7 @@ def draw_zone_path(my_zone_list, output_path=None, summary_lines=None):
         return
     draw_events = map_path.build_map_events(zone_list)
 
-    map_renderer = eq_display.MapRenderer(
-        include_metrics_panel=summary_lines is not None,
-    )
-    if summary_lines is not None:
-        map_renderer.draw_metrics(summary_lines)
+    map_renderer = eq_display.MapRenderer()
 
     # Draw newest events first so older low-level routes remain visible on top.
     for draw_event in reversed(draw_events):
