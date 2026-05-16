@@ -156,11 +156,51 @@ UNUSED_PIL_PLUGINS = [
 ]
 
 # Native libraries shipped with Pillow for image formats we don't read or
-# write. matplotlib needs freetype (for text) and lcms2 (for the PNG color
-# pipeline), so those are deliberately not listed here.
+# write. matplotlib is gone now, but Pillow itself still uses lcms2 for the
+# PNG color pipeline; freetype is only used by ImageFont/text rendering and
+# the app no longer renders text via Pillow, so freetype could in principle
+# be excluded too -- left in for safety in case a Qt code path pulls it.
 UNUSED_PIL_NATIVE_LIB_STEMS = [
     "libtiff", "libwebp", "libwebpdemux", "libwebpmux",
     "libjpeg", "libturbojpeg", "libopenjp2", "libjp2",
+]
+
+# Pillow C extension modules the app does not call. After the matplotlib
+# removal and the metrics-panel removal, the app only uses Image.open,
+# Image.new, Image.paste, ImageDraw.line, ImageDraw.ellipse, and Image.save.
+# Every other compiled extension Pillow ships is dead weight.
+UNUSED_PIL_C_EXTENSION_STEMS = [
+    "_imagingft",     # FreeType bindings; used by ImageFont / ImageDraw.text
+    "_imagingtk",     # Tkinter integration
+    "_imagingmorph",  # Morphology ops (erode, dilate, ...)
+    "_avif",          # AVIF format
+    "_webp",          # WebP format (C extension; Python plugin already excluded)
+]
+
+# Standard-library packages PyInstaller bundles by default but that this
+# pure-desktop, no-network, no-database app never imports. Trimming these
+# shrinks the PYZ archive and the unpacked .pyc cache. Excluded here rather
+# than via a binary/data filter because they are pure-Python packages.
+UNUSED_STDLIB_MODULES = [
+    "asyncio",
+    "email",
+    "html",
+    "http",
+    "xml", "xmlrpc",
+    "urllib.request", "urllib.response", "urllib.error", "urllib.robotparser",
+    "sqlite3", "_sqlite3",
+    "pydoc", "pydoc_data",
+    "distutils",
+    "lib2to3",
+    "ensurepip",
+    "idlelib",
+    "turtle", "turtledemo",
+    "test",
+    "unittest",
+    "doctest",
+    "wsgiref",
+    "dbm",
+    "curses",
 ]
 
 
@@ -174,6 +214,25 @@ def _is_excluded_qt(dest: str) -> bool:
 
     # QML modules under PySide6/qml/ -- the app uses QtWidgets, not Qt Quick.
     if "/qml/" in norm or norm.startswith("qml/"):
+        return True
+
+    # Qt class metadata for QML / runtime reflection (~15 MB of JSON). A
+    # pure-QtWidgets app does not load any of it.
+    if "/metatypes/" in norm and norm.endswith("_metatypes.json"):
+        return True
+
+    # PySide6 Qt resources -- after excluding the WebEngine module above,
+    # this folder only contains its leftover assets (qtwebengine_*.pak,
+    # v8_context_snapshot.bin, the WebEngine-specific icudtl.dat). None
+    # are needed by a QtWidgets-only app. Matched specifically rather
+    # than by /resources/ alone so a hypothetical Qt resource we DO need
+    # would not be caught accidentally.
+    base = norm.rsplit("/", 1)[-1]
+    if "/resources/" in norm and (
+        base.startswith("qtwebengine_")
+        or base == "icudtl.dat"
+        or base == "v8_context_snapshot.bin"
+    ):
         return True
 
     for module in UNUSED_QT_MODULES:
@@ -214,9 +273,28 @@ def _is_excluded_pillow_lib(dest: str) -> bool:
     return False
 
 
+def _is_excluded_pillow_ext(dest: str) -> bool:
+    """Return True if a bundled entry is an unused Pillow C extension module."""
+    norm = dest.replace("\\", "/").lower()
+    # Only match inside the PIL package so a similarly named module elsewhere
+    # would not be caught.
+    if "/pil/" not in norm and not norm.startswith("pil/"):
+        return False
+    base = norm.rsplit("/", 1)[-1]
+    for stem in UNUSED_PIL_C_EXTENSION_STEMS:
+        # Matches _imagingft.cp312-win_amd64.pyd, _imagingft.abi3.so, etc.
+        if base.startswith(stem) and (base.endswith(".pyd") or ".so" in base):
+            return True
+    return False
+
+
 def _keep(entry) -> bool:
     dest = entry[0]
-    return not (_is_excluded_qt(dest) or _is_excluded_pillow_lib(dest))
+    return not (
+        _is_excluded_qt(dest)
+        or _is_excluded_pillow_lib(dest)
+        or _is_excluded_pillow_ext(dest)
+    )
 
 
 a = Analysis(
@@ -233,6 +311,7 @@ a = Analysis(
         *(f"PySide6.{m}" for m in UNUSED_QT_MODULES),
         *UNUSED_HEAVY_DEPS,
         *UNUSED_PIL_PLUGINS,
+        *UNUSED_STDLIB_MODULES,
     ],
     noarchive=False,
 )
