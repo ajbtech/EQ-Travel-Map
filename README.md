@@ -5,7 +5,7 @@ log files. Drop in your logs, pick your character, click Generate.
 
 ![Sample travel map for Gorrek on Project 1999](docs/sample_map.png)
 
-[![tests](https://github.com/<owner>/everquest-travel-map/actions/workflows/test.yml/badge.svg)](https://github.com/<owner>/everquest-travel-map/actions/workflows/test.yml)
+[![tests](https://github.com/ajbtech/EQ-Travel-Map/actions/workflows/test.yml/badge.svg)](https://github.com/ajbtech/EQ-Travel-Map/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)](pyproject.toml)
 
@@ -26,14 +26,14 @@ trimmed down to ~1.3 MB so the project ships with a working first-run example.
 ## For EverQuest players (no Python or terminal needed)
 
 > **Note:** A pre-built `EQTravelMap.exe` is attached to each
-> [GitHub release](https://github.com/<owner>/everquest-travel-map/releases).
+> [GitHub release](https://github.com/ajbtech/EQ-Travel-Map/releases).
 > Download it from there — there is nothing to install and no terminal
 > commands to run.
 
 ### Try it on the bundled sample (no logs of your own required)
 
 1. Download `EQTravelMap-vX.Y.Z-windows.zip` from the
-   [latest release](https://github.com/<owner>/everquest-travel-map/releases/latest).
+   [latest release](https://github.com/ajbtech/EQ-Travel-Map/releases/latest).
 2. Right-click → **Extract All…** anywhere on your computer.
 3. Open the extracted folder and double-click **`EQTravelMap.exe`**.
 4. The form is pre-filled with the bundled `samples/` folder and character
@@ -60,7 +60,7 @@ trimmed down to ~1.3 MB so the project ships with a working first-run example.
 
 If anything goes wrong, the app shows a friendly explanation with a
 "Show Details" button for the technical message — paste that into a
-[bug report](https://github.com/<owner>/everquest-travel-map/issues/new?template=bug_report.md)
+[bug report](https://github.com/ajbtech/EQ-Travel-Map/issues/new?template=bug_report.md)
 and we'll take a look.
 
 ---
@@ -70,8 +70,8 @@ and we'll take a look.
 If you have Python 3.10+ and prefer running from source:
 
 ```powershell
-git clone https://github.com/<owner>/everquest-travel-map.git
-cd everquest-travel-map
+git clone https://github.com/ajbtech/EQ-Travel-Map.git
+cd EQ-Travel-Map
 python -m venv .venv
 .\.venv\Scripts\activate
 pip install -r requirements.txt
@@ -143,7 +143,7 @@ EverQuest alive and to everyone who has reported issues against this tool.
 ## Roadmap
 
 See [TODO.md](TODO.md) for the maintainer's working notes and
-[GitHub Issues](https://github.com/<owner>/everquest-travel-map/issues) for
+[GitHub Issues](https://github.com/ajbtech/EQ-Travel-Map/issues) for
 discussion. Highlights for upcoming versions:
 
 - Better Kunark zone center positions
