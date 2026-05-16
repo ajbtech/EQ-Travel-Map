@@ -15,9 +15,11 @@ PROJECT_ROOT = Path(SPECPATH).resolve()
 SRC_DIR = PROJECT_ROOT / "src"
 
 # (source on disk, target directory inside the bundle)
+# ``samples/`` is intentionally not bundled here -- it ships as a separate
+# ``EQTravelMap-samples.zip`` release asset to keep the Windows download
+# small for users who already have their own log files.
 DATAS = [
     (str(PROJECT_ROOT / "assets"), "assets"),
-    (str(PROJECT_ROOT / "samples"), "samples"),
     (str(PROJECT_ROOT / "LICENSES"), "LICENSES"),
     (str(SRC_DIR / "ui" / "theme"), "ui/theme"),
     (str(PROJECT_ROOT / "zone_graph.json"), "."),

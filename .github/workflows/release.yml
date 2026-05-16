@@ -31,18 +31,23 @@ jobs:
       - name: Build PyInstaller bundle
         run: pyinstaller --noconfirm --clean EQTravelMap.spec
 
-      - name: Zip bundle
+      - name: Zip bundle and samples
         shell: pwsh
         run: |
           $tag = "${{ github.ref_name }}"
-          $zip = "EQTravelMap-$tag-windows.zip"
-          Compress-Archive -Path dist/EQTravelMap/* -DestinationPath $zip
-          "ZIP_PATH=$zip" | Out-File -FilePath $env:GITHUB_ENV -Append
+          $bundleZip  = "EQTravelMap-$tag-windows.zip"
+          $samplesZip = "EQTravelMap-samples.zip"
+          Compress-Archive -Path dist/EQTravelMap/* -DestinationPath $bundleZip
+          Compress-Archive -Path samples           -DestinationPath $samplesZip
+          "BUNDLE_ZIP=$bundleZip"   | Out-File -FilePath $env:GITHUB_ENV -Append
+          "SAMPLES_ZIP=$samplesZip" | Out-File -FilePath $env:GITHUB_ENV -Append
 
-      - name: Create GitHub Release and upload zip
+      - name: Create GitHub Release and upload assets
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ env.ZIP_PATH }}
+          files: |
+            ${{ env.BUNDLE_ZIP }}
+            ${{ env.SAMPLES_ZIP }}
           generate_release_notes: true
           draft: false
           prerelease: false
