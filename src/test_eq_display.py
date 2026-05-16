@@ -1,4 +1,5 @@
 import pytest
+from PIL import Image
 
 import eq_display
 
@@ -96,9 +97,8 @@ def test_map_renderer_saves_map_only_by_default(tmp_path):
 
     renderer.save_map(output_path)
 
-    image = eq_display.img.imread(output_path)
-
-    assert image.shape[1] == eq_display.MAP_PIXEL_WIDTH
+    with Image.open(output_path) as image:
+        assert image.width == eq_display.MAP_PIXEL_WIDTH
 
 
 def test_map_renderer_can_extend_canvas_for_metrics_panel(tmp_path):
@@ -108,7 +108,10 @@ def test_map_renderer_can_extend_canvas_for_metrics_panel(tmp_path):
     renderer.draw_metrics(["Top 5 killed creatures:", "1. ghoul = 3"])
     renderer.save_map(output_path)
 
-    image = eq_display.img.imread(output_path)
-
-    assert image.shape[1] > eq_display.MAP_PIXEL_WIDTH
-    assert image[10, eq_display.MAP_PIXEL_WIDTH + 10, 3] == pytest.approx(1)
+    with Image.open(output_path) as image:
+        assert image.width > eq_display.MAP_PIXEL_WIDTH
+        # Pixel inside the metrics panel should be fully opaque so text
+        # stays readable even in dark-mode viewers.
+        assert image.convert("RGBA").getpixel(
+            (eq_display.MAP_PIXEL_WIDTH + 10, 10)
+        )[3] == 255
