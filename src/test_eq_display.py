@@ -1,4 +1,5 @@
 import pytest
+from PIL import Image
 
 import eq_display
 
@@ -90,25 +91,11 @@ def test_make_rainbow_moves_through_classic_color_stops_then_ends_at_red():
     assert eq_display.make_rainbow(1) == pytest.approx((1, 0, 0))
 
 
-def test_map_renderer_saves_map_only_by_default(tmp_path):
+def test_map_renderer_saves_map_at_expected_dimensions(tmp_path):
     output_path = tmp_path / "map_only.png"
     renderer = eq_display.MapRenderer()
 
     renderer.save_map(output_path)
 
-    image = eq_display.img.imread(output_path)
-
-    assert image.shape[1] == eq_display.MAP_PIXEL_WIDTH
-
-
-def test_map_renderer_can_extend_canvas_for_metrics_panel(tmp_path):
-    output_path = tmp_path / "map_with_metrics.png"
-    renderer = eq_display.MapRenderer(include_metrics_panel=True)
-
-    renderer.draw_metrics(["Top 5 killed creatures:", "1. ghoul = 3"])
-    renderer.save_map(output_path)
-
-    image = eq_display.img.imread(output_path)
-
-    assert image.shape[1] > eq_display.MAP_PIXEL_WIDTH
-    assert image[10, eq_display.MAP_PIXEL_WIDTH + 10, 3] == pytest.approx(1)
+    with Image.open(output_path) as image:
+        assert image.size == (eq_display.MAP_PIXEL_WIDTH, eq_display.MAP_PIXEL_HEIGHT)

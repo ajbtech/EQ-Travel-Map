@@ -15,9 +15,11 @@ PROJECT_ROOT = Path(SPECPATH).resolve()
 SRC_DIR = PROJECT_ROOT / "src"
 
 # (source on disk, target directory inside the bundle)
+# ``samples/`` is intentionally not bundled here -- it ships as a separate
+# ``EQTravelMap-samples.zip`` release asset to keep the Windows download
+# small for users who already have their own log files.
 DATAS = [
     (str(PROJECT_ROOT / "assets"), "assets"),
-    (str(PROJECT_ROOT / "samples"), "samples"),
     (str(PROJECT_ROOT / "LICENSES"), "LICENSES"),
     (str(SRC_DIR / "ui" / "theme"), "ui/theme"),
     (str(PROJECT_ROOT / "zone_graph.json"), "."),
@@ -122,26 +124,12 @@ UNUSED_QT_TOOL_EXES = [
     "balsam", "balsamui",
 ]
 
-# matplotlib GUI/interactive backends. The app calls ``matplotlib.use("Agg")``
-# in eq_display.py and only writes PNGs through the Agg renderer, so every
-# other backend (and the test/sample data trees) is dead weight.
-UNUSED_MPL_BACKENDS = [
-    "matplotlib.backends.backend_qt5", "matplotlib.backends.backend_qt5agg",
-    "matplotlib.backends.backend_qt5cairo", "matplotlib.backends.backend_qtagg",
-    "matplotlib.backends.backend_qtcairo", "matplotlib.backends.backend_qt",
-    "matplotlib.backends.backend_tkagg", "matplotlib.backends.backend_tkcairo",
-    "matplotlib.backends.backend_wx", "matplotlib.backends.backend_wxagg",
-    "matplotlib.backends.backend_wxcairo",
-    "matplotlib.backends.backend_gtk3", "matplotlib.backends.backend_gtk3agg",
-    "matplotlib.backends.backend_gtk3cairo",
-    "matplotlib.backends.backend_gtk4", "matplotlib.backends.backend_gtk4agg",
-    "matplotlib.backends.backend_gtk4cairo",
-    "matplotlib.backends.backend_macosx", "matplotlib.backends.backend_cocoaagg",
-    "matplotlib.backends.backend_nbagg",
-    "matplotlib.backends.backend_webagg", "matplotlib.backends.backend_webagg_core",
-    "matplotlib.backends.backend_pgf",
-    "matplotlib.tests", "matplotlib.testing",
-]
+# matplotlib and numpy used to be runtime dependencies (matplotlib drove
+# the map renderer). The renderer was rewritten on top of Pillow, so list
+# them here as defensive PyInstaller excludes -- if a stray ``import
+# matplotlib`` ever sneaks back into the codebase, the bundle will fail
+# loudly at runtime instead of silently re-bundling ~25 MB of dead code.
+UNUSED_HEAVY_DEPS = ["matplotlib", "numpy"]
 
 # Pillow image-format plugins. Pillow auto-registers every plugin it can
 # import, but the app only ever opens PNG (the bundled assets and the
@@ -212,22 +200,6 @@ def _is_excluded_qt(dest: str) -> bool:
     return False
 
 
-def _is_excluded_mpl(dest: str) -> bool:
-    """Return True if a bundled entry is matplotlib data the app doesn't use."""
-    norm = dest.replace("\\", "/").lower()
-
-    # Bundled example datasets used only by matplotlib's own documentation.
-    if "/mpl-data/sample_data/" in norm:
-        return True
-
-    # Adobe Font Metrics files for PostScript output -- the app only ever
-    # renders to PNG via the Agg backend.
-    if "/mpl-data/fonts/afm/" in norm:
-        return True
-
-    return False
-
-
 def _is_excluded_pillow_lib(dest: str) -> bool:
     """Return True if a bundled entry is a Pillow native lib for an unused format."""
     base = dest.replace("\\", "/").rsplit("/", 1)[-1].lower()
@@ -244,11 +216,7 @@ def _is_excluded_pillow_lib(dest: str) -> bool:
 
 def _keep(entry) -> bool:
     dest = entry[0]
-    return not (
-        _is_excluded_qt(dest)
-        or _is_excluded_mpl(dest)
-        or _is_excluded_pillow_lib(dest)
-    )
+    return not (_is_excluded_qt(dest) or _is_excluded_pillow_lib(dest))
 
 
 a = Analysis(
@@ -263,7 +231,7 @@ a = Analysis(
     excludes=[
         "tkinter",
         *(f"PySide6.{m}" for m in UNUSED_QT_MODULES),
-        *UNUSED_MPL_BACKENDS,
+        *UNUSED_HEAVY_DEPS,
         *UNUSED_PIL_PLUGINS,
     ],
     noarchive=False,

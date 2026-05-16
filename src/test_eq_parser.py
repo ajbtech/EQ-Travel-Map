@@ -137,14 +137,10 @@ def test_main_prints_summary_and_draws_map(monkeypatch, capsys, tmp_path):
 
 def test_draw_zone_path_can_save_map(monkeypatch, tmp_path):
     saved_paths = []
-    drawn_metrics = []
 
     class FakeMapRenderer:
         def __init__(self, *args, **kwargs):
-            self.include_metrics_panel = kwargs.get("include_metrics_panel")
-
-        def draw_metrics(self, lines):
-            drawn_metrics.extend(lines)
+            pass
 
         def draw_line(self, zone_loc_1, zone_loc_2, percent):
             pass
@@ -164,14 +160,9 @@ def test_draw_zone_path_can_save_map(monkeypatch, tmp_path):
 
     monkeypatch.setattr(eq_parser.eq_display, "MapRenderer", FakeMapRenderer)
 
-    eq_parser.draw_zone_path(
-        zone_list,
-        output_path=output_path,
-        summary_lines=["Total logs = 100"],
-    )
+    eq_parser.draw_zone_path(zone_list, output_path=output_path)
 
     assert saved_paths == [output_path]
-    assert drawn_metrics == ["Total logs = 100"]
 
 
 def test_draw_zone_path_does_not_mark_zone_centers(monkeypatch, tmp_path):
