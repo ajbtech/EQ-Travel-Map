@@ -21,6 +21,5 @@ sys.path.insert(0, str(_src_dir()))
 
 from ui.app import main  # noqa: E402
 
-
 if __name__ == "__main__":
     main()

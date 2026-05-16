@@ -22,6 +22,7 @@ from ui.widgets.parchment_panel import ParchmentPanel
 class ResultsView(QWidget):
     back_requested = Signal()
     preferred_window_size = (1240, 760)
+    minimum_window_size = (900, 600)
 
     def __init__(self, parent=None):
         super().__init__(parent)

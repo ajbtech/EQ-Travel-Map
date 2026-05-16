@@ -1,8 +1,22 @@
 from pathlib import Path
 
+from PySide6.QtCore import QSize
+from PySide6.QtGui import QCloseEvent
+
 import summary_formatter
 from ui.main_window import MainWindow, _split_error_message
 from ui.parse_worker import ParseWorker
+
+
+class _FakeSettings:
+    def __init__(self, initial=None):
+        self._values = dict(initial or {})
+
+    def value(self, key, default=None):
+        return self._values.get(key, default)
+
+    def setValue(self, key, value):
+        self._values[key] = value
 
 
 def _sections(character="Gorrek", stats_lines=None):
@@ -41,6 +55,7 @@ def _make_window(qt_app, **overrides):
         worker_factory=overrides.get("worker_factory", default_worker_factory),
         run_worker=overrides.get("run_worker", lambda worker: worker.run()),
         error_dialog=overrides.get("error_dialog", fake_error_dialog),
+        settings=overrides.get("settings", _FakeSettings()),
     )
     window._test_workers = workers_built
     window._test_errors = errors_shown
@@ -230,6 +245,90 @@ def test_window_resizes_to_each_view_preferred_size(qt_app):
 
     window.show_input()
     assert window.size().toTuple() == window.input_view.preferred_window_size
+
+
+def test_results_view_is_freely_resizable(qt_app):
+    window = _make_window(qt_app)
+    window.show()
+    window.show_results(Path("/tmp/out.png"), _sections())
+
+    min_w, min_h = window.results_view.minimum_window_size
+    assert window.minimumSize().toTuple() == (min_w, min_h)
+    # Maximum size should be unconstrained (Qt's QWIDGETSIZE_MAX sentinel).
+    assert window.maximumSize().width() >= (1 << 24) - 1
+    assert window.maximumSize().height() >= (1 << 24) - 1
+
+
+def test_input_and_progress_views_remain_fixed_size(qt_app):
+    window = _make_window(qt_app)
+    window.show()
+
+    in_w, in_h = window.input_view.preferred_window_size
+    assert window.minimumSize().toTuple() == (in_w, in_h)
+    assert window.maximumSize().toTuple() == (in_w, in_h)
+
+    window.show_progress("Gorrek")
+    pg_w, pg_h = window.progress_view.preferred_window_size
+    assert window.minimumSize().toTuple() == (pg_w, pg_h)
+    assert window.maximumSize().toTuple() == (pg_w, pg_h)
+
+
+def test_results_view_restores_saved_size_from_settings(qt_app):
+    saved = QSize(1500, 900)
+    settings = _FakeSettings({"results/size": saved})
+    window = _make_window(qt_app, settings=settings)
+    window.show()
+
+    window.show_results(Path("/tmp/out.png"), _sections())
+
+    assert window.size().toTuple() == (1500, 900)
+
+
+def test_results_view_uses_preferred_size_when_no_saved_size(qt_app):
+    window = _make_window(qt_app, settings=_FakeSettings())
+    window.show()
+
+    window.show_results(Path("/tmp/out.png"), _sections())
+
+    assert window.size().toTuple() == window.results_view.preferred_window_size
+
+
+def test_saved_size_below_minimum_is_clamped_up(qt_app):
+    settings = _FakeSettings({"results/size": QSize(100, 100)})
+    window = _make_window(qt_app, settings=settings)
+    window.show()
+
+    window.show_results(Path("/tmp/out.png"), _sections())
+
+    min_w, min_h = window.results_view.minimum_window_size
+    assert window.size().width() >= min_w
+    assert window.size().height() >= min_h
+
+
+def test_close_persists_last_results_size(qt_app):
+    settings = _FakeSettings()
+    window = _make_window(qt_app, settings=settings)
+    window.show()
+    window.show_results(Path("/tmp/out.png"), _sections())
+
+    window.resize(1400, 850)
+    # Forced resize fires resizeEvent synchronously in Qt; the new size is
+    # captured by MainWindow.resizeEvent for persistence on close.
+    window.closeEvent(QCloseEvent())
+
+    saved = settings.value("results/size")
+    assert isinstance(saved, QSize)
+    assert saved.toTuple() == (1400, 850)
+
+
+def test_close_does_not_persist_when_results_never_shown(qt_app):
+    settings = _FakeSettings()
+    window = _make_window(qt_app)
+    window.show()
+
+    window.closeEvent(QCloseEvent())
+
+    assert settings.value("results/size") is None
 
 
 class _ProgressStub:

@@ -8,7 +8,7 @@
 ## Features
 - [ ] Add a view that allows a live run of the travel map
 - [ ] Allow zoom and pan in the map
-- [ ] Allow dynamic app resizing
+- [x] Allow dynamic app resizing
 
 ## Polish
 - [ ] Fix bevel so it matches the original UI style
