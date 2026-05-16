@@ -184,7 +184,8 @@ UNUSED_PIL_C_EXTENSION_STEMS = [
 UNUSED_STDLIB_MODULES = [
     "asyncio",
     "email",
-    "html",
+    # "html" is imported by src/ui/views/results_view.py for html.escape
+    # when building the Qt summary widget -- do NOT add it back.
     "http",
     "xml", "xmlrpc",
     "urllib.request", "urllib.response", "urllib.error", "urllib.robotparser",
