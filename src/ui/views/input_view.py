@@ -3,7 +3,6 @@ from pathlib import Path
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QFileDialog,
-    QFrame,
     QGridLayout,
     QHBoxLayout,
     QLabel,
@@ -13,7 +12,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ui.widgets.parchment_panel import ParchmentPanel
+from ui.widgets.parchment_panel import build_stone_framed_parchment
 
 
 class InputView(QWidget):
@@ -35,19 +34,11 @@ class InputView(QWidget):
         outer.setContentsMargins(0, 0, 0, 0)
         outer.setSpacing(0)
 
-        stone_frame = QFrame()
-        stone_frame.setObjectName("inputStoneFrame")
-        stone_layout = QVBoxLayout(stone_frame)
-        # QSS border-width inset is unreliable for stretchy children, so we
-        # set explicit margins matching the bevel thickness here. This keeps
-        # the parchment from overflowing past the bottom bevel.
-        stone_layout.setContentsMargins(9, 9, 9, 9)
-        stone_layout.setSpacing(0)
+        stone_frame, parchment = build_stone_framed_parchment(
+            stone_object_name="inputStoneFrame",
+            parchment_object_name="inputParchment",
+        )
         outer.addWidget(stone_frame, 1)
-
-        parchment = ParchmentPanel()
-        parchment.setObjectName("inputParchment")
-        stone_layout.addWidget(parchment, 1)
 
         body = QVBoxLayout(parchment)
         body.setContentsMargins(16, 16, 16, 16)
