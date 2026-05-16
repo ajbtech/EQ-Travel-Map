@@ -5,15 +5,16 @@ quality concerns. Read alongside `OSS_READINESS_FINDINGS.md`.
 
 ## TL;DR
 
-**163 tests, 0.74 s wall-clock, 84 % line coverage (1011 / 1209
-statements).** The pure-logic core (parsers, formatters, money math,
-zone graph) is well-covered with named-behavior tests and consistent
-TDD discipline. The Qt UI and drawing layers are where the gaps live,
-plus there is no end-to-end test against the bundled sample log and no
-coverage gate in CI.
+**178 tests, 1.21 s wall-clock, 90 % line coverage (1085 / 1209
+statements)** after the T1–T5 follow-up. Original audit numbers were
+163 tests / 0.74 s / 84 %. The pure-logic core (parsers, formatters,
+money math, zone graph) is well-covered with named-behavior tests and
+consistent TDD discipline. Remaining gaps are concentrated in the
+`EngravedHeading` widget (T7) and the bootstrap/exec branches of
+`ui/app.py` (T4 partial).
 
-Verdict: **adequate for a v0.1.0 public release**, with specific gaps
-worth filing as issues. Nothing here is a blocker.
+Verdict: **adequate for v0.1.0**, with the most material gaps now
+closed. Status of each follow-up is marked inline below.
 
 ---
 
@@ -65,60 +66,77 @@ Test counts per module:
 
 ## Should-fix
 
-### T1. No end-to-end test against `samples/sample_eqlog_Gorrek_P1999Green.txt`
+### T1. No end-to-end test against `samples/sample_eqlog_Gorrek_P1999Green.txt` — ✅ Resolved
 - The bundled sample is the documented "first-run experience"
   (`README.md:33-44`, `samples/README.md`), and `CONTRIBUTING.md:26`
   even calls it a CLI smoke-test target. Yet no `test_*.py` references
   `samples/sample_eqlog_Gorrek_P1999Green.txt` (verified by grep).
 - Every parser test uses tiny synthetic strings; a regression that
   breaks the real 18,112-line log would not fail CI.
-- Recommended: one test that parses the bundled sample and asserts
-  the high-level counts the README advertises (zone count, kill count,
-  level, coin totals). It runs in well under a second and turns the
-  sample into a load-bearing fixture.
+- New `src/test_integration.py` parses the bundled sample and pins
+  the headline counts (`line_count==18112`, `login_count==668`,
+  `death_count==39`, `zone_count==1086`, `kill_count==5123`,
+  `current_level==51`, `loot_cash.platinum==26876`,
+  `merch_cash.platinum==9525`) plus asserts that
+  `eq_parser.draw_zone_path` produces a valid (>100 KB, PNG header)
+  output image. Runs in ~0.6 s and turns the sample into a load-bearing
+  CI fixture.
 
-### T2. `_split_error_message` (`src/ui/main_window.py:24-44`) is untested
+### T2. `_split_error_message` (`src/ui/main_window.py:24-44`) is untested — ✅ Resolved
 - This function classifies parse exceptions into friendly user-facing
   strings (`"No log files were found…"`, `"…couldn't read one of the
   log files…"`). Three distinct branches, all driven by substring
   matching against an error message.
 - Currently 0 coverage on lines 17-40 (the `_default_error_dialog` +
   `_split_error_message` pair).
-- Friendly-error wording is exactly the kind of thing that silently
-  regresses during refactors. Worth three small tests pinning each
-  branch.
+- `src/test_main_window.py` gains four new tests covering the missing-log,
+  permission-denied, generic-fallback, and empty-input branches via
+  direct import of `_split_error_message`.
 
-### T3. `MapCanvas` success path and rescale untested (`src/ui/widgets/map_canvas.py:30-36, 45-50`)
+### T3. `MapCanvas` success path and rescale untested (`src/ui/widgets/map_canvas.py:30-36, 45-50`) — ✅ Resolved
 - Existing tests cover the error branches (file missing, null pixmap)
   but never the happy path where a real PNG loads and rescales on
   resize.
 - The whole widget is 73 % covered, and the rescale logic is the most
   likely place a user-visible UI bug surfaces (image distortion,
   zero-size pixmap).
-- Recommended: one test that loads `samples/`-adjacent PNG (or
-  `docs/sample_map.png`) and asserts `pixmap()` is non-null after
-  load + after a `resizeEvent`.
+- New `src/test_map_canvas.py` adds three tests: pixmap is non-null
+  after loading `docs/sample_map.png`, the loaded pixmap respects
+  widget bounds (aspect ratio), and resizing a shown widget triggers
+  a real rescale (uses `qt_app.processEvents()` to drive the resize
+  event through headless Qt). `map_canvas.py` 73 % → 91 %.
 
-### T4. `_load_stylesheet` in `src/ui/app.py` swallows template errors silently
+### T4. `_load_stylesheet` in `src/ui/app.py` swallows template errors silently — ✅ Resolved
 - `ui/app.py` is 0 % covered (no `test_app.py` file exists).
 - `_load_stylesheet` does `template.format(stone=…, canvas=…,
   beveled_stone=…)`. If `eq_theme.qss` ever references a fourth
   placeholder the `.format()` raises `KeyError`, crashing app
   startup. That's exactly the failure mode CI should catch.
-- Recommended: add `test_app.py` with at least
-  `test_load_stylesheet_formats_with_known_placeholders` (loads the
-  real `eq_theme.qss`, asserts `.format()` resolves) and
-  `test_build_arg_parser_round_trip`.
+- New `src/test_app.py` covers `_load_stylesheet` (happy path + the
+  no-op-when-theme-missing branch), `build_arg_parser` (positional +
+  flag round trip, optional character), and the
+  `_infer_character_names` / `_default_character_name` helpers used
+  by the GUI to prefill the character field.
+- `ui/app.py` 0 % → 67 %; `ui/asset_paths.py` 0 % → 78 %.
+  Remaining uncovered chunk in `app.py` is the
+  `QApplication.exec()` mainloop (lines 80–95, 99–100, 104), which
+  is intentionally out of scope for unit tests.
 
-### T5. No coverage gate in CI
+### T5. No coverage gate in CI — ✅ Resolved
 - `.github/workflows/test.yml` runs `pytest` without `coverage`.
 - No `[tool.coverage]` config in `pyproject.toml`, no `.coveragerc`.
 - The 84 % figure here came from a one-off local run; nothing is
   watching it drift.
-- Recommended: add `coverage` to the dev deps, run `coverage run -m
-  pytest && coverage report --fail-under=80` in CI, and post a
-  coverage badge or comment on PRs. Threshold 80 leaves slack for
-  legitimate Qt-paint gaps without inviting regressions in the core.
+- `coverage>=7.0` added to `[project.optional-dependencies].dev` in
+  `pyproject.toml`.
+- `[tool.coverage.run]` and `[tool.coverage.report]` blocks added to
+  `pyproject.toml`. Threshold set to **`fail_under = 85`** (current
+  coverage is 90 %, leaving ~5 points of slack for legitimate
+  Qt-paint gaps).
+- New `coverage` job in `.github/workflows/test.yml` runs on every
+  push / PR alongside the existing `test` and `lint` jobs (Linux /
+  Python 3.12 / Qt offscreen). `coverage report` is the gate — it
+  exits non-zero when the threshold is violated.
 
 ---
 
@@ -220,15 +238,17 @@ None individually critical; collectively a clean "raise coverage to
 
 ## Audit metadata
 
-- Repo HEAD at the time of this audit: `f68fa35` on
+- Original audit at `f68fa35`; T1–T5 follow-up at HEAD of
   `claude/eq-travel-map-opensource-dQ5GJ` (PR #9).
-- Tooling: `coverage==7.x` (line coverage only; branch coverage was
-  not enabled), `pytest`, manual inspection of every `test_*.py` and
-  every uncovered code chunk reported by `coverage report -m`.
-- Verification commands:
-  - `QT_QPA_PLATFORM=offscreen coverage run --source=src
-    --omit='src/test_*,src/conftest.py' -m pytest -q src`
-  - `coverage report -m`
+- Tooling: `coverage==7.x` (line coverage only; branch coverage not
+  enabled), `pytest`, manual inspection of every `test_*.py` and every
+  uncovered code chunk reported by `coverage report -m`.
+- Verification commands (post-T1–T5):
+  - `QT_QPA_PLATFORM=offscreen coverage run -m pytest -q src` →
+    `178 passed in 1.21s`
+  - `coverage report` → `TOTAL 1209 124 90%`, exit 0 (above
+    `fail_under = 85` threshold)
+  - `ruff check src` and `black --check src` → both clean
 - Branch coverage (`coverage run --branch`) was not measured here.
-  Worth re-running with `--branch` once T5's gate is in place; it
-  typically drops a line-coverage figure by 5–10 points.
+  Worth re-running with `--branch` later; it typically drops a
+  line-coverage figure by 5–10 points.

@@ -29,6 +29,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0",
+    "coverage>=7.0",
     "pyinstaller>=6.0",
     "ruff>=0.1",
     "black>=23.0",
@@ -46,3 +47,15 @@ select = ["E", "F", "W", "I"]
 
 [tool.pytest.ini_options]
 testpaths = ["src"]
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["src/test_*", "src/conftest.py"]
+
+[tool.coverage.report]
+# Minimum overall line coverage. Enforced in CI via the `coverage` job
+# in .github/workflows/test.yml. The gap to 100% lives almost entirely
+# in the Qt UI and drawing layers — see TEST_COVERAGE_FINDINGS.md.
+fail_under = 85
+show_missing = true
+skip_covered = false
