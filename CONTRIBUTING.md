@@ -8,16 +8,16 @@ for contributors.
 Requires Python 3.10 or newer.
 
 ```powershell
-git clone https://github.com/<your-fork>/everquest-travel-map.git
-cd everquest-travel-map
+git clone https://github.com/<your-fork>/EQ-Travel-Map.git
+cd EQ-Travel-Map
 python -m venv .venv
 .\.venv\Scripts\activate          # Windows
 # source .venv/bin/activate         # Linux/macOS
 pip install -e ".[dev]"
 ```
 
-`pip install -e ".[dev]"` pulls in the runtime dependencies (PySide6, Pillow,
-matplotlib) plus the dev tools (pytest, ruff, black, pyinstaller).
+`pip install -e ".[dev]"` pulls in the runtime dependencies (PySide6, Pillow)
+plus the dev tools (pytest, ruff, black, pyinstaller).
 
 ## Running the app from source
 
@@ -87,7 +87,7 @@ See [CLAUDE.md](CLAUDE.md) for a deeper architectural tour. Quick map:
 
 ## Good first issues
 
-Look at the [good first issue](https://github.com/<owner>/everquest-travel-map/labels/good%20first%20issue)
+Look at the [good first issue](https://github.com/ajbtech/EQ-Travel-Map/labels/good%20first%20issue)
 label for tickets sized for newcomers. Adding a new EverQuest zone is one of
 the simplest:
 
@@ -107,5 +107,5 @@ the simplest:
 
 ## Questions
 
-Open a [discussion](https://github.com/<owner>/everquest-travel-map/discussions)
+Open a [discussion](https://github.com/ajbtech/EQ-Travel-Map/discussions)
 or a low-stakes issue. Thanks for helping!

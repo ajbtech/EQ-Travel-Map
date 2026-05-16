@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import summary_formatter
-from ui.main_window import MainWindow
+from ui.main_window import MainWindow, _split_error_message
 from ui.parse_worker import ParseWorker
 
 
@@ -51,6 +51,38 @@ def test_initial_view_is_input(qt_app):
     window = _make_window(qt_app)
 
     assert window.current_view_name == "input"
+
+
+def test_split_error_message_classifies_missing_log_files():
+    summary, detail = _split_error_message(
+        "FileNotFoundError: no log files matching eqlog_Gorrek_*.txt"
+    )
+
+    assert "No log files were found" in summary
+    assert "eqlog_Gorrek" in detail
+
+
+def test_split_error_message_classifies_permission_denied():
+    summary, detail = _split_error_message(
+        "PermissionError: [Errno 13] Permission denied: 'eqlog.txt'"
+    )
+
+    assert "couldn't read" in summary
+    assert "Permission denied" in detail
+
+
+def test_split_error_message_falls_back_to_generic_for_unknown_error():
+    summary, detail = _split_error_message("KaboomError: something weird")
+
+    assert "Something went wrong" in summary
+    assert detail == "KaboomError: something weird"
+
+
+def test_split_error_message_handles_empty_input():
+    summary, detail = _split_error_message("")
+
+    assert "Something went wrong" in summary
+    assert detail == ""
 
 
 def test_show_progress_switches_to_progress_view(qt_app):

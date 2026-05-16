@@ -1,0 +1,11 @@
+# Pinned dependencies for the release build (the Windows PyInstaller
+# bundle that ships to end users). The unpinned ranges in
+# ``requirements.txt`` are for developers; this file is what
+# ``.github/workflows/release.yml`` installs so released artifacts are
+# reproducible.
+#
+# Bump these together with a CHANGELOG entry whenever you cut a release.
+pyside6==6.11.1
+shiboken6==6.11.1
+pillow==12.2.0
+pyinstaller==6.16.0

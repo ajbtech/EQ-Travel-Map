@@ -25,8 +25,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pyinstaller
+          pip install -r requirements-release.txt
 
       - name: Build PyInstaller bundle
         run: pyinstaller --noconfirm --clean EQTravelMap.spec
@@ -42,12 +41,20 @@ jobs:
           "BUNDLE_ZIP=$bundleZip"   | Out-File -FilePath $env:GITHUB_ENV -Append
           "SAMPLES_ZIP=$samplesZip" | Out-File -FilePath $env:GITHUB_ENV -Append
 
+      - name: Generate SHA256 checksums
+        shell: pwsh
+        run: |
+          Get-FileHash -Algorithm SHA256 $env:BUNDLE_ZIP, $env:SAMPLES_ZIP |
+            ForEach-Object { "{0}  {1}" -f $_.Hash.ToLower(), (Split-Path -Leaf $_.Path) } |
+            Out-File -Encoding ascii -FilePath SHA256SUMS.txt
+
       - name: Create GitHub Release and upload assets
         uses: softprops/action-gh-release@v2
         with:
           files: |
             ${{ env.BUNDLE_ZIP }}
             ${{ env.SAMPLES_ZIP }}
+            SHA256SUMS.txt
           generate_release_notes: true
           draft: false
           prerelease: false
