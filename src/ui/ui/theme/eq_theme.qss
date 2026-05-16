@@ -168,44 +168,60 @@ QLabel#mapCanvas {{
     font-style: italic;
 }}
 
-/* === Bronze buttons ====================================================== */
+/* === EQ action buttons ===================================================
+   Tan/khaki parchment-toned buttons with cream serif text, tuned to match
+   the in-game action button strip (WHO / INVITE / etc.). Subtle vertical
+   gradient with a slightly lighter top edge and darker bottom edge for a
+   shallow embossed look; pressed state inverts the gradient and the bevel. */
 
 QPushButton#bronzeButton {{
     background-color: qlineargradient(
         x1:0, y1:0, x2:0, y2:1,
-        stop:0 #c8a667, stop:0.45 #a07e3f, stop:1 #6e4f25
+        stop:0 #e0d4b2, stop:0.5 #d3c5a0, stop:1 #c0b088
     );
-    border: 3px outset #b89358;
+    border-top: 2px solid #f2e8c8;
+    border-left: 2px solid #d8cba6;
+    border-right: 2px solid #6c5a36;
+    border-bottom: 2px solid #4a3a1c;
     border-radius: 0;
-    color: #f7eccd;
+    color: #0a0805;
     font-family: "Georgia", "Times New Roman", serif;
-    font-size: 11pt;
-    font-weight: bold;
-    padding: 7px 22px;
-    min-height: 28px;
+    font-size: 15pt;
+    font-weight: normal;
+    padding: 2px 22px;
+    min-height: 24px;
+    max-height: 34px;
 }}
 
 QPushButton#bronzeButton:hover {{
     background-color: qlineargradient(
         x1:0, y1:0, x2:0, y2:1,
-        stop:0 #d8b677, stop:0.45 #b08e4f, stop:1 #7e5f35
+        stop:0 #ece1be, stop:0.5 #ddd0ad, stop:1 #ccbc94
     );
-    border: 3px outset #d2b070;
+    border-top: 2px solid #faf0d4;
+    border-left: 2px solid #e6d8b4;
 }}
 
 QPushButton#bronzeButton:pressed {{
     background-color: qlineargradient(
         x1:0, y1:0, x2:0, y2:1,
-        stop:0 #6e4f25, stop:0.55 #a07e3f, stop:1 #c8a667
+        stop:0 #7a6a44, stop:0.5 #948361, stop:1 #a89572
     );
-    border: 3px inset #b89358;
-    padding: 8px 21px 6px 23px;
+    border-top: 2px solid #4a3a1c;
+    border-left: 2px solid #6c5a36;
+    border-right: 2px solid #d8cba6;
+    border-bottom: 2px solid #f2e8c8;
+    color: #0a0805;
+    padding: 3px 21px 1px 23px;
 }}
 
 QPushButton#bronzeButton:disabled {{
-    background-color: #807060;
-    border: 3px outset #807060;
-    color: #c0b8a8;
+    background-color: #b8b0a0;
+    border-top: 2px solid #c8c0b0;
+    border-left: 2px solid #b8b0a0;
+    border-right: 2px solid #6a604c;
+    border-bottom: 2px solid #4a3a2c;
+    color: #4a4438;
 }}
 
 /* === Stone-groove progress bar with rune-blue fill ======================= */

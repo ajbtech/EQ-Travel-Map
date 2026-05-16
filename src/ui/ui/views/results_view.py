@@ -1,4 +1,5 @@
 import shutil
+from html import escape
 from pathlib import Path
 
 from PySide6.QtCore import Qt, Signal
@@ -50,19 +51,19 @@ class ResultsView(QWidget):
         button_column.setContentsMargins(0, 0, 0, 0)
         button_column.setSpacing(8)
 
-        self.back_button = QPushButton("New Input")
+        self.back_button = QPushButton("NEW INPUT")
         self.back_button.setObjectName("bronzeButton")
         self.back_button.setFixedWidth(200)
         self.back_button.clicked.connect(self.back_requested.emit)
         button_column.addWidget(self.back_button)
 
-        self.copy_text_button = QPushButton("Copy Text")
+        self.copy_text_button = QPushButton("COPY TEXT")
         self.copy_text_button.setObjectName("bronzeButton")
         self.copy_text_button.setFixedWidth(200)
         self.copy_text_button.clicked.connect(self._on_copy_text)
         button_column.addWidget(self.copy_text_button)
 
-        self.save_image_button = QPushButton("Save Map")
+        self.save_image_button = QPushButton("SAVE MAP")
         self.save_image_button.setObjectName("bronzeButton")
         self.save_image_button.setFixedWidth(200)
         self.save_image_button.clicked.connect(self._on_save_image)
@@ -115,9 +116,25 @@ class ResultsView(QWidget):
         self._current_image_path = Path(image_path)
         self._current_sections = summary_sections
         self.map_canvas.load_image(self._current_image_path)
-        self._kills_column.setText("\n".join(summary_sections.top_kills_lines))
-        self._zones_column.setText("\n".join(summary_sections.top_zones_lines))
-        self._stats_column.setText("\n".join(summary_sections.stats_lines))
+        self._kills_column.setText(
+            self._render_column_html(summary_sections.top_kills_lines)
+        )
+        self._zones_column.setText(
+            self._render_column_html(summary_sections.top_zones_lines)
+        )
+        self._stats_column.setText(
+            self._render_column_html(
+                ["Major Statistics", *summary_sections.stats_lines],
+            )
+        )
+
+    @staticmethod
+    def _render_column_html(lines):
+        if not lines:
+            return ""
+        head = f"<b><u>{escape(lines[0])}</u></b>"
+        body = [escape(line) for line in lines[1:]]
+        return "<br>".join([head, *body])
 
     def summary_text(self):
         if self._current_sections is None:

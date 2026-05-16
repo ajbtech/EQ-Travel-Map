@@ -41,7 +41,7 @@ class InputView(QWidget):
         # QSS border-width inset is unreliable for stretchy children, so we
         # set explicit margins matching the bevel thickness here. This keeps
         # the parchment from overflowing past the bottom bevel.
-        stone_layout.setContentsMargins(18, 18, 18, 18)
+        stone_layout.setContentsMargins(9, 9, 9, 9)
         stone_layout.setSpacing(0)
         outer.addWidget(stone_frame, 1)
 
@@ -50,7 +50,7 @@ class InputView(QWidget):
         stone_layout.addWidget(parchment, 1)
 
         body = QVBoxLayout(parchment)
-        body.setContentsMargins(28, 16, 28, 20)
+        body.setContentsMargins(16, 16, 16, 16)
         body.setSpacing(10)
 
         title = QLabel("EverQuest Travel Map")
@@ -82,7 +82,7 @@ class InputView(QWidget):
         self.folder_input.setMinimumWidth(280)
         self.folder_input.setToolTip("The folder containing your EverQuest log files.")
 
-        self.browse_button = QPushButton("Browse")
+        self.browse_button = QPushButton("BROWSE")
         self.browse_button.setObjectName("bronzeButton")
         self.browse_button.clicked.connect(self._on_browse_clicked)
 
@@ -102,7 +102,7 @@ class InputView(QWidget):
 
         button_row = QHBoxLayout()
         button_row.addStretch(1)
-        self.generate_button = QPushButton("Generate")
+        self.generate_button = QPushButton("GENERATE")
         self.generate_button.setObjectName("bronzeButton")
         self.generate_button.setMinimumWidth(150)
         self.generate_button.clicked.connect(self._on_generate_clicked)

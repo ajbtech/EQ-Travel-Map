@@ -72,7 +72,7 @@ class ProgressView(QWidget):
 
         button_row = QHBoxLayout()
         button_row.addStretch(1)
-        self.cancel_button = QPushButton("Cancel")
+        self.cancel_button = QPushButton("CANCEL")
         self.cancel_button.setObjectName("bronzeButton")
         self.cancel_button.setMinimumWidth(150)
         self.cancel_button.clicked.connect(self.cancel_requested.emit)
