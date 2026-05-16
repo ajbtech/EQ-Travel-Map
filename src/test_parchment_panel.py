@@ -1,4 +1,5 @@
 """Tests for the stone-framed parchment helper."""
+
 import os
 import sys
 from pathlib import Path
@@ -43,14 +44,16 @@ def test_object_names_are_assigned(qapp):
 
 def test_parchment_is_child_of_stone_frame(qapp):
     stone, parchment = build_stone_framed_parchment(
-        stone_object_name="s", parchment_object_name="p",
+        stone_object_name="s",
+        parchment_object_name="p",
     )
     assert parchment.parent() is stone
 
 
 def test_stone_frame_uses_shared_inset_on_all_sides(qapp):
     stone, _ = build_stone_framed_parchment(
-        stone_object_name="s", parchment_object_name="p",
+        stone_object_name="s",
+        parchment_object_name="p",
     )
     margins = stone.layout().contentsMargins()
     assert (margins.left(), margins.top(), margins.right(), margins.bottom()) == (
@@ -63,7 +66,8 @@ def test_stone_frame_uses_shared_inset_on_all_sides(qapp):
 
 def test_stone_frame_layout_has_no_spacing(qapp):
     stone, _ = build_stone_framed_parchment(
-        stone_object_name="s", parchment_object_name="p",
+        stone_object_name="s",
+        parchment_object_name="p",
     )
     assert isinstance(stone.layout(), QVBoxLayout)
     assert stone.layout().spacing() == 0
