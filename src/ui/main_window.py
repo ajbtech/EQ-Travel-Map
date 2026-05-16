@@ -1,7 +1,11 @@
 from pathlib import Path
 
-from PySide6.QtCore import QThread, Slot
+from PySide6.QtCore import QSettings, QSize, QThread, Slot
 from PySide6.QtWidgets import QMainWindow, QMessageBox, QStackedWidget
+
+# Qt's QWIDGETSIZE_MAX sentinel: not exposed by PySide6, so inline the value
+# (see qtbase/src/widgets/kernel/qwidget.h).
+QWIDGETSIZE_MAX = (1 << 24) - 1
 
 from ui.parse_worker import ParseWorker
 from ui.views.input_view import InputView
@@ -9,8 +13,17 @@ from ui.views.progress_view import ProgressView
 from ui.views.results_view import ResultsView
 
 
+SETTINGS_ORG = "EQTravelMap"
+SETTINGS_APP = "Desktop"
+RESULTS_SIZE_KEY = "results/size"
+
+
 def _default_worker_factory(character, folder, output):
     return ParseWorker(character, folder, output)
+
+
+def _default_settings_factory():
+    return QSettings(SETTINGS_ORG, SETTINGS_APP)
 
 
 def _default_error_dialog(title, message):
@@ -53,6 +66,7 @@ class MainWindow(QMainWindow):
         worker_factory=None,
         run_worker=None,
         error_dialog=None,
+        settings=None,
         parent=None,
     ):
         super().__init__(parent)
@@ -62,6 +76,7 @@ class MainWindow(QMainWindow):
         self._worker_factory = worker_factory or _default_worker_factory
         self._run_worker = run_worker or self._run_worker_on_thread
         self._error_dialog = error_dialog or _default_error_dialog
+        self._settings = settings if settings is not None else _default_settings_factory()
 
         self._stack = QStackedWidget(self)
         self._stack.setObjectName("rootStack")
@@ -93,6 +108,7 @@ class MainWindow(QMainWindow):
 
         self._active_worker = None
         self._active_thread = None
+        self._last_results_size = None
 
         self.show_input()
 
@@ -108,21 +124,47 @@ class MainWindow(QMainWindow):
 
     def _resize_to_active_view(self):
         active = self._stack.currentWidget()
-        size = getattr(active, "preferred_window_size", None)
-        if size is None:
+        preferred = getattr(active, "preferred_window_size", None)
+        if preferred is None:
             return
-        width, height = size
-        if not self.isVisible():
-            self.setFixedSize(width, height)
-            return
-        # Preserve the visual center so growing the window (e.g. progress ->
-        # results) expands in all directions instead of pushing the bottom
-        # right offscreen.
-        old_center = self.frameGeometry().center()
-        self.setFixedSize(width, height)
-        new_geom = self.frameGeometry()
-        new_geom.moveCenter(old_center)
-        self.move(new_geom.topLeft())
+        minimum = getattr(active, "minimum_window_size", None)
+        target = self._target_size_for(active, preferred, minimum)
+        old_center = self.frameGeometry().center() if self.isVisible() else None
+        if minimum is None:
+            self.setFixedSize(target)
+        else:
+            # Drop any prior fixed-size constraint before allowing free resize.
+            self.setMinimumSize(QSize(*minimum))
+            self.setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX)
+            self.resize(target)
+        if old_center is not None:
+            # Preserve the visual center so growing the window (e.g. progress ->
+            # results) expands in all directions instead of pushing the bottom
+            # right offscreen.
+            new_geom = self.frameGeometry()
+            new_geom.moveCenter(old_center)
+            self.move(new_geom.topLeft())
+
+    def _target_size_for(self, view, preferred, minimum):
+        preferred_size = QSize(*preferred)
+        if view is not self.results_view:
+            return preferred_size
+        saved = self._settings.value(RESULTS_SIZE_KEY)
+        if isinstance(saved, QSize) and saved.isValid():
+            if minimum is not None:
+                return saved.expandedTo(QSize(*minimum))
+            return saved
+        return preferred_size
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        if self._stack.currentWidget() is self.results_view:
+            self._last_results_size = self.size()
+
+    def closeEvent(self, event):
+        if self._last_results_size is not None and self._last_results_size.isValid():
+            self._settings.setValue(RESULTS_SIZE_KEY, self._last_results_size)
+        super().closeEvent(event)
 
     def show_progress(self, character_name):
         self.progress_view.set_character(character_name)
