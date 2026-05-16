@@ -3,15 +3,14 @@ from pathlib import Path
 from PySide6.QtCore import QSettings, QSize, QThread, Slot
 from PySide6.QtWidgets import QMainWindow, QMessageBox, QStackedWidget
 
-# Qt's QWIDGETSIZE_MAX sentinel: not exposed by PySide6, so inline the value
-# (see qtbase/src/widgets/kernel/qwidget.h).
-QWIDGETSIZE_MAX = (1 << 24) - 1
-
 from ui.parse_worker import ParseWorker
 from ui.views.input_view import InputView
 from ui.views.progress_view import ProgressView
 from ui.views.results_view import ResultsView
 
+# Qt's QWIDGETSIZE_MAX sentinel: not exposed by PySide6, so inline the value
+# (see qtbase/src/widgets/kernel/qwidget.h).
+QWIDGETSIZE_MAX = (1 << 24) - 1
 
 SETTINGS_ORG = "EQTravelMap"
 SETTINGS_APP = "Desktop"
@@ -76,7 +75,9 @@ class MainWindow(QMainWindow):
         self._worker_factory = worker_factory or _default_worker_factory
         self._run_worker = run_worker or self._run_worker_on_thread
         self._error_dialog = error_dialog or _default_error_dialog
-        self._settings = settings if settings is not None else _default_settings_factory()
+        self._settings = (
+            settings if settings is not None else _default_settings_factory()
+        )
 
         self._stack = QStackedWidget(self)
         self._stack.setObjectName("rootStack")
