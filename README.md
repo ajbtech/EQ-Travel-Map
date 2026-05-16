@@ -109,7 +109,7 @@ Full setup, testing, and packaging instructions live in
 
 ```powershell
 pip install -e ".[dev]"
-python -m pytest -q src     # 161 tests
+python -m pytest -q src
 ruff check src && black --check src
 pyinstaller --noconfirm --clean EQTravelMap.spec   # build the redistributable
 ```
@@ -137,8 +137,11 @@ attribution list and notes.
 
 EverQuest and the world map artwork are property of Daybreak Game Company.
 This is an unofficial fan project with no affiliation to Daybreak or the
-Project 1999 team. The bundled `zone_map.png` is a community-made annotated
-reference of the classic-era Norrath worlds.
+Project 1999 team. The bundled `zone_map.png` is the
+[Project 1999 Unofficial Zone Connection Map](https://wiki.project1999.com/Zone_Connection_World),
+originally created by Yurz Truly of the Project 1999 server and later
+expanded by Matthew Gordon Roulston (a.k.a Within Amnesia). Full per-file
+credits live in [assets/ATTRIBUTION.md](assets/ATTRIBUTION.md).
 
 Special thanks to the **Project 1999** community for keeping classic
 EverQuest alive and to everyone who has reported issues against this tool.

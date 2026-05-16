@@ -8,7 +8,9 @@ against the following third-party components, each retaining its own license:
 | Qt 6 | LGPL-3.0 | https://download.qt.io/ |
 | PySide6 | LGPL-3.0 | https://code.qt.io/cgit/pyside/pyside-setup.git/ |
 | Pillow | HPND (MIT-compatible) | https://github.com/python-pillow/Pillow |
-| Matplotlib | Matplotlib license (BSD-style) | https://github.com/matplotlib/matplotlib |
+
+For bundled image assets (the zone map and EverQuest UI-derived textures),
+see [`../assets/ATTRIBUTION.md`](../assets/ATTRIBUTION.md).
 
 ## LGPL compliance notes
 

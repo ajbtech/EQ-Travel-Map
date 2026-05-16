@@ -6,7 +6,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-## [0.1.0] - TBD
+## [0.1.0] - 2026-05-16
 
 First public release.
 
@@ -31,5 +31,5 @@ First public release.
   with ruff and black lint, plus an automated release workflow that builds
   and uploads the Windows zip on tag push.
 
-[Unreleased]: https://github.com/<owner>/everquest-travel-map/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/<owner>/everquest-travel-map/releases/tag/v0.1.0
+[Unreleased]: https://github.com/ajbtech/EQ-Travel-Map/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/ajbtech/EQ-Travel-Map/releases/tag/v0.1.0
