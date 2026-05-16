@@ -49,6 +49,96 @@ HIDDEN_IMPORTS = [
     "ui.widgets.parchment_panel",
 ]
 
+# Qt modules the app does not use. The app only imports QtCore, QtGui, and
+# QtWidgets, so every other Qt submodule -- and its accompanying native
+# library, plugin folder, and QML resources -- can be stripped from the
+# bundle. PyInstaller's PySide6 hook is permissive and pulls most of these
+# in by default, so the resulting savings are significant (tens of MB).
+UNUSED_QT_MODULES = [
+    "Qt3DAnimation", "Qt3DCore", "Qt3DExtras", "Qt3DInput", "Qt3DLogic",
+    "Qt3DQuick", "Qt3DQuickAnimation", "Qt3DQuickExtras", "Qt3DQuickInput",
+    "Qt3DQuickRender", "Qt3DQuickScene2D", "Qt3DRender",
+    "QtBluetooth", "QtCharts", "QtChartsQml",
+    "QtConcurrent", "QtDBus",
+    "QtDataVisualization", "QtDataVisualizationQml",
+    "QtDesigner", "QtDesignerComponents",
+    "QtHelp", "QtHttpServer",
+    "QtMultimedia", "QtMultimediaQuick", "QtMultimediaWidgets",
+    "QtNetwork", "QtNetworkAuth", "QtNfc",
+    "QtOpenGL", "QtOpenGLWidgets",
+    "QtPdf", "QtPdfQuick", "QtPdfWidgets",
+    "QtPositioning", "QtPositioningQuick",
+    "QtPrintSupport",
+    "QtQml", "QtQmlCore", "QtQmlMeta", "QtQmlModels",
+    "QtQmlWorkerScript", "QtQmlXmlListModel",
+    "QtQuick", "QtQuick3D", "QtQuick3DAssetImport", "QtQuick3DAssetUtils",
+    "QtQuick3DEffects", "QtQuick3DGlslParser", "QtQuick3DHelpers",
+    "QtQuick3DHelpersImpl", "QtQuick3DIblBaker",
+    "QtQuick3DParticleEffects", "QtQuick3DParticles",
+    "QtQuick3DRuntimeRender", "QtQuick3DUtils",
+    "QtQuick3DXr", "QtQuick3DXrHelpers", "QtQuick3DXrHelpersImpl",
+    "QtQuickControls2", "QtQuickControls2Impl",
+    "QtQuickDialogs2", "QtQuickDialogs2QuickImpl", "QtQuickDialogs2Utils",
+    "QtQuickEffects", "QtQuickLayouts", "QtQuickParticles",
+    "QtQuickShapes", "QtQuickTemplates2", "QtQuickTest",
+    "QtQuickTimeline", "QtQuickWidgets",
+    "QtRemoteObjects", "QtScxml", "QtScxmlQml",
+    "QtSensors", "QtSensorsQuick",
+    "QtSerialBus", "QtSerialPort",
+    "QtSpatialAudio", "QtSql",
+    "QtStateMachine", "QtStateMachineQml",
+    "QtSvg", "QtSvgWidgets",
+    "QtTest", "QtTextToSpeech",
+    "QtUiTools", "QtVirtualKeyboard",
+    "QtWebChannel", "QtWebChannelQuick",
+    "QtWebEngineCore", "QtWebEngineQuick", "QtWebEngineWidgets",
+    "QtWebSockets", "QtWebView", "QtWebViewQuick",
+    "QtXml", "QtXmlPatterns",
+]
+
+# Qt plugin subfolders tied to the modules above. The platforms, styles,
+# imageformats, iconengines, generic, and platformthemes folders are kept
+# because QtWidgets needs them at runtime.
+UNUSED_QT_PLUGIN_DIRS = [
+    "3dinputdevices", "3drenderers", "assetimporters",
+    "canbus", "designer", "geometryloaders",
+    "multimedia", "networkinformation",
+    "playlistformats", "position", "printsupport",
+    "qmltooling", "renderers", "renderplugins",
+    "sceneparsers", "scxmldatamodel",
+    "sensorgestures", "sensors",
+    "sqldrivers", "texttospeech", "tls",
+    "virtualkeyboard", "webview",
+]
+
+
+def _is_excluded_qt(dest: str) -> bool:
+    """Return True if a bundled entry belongs to an unused Qt module."""
+    norm = dest.replace("\\", "/").lower()
+
+    # Qt .qm translation files -- the app never installs a QTranslator.
+    if "/translations/" in norm or norm.startswith("translations/"):
+        return True
+
+    # QML modules under PySide6/qml/ -- the app uses QtWidgets, not Qt Quick.
+    if "/qml/" in norm or norm.startswith("qml/"):
+        return True
+
+    for module in UNUSED_QT_MODULES:
+        name = module.lower()
+        # PySide6 Python wrapper (QtNetwork.pyd, QtNetwork.abi3.so, ...).
+        if f"/{name}." in norm or norm.endswith(f"/{name}"):
+            return True
+        # Native Qt library (Qt6Network.dll, libQt6Network.so.6, ...).
+        if f"qt6{module[2:].lower()}." in norm:
+            return True
+
+    for plugin_dir in UNUSED_QT_PLUGIN_DIRS:
+        if f"/plugins/{plugin_dir}/" in norm:
+            return True
+
+    return False
+
 
 a = Analysis(
     ["app_entry.py"],
@@ -59,9 +149,12 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=["tkinter"],
+    excludes=["tkinter", *(f"PySide6.{m}" for m in UNUSED_QT_MODULES)],
     noarchive=False,
 )
+
+a.binaries = [b for b in a.binaries if not _is_excluded_qt(b[0])]
+a.datas = [d for d in a.datas if not _is_excluded_qt(d[0])]
 
 pyz = PYZ(a.pure)
 
