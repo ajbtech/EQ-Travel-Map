@@ -551,8 +551,8 @@ def test_print_summary_only_includes_requested_rollups(capsys):
     assert "Kill Count: 10" in output
     assert "Levels Lost: 1" in output
     assert "Current Level: 59" in output
-    assert "looted coin: 1p 2g 3s 4c" in output
-    assert "Total cash from merchants: 5p 6g 7s 8c" in output
+    assert "Looted coin: 1p 2g 3s 4c" in output
+    assert "Coin from Merchants: 5p 6g 7s 8c" in output
     assert "Level Count" not in output
     assert "Login Count" not in output
     assert "LevelLost Count" not in output

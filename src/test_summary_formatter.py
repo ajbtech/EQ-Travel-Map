@@ -75,8 +75,8 @@ def test_build_summary_lines_formats_cash_and_counts():
         "Kill Count: 8,042",
         "Levels Lost: 0",
         "Current Level: 1",
-        "looted coin: 41,068p 2g 3s 4c",
-        "Total cash from merchants: 25,054p 6g 7s 8c",
+        "Looted coin: 41,068p 2g 3s 4c",
+        "Coin from Merchants: 25,054p 6g 7s 8c",
     ]
 
 
@@ -123,8 +123,8 @@ def test_build_summary_sections_groups_by_section():
         "Kill Count: 8,042",
         "Levels Lost: 0",
         "Current Level: 1",
-        "looted coin: 41,068p 2g 3s 4c",
-        "Total cash from merchants: 25,054p 6g 7s 8c",
+        "Looted coin: 41,068p 2g 3s 4c",
+        "Coin from Merchants: 25,054p 6g 7s 8c",
     ]
 
 
