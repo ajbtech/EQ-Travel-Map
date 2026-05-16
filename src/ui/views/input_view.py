@@ -41,7 +41,7 @@ class InputView(QWidget):
         # QSS border-width inset is unreliable for stretchy children, so we
         # set explicit margins matching the bevel thickness here. This keeps
         # the parchment from overflowing past the bottom bevel.
-        stone_layout.setContentsMargins(9, 9, 9, 9)
+        stone_layout.setContentsMargins(18, 18, 18, 18)
         stone_layout.setSpacing(0)
         outer.addWidget(stone_frame, 1)
 
