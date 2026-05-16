@@ -1,6 +1,5 @@
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
-    QFrame,
     QHBoxLayout,
     QLabel,
     QProgressBar,
@@ -9,7 +8,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ui.widgets.parchment_panel import ParchmentPanel
+from ui.widgets.parchment_panel import build_stone_framed_parchment
 
 
 def _format_count(value):
@@ -28,19 +27,11 @@ class ProgressView(QWidget):
         outer.setContentsMargins(0, 0, 0, 0)
         outer.setSpacing(0)
 
-        stone_frame = QFrame()
-        stone_frame.setObjectName("progressStoneFrame")
-        stone_layout = QVBoxLayout(stone_frame)
-        # QSS border-width inset is unreliable for stretchy children, so we
-        # set explicit margins matching the bevel thickness here. This keeps
-        # the parchment from overflowing past the bottom bevel.
-        stone_layout.setContentsMargins(18, 18, 18, 18)
-        stone_layout.setSpacing(0)
+        stone_frame, parchment = build_stone_framed_parchment(
+            stone_object_name="progressStoneFrame",
+            parchment_object_name="progressParchment",
+        )
         outer.addWidget(stone_frame, 1)
-
-        parchment = ParchmentPanel()
-        parchment.setObjectName("progressParchment")
-        stone_layout.addWidget(parchment, 1)
 
         body = QVBoxLayout(parchment)
         body.setContentsMargins(28, 16, 28, 20)

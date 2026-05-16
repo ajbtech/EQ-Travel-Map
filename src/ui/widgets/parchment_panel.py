@@ -1,4 +1,11 @@
-from PySide6.QtWidgets import QFrame
+from PySide6.QtWidgets import QFrame, QVBoxLayout
+
+
+# Inset (in pixels) used when placing a ParchmentPanel inside a stone-bevel
+# QFrame (input/progress views). Single source of truth so the two views
+# can't drift apart again; tune here to reposition the parchment relative
+# to the stone bevel.
+STONE_FRAME_INSET = 9
 
 
 class ParchmentPanel(QFrame):
@@ -31,3 +38,27 @@ class ParchmentPanel(QFrame):
         super().resizeEvent(event)
         if self._fill_child is not None:
             self._fill_child.setGeometry(self.rect())
+
+
+def build_stone_framed_parchment(*, stone_object_name, parchment_object_name):
+    """Build a stone-bevel QFrame containing a ParchmentPanel.
+
+    Returns ``(stone_frame, parchment)``. The caller adds ``stone_frame`` to
+    the view's outer layout (typically with stretch=1) and places content on
+    the parchment.
+
+    The stone frame's contents margins use ``STONE_FRAME_INSET`` on every
+    side so both the input and progress views position their parchments
+    identically — change the constant to reposition both at once.
+    """
+    stone_frame = QFrame()
+    stone_frame.setObjectName(stone_object_name)
+    layout = QVBoxLayout(stone_frame)
+    layout.setContentsMargins(
+        STONE_FRAME_INSET, STONE_FRAME_INSET, STONE_FRAME_INSET, STONE_FRAME_INSET
+    )
+    layout.setSpacing(0)
+    parchment = ParchmentPanel()
+    parchment.setObjectName(parchment_object_name)
+    layout.addWidget(parchment, 1)
+    return stone_frame, parchment
