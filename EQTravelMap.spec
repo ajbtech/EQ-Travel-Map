@@ -111,6 +111,70 @@ UNUSED_QT_PLUGIN_DIRS = [
     "virtualkeyboard", "webview",
 ]
 
+# Qt developer tools shipped inside PySide6/ -- linguist, designer, the
+# QML toolchain, uic/rcc, etc. The runtime app never invokes them.
+UNUSED_QT_TOOL_EXES = [
+    "assistant", "designer", "linguist",
+    "lupdate", "lrelease", "uic", "rcc",
+    "qmllint", "qmlformat", "qmlimportscanner", "qmlcachegen",
+    "qmlplugindump", "qmlpreview", "qmlprofiler",
+    "qmlscene", "qmltestrunner", "qmltime",
+    "balsam", "balsamui",
+]
+
+# matplotlib GUI/interactive backends. The app calls ``matplotlib.use("Agg")``
+# in eq_display.py and only writes PNGs through the Agg renderer, so every
+# other backend (and the test/sample data trees) is dead weight.
+UNUSED_MPL_BACKENDS = [
+    "matplotlib.backends.backend_qt5", "matplotlib.backends.backend_qt5agg",
+    "matplotlib.backends.backend_qt5cairo", "matplotlib.backends.backend_qtagg",
+    "matplotlib.backends.backend_qtcairo", "matplotlib.backends.backend_qt",
+    "matplotlib.backends.backend_tkagg", "matplotlib.backends.backend_tkcairo",
+    "matplotlib.backends.backend_wx", "matplotlib.backends.backend_wxagg",
+    "matplotlib.backends.backend_wxcairo",
+    "matplotlib.backends.backend_gtk3", "matplotlib.backends.backend_gtk3agg",
+    "matplotlib.backends.backend_gtk3cairo",
+    "matplotlib.backends.backend_gtk4", "matplotlib.backends.backend_gtk4agg",
+    "matplotlib.backends.backend_gtk4cairo",
+    "matplotlib.backends.backend_macosx", "matplotlib.backends.backend_cocoaagg",
+    "matplotlib.backends.backend_nbagg",
+    "matplotlib.backends.backend_webagg", "matplotlib.backends.backend_webagg_core",
+    "matplotlib.backends.backend_pgf",
+    "matplotlib.tests", "matplotlib.testing",
+]
+
+# Pillow image-format plugins. Pillow auto-registers every plugin it can
+# import, but the app only ever opens PNG (the bundled assets and the
+# user-supplied zone_map.png). Keep PngImagePlugin; drop the rest.
+UNUSED_PIL_PLUGINS = [
+    "PIL.BlpImagePlugin", "PIL.BmpImagePlugin", "PIL.BufrStubImagePlugin",
+    "PIL.CurImagePlugin", "PIL.DcxImagePlugin", "PIL.DdsImagePlugin",
+    "PIL.EpsImagePlugin", "PIL.FitsImagePlugin", "PIL.FliImagePlugin",
+    "PIL.FpxImagePlugin", "PIL.FtexImagePlugin",
+    "PIL.GbrImagePlugin", "PIL.GifImagePlugin", "PIL.GribStubImagePlugin",
+    "PIL.Hdf5StubImagePlugin",
+    "PIL.IcnsImagePlugin", "PIL.IcoImagePlugin", "PIL.ImImagePlugin",
+    "PIL.ImtImagePlugin", "PIL.IptcImagePlugin",
+    "PIL.Jpeg2KImagePlugin", "PIL.JpegImagePlugin",
+    "PIL.McIdasImagePlugin", "PIL.MicImagePlugin", "PIL.MpegImagePlugin",
+    "PIL.MpoImagePlugin", "PIL.MspImagePlugin",
+    "PIL.PalmImagePlugin", "PIL.PcdImagePlugin", "PIL.PcxImagePlugin",
+    "PIL.PdfImagePlugin", "PIL.PixarImagePlugin", "PIL.PpmImagePlugin",
+    "PIL.PsdImagePlugin", "PIL.QoiImagePlugin",
+    "PIL.SgiImagePlugin", "PIL.SpiderImagePlugin", "PIL.SunImagePlugin",
+    "PIL.TgaImagePlugin", "PIL.TiffImagePlugin",
+    "PIL.WebPImagePlugin", "PIL.WmfImagePlugin",
+    "PIL.XbmImagePlugin", "PIL.XpmImagePlugin", "PIL.XVThumbImagePlugin",
+]
+
+# Native libraries shipped with Pillow for image formats we don't read or
+# write. matplotlib needs freetype (for text) and lcms2 (for the PNG color
+# pipeline), so those are deliberately not listed here.
+UNUSED_PIL_NATIVE_LIB_STEMS = [
+    "libtiff", "libwebp", "libwebpdemux", "libwebpmux",
+    "libjpeg", "libturbojpeg", "libopenjp2", "libjp2",
+]
+
 
 def _is_excluded_qt(dest: str) -> bool:
     """Return True if a bundled entry belongs to an unused Qt module."""
@@ -137,7 +201,54 @@ def _is_excluded_qt(dest: str) -> bool:
         if f"/plugins/{plugin_dir}/" in norm:
             return True
 
+    # PySide6 developer tools (linguist.exe, qmlcachegen.exe, ...). Match
+    # both the bare executable and the ``pyside6-<tool>`` wrappers, on
+    # Windows (.exe) and POSIX (no extension).
+    for tool in UNUSED_QT_TOOL_EXES:
+        base = norm.rsplit("/", 1)[-1]
+        if base in {tool, f"{tool}.exe", f"pyside6-{tool}", f"pyside6-{tool}.exe"}:
+            return True
+
     return False
+
+
+def _is_excluded_mpl(dest: str) -> bool:
+    """Return True if a bundled entry is matplotlib data the app doesn't use."""
+    norm = dest.replace("\\", "/").lower()
+
+    # Bundled example datasets used only by matplotlib's own documentation.
+    if "/mpl-data/sample_data/" in norm:
+        return True
+
+    # Adobe Font Metrics files for PostScript output -- the app only ever
+    # renders to PNG via the Agg backend.
+    if "/mpl-data/fonts/afm/" in norm:
+        return True
+
+    return False
+
+
+def _is_excluded_pillow_lib(dest: str) -> bool:
+    """Return True if a bundled entry is a Pillow native lib for an unused format."""
+    base = dest.replace("\\", "/").rsplit("/", 1)[-1].lower()
+
+    for stem in UNUSED_PIL_NATIVE_LIB_STEMS:
+        # Matches libtiff.dll, libtiff-5.dll, libtiff.so.6, libtiff.6.dylib, ...
+        if base.startswith(stem) and (
+            base.endswith(".dll") or ".so" in base or base.endswith(".dylib")
+        ):
+            return True
+
+    return False
+
+
+def _keep(entry) -> bool:
+    dest = entry[0]
+    return not (
+        _is_excluded_qt(dest)
+        or _is_excluded_mpl(dest)
+        or _is_excluded_pillow_lib(dest)
+    )
 
 
 a = Analysis(
@@ -149,12 +260,17 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=["tkinter", *(f"PySide6.{m}" for m in UNUSED_QT_MODULES)],
+    excludes=[
+        "tkinter",
+        *(f"PySide6.{m}" for m in UNUSED_QT_MODULES),
+        *UNUSED_MPL_BACKENDS,
+        *UNUSED_PIL_PLUGINS,
+    ],
     noarchive=False,
 )
 
-a.binaries = [b for b in a.binaries if not _is_excluded_qt(b[0])]
-a.datas = [d for d in a.datas if not _is_excluded_qt(d[0])]
+a.binaries = [b for b in a.binaries if _keep(b)]
+a.datas = [d for d in a.datas if _keep(d)]
 
 pyz = PYZ(a.pure)
 
