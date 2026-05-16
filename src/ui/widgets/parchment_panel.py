@@ -1,6 +1,5 @@
 from PySide6.QtWidgets import QFrame, QVBoxLayout
 
-
 # Inset (in pixels) used when placing a ParchmentPanel inside a stone-bevel
 # QFrame (input/progress views). Single source of truth so the two views
 # can't drift apart again; tune here to reposition the parchment relative
