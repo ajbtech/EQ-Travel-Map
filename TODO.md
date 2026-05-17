@@ -1,7 +1,7 @@
 # TODO
 
 ## Bugs
-- [ ] Remove coin from looting own corpse
+- [x] Remove coin from looting own corpse
 - [ ] Fix zone centers which are off, particularly in Kunark
 - [ ] Fix capitalization of loot
 

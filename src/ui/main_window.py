@@ -4,6 +4,7 @@ from PySide6.QtCore import QThread, Slot
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import QMainWindow, QMessageBox, QStackedWidget
 
+from ui import settings as user_settings
 from ui.parse_worker import ParseWorker
 from ui.views.input_view import InputView
 from ui.views.progress_view import ProgressView
@@ -66,6 +67,7 @@ class MainWindow(QMainWindow):
         run_worker=None,
         error_dialog=None,
         available_geometry=None,
+        save_log_folder=None,
         parent=None,
     ):
         super().__init__(parent)
@@ -76,6 +78,7 @@ class MainWindow(QMainWindow):
         self._run_worker = run_worker or self._run_worker_on_thread
         self._error_dialog = error_dialog or _default_error_dialog
         self._available_geometry = available_geometry or _default_available_geometry
+        self._save_log_folder = save_log_folder or user_settings.save_log_folder
 
         self._stack = QStackedWidget(self)
         self._stack.setObjectName("rootStack")
@@ -154,6 +157,7 @@ class MainWindow(QMainWindow):
 
     @Slot(str, str, str)
     def _on_parse_requested(self, character, folder, output):
+        self._save_log_folder(folder)
         worker = self._worker_factory(character, folder, output)
         self._active_worker = worker
         worker.progress.connect(self._on_worker_progress)

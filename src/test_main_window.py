@@ -41,6 +41,8 @@ def _make_window(qt_app, **overrides):
     def default_available_geometry(_window):
         return QRect(0, 0, 4000, 3000)
 
+    folders_saved = []
+
     window = MainWindow(
         default_log_folder=Path("/logs"),
         default_output_path=Path("/tmp/out.png"),
@@ -51,9 +53,11 @@ def _make_window(qt_app, **overrides):
         available_geometry=overrides.get(
             "available_geometry", default_available_geometry
         ),
+        save_log_folder=overrides.get("save_log_folder", folders_saved.append),
     )
     window._test_workers = workers_built
     window._test_errors = errors_shown
+    window._test_saved_folders = folders_saved
     return window
 
 
@@ -152,6 +156,14 @@ def test_parse_requested_runs_worker_and_routes_finished_to_results(qt_app):
 
     assert window.current_view_name == "results"
     assert "Kill Count: 9001" in window.results_view.summary_text()
+
+
+def test_parse_requested_persists_log_folder(qt_app):
+    window = _make_window(qt_app)
+
+    window.input_view.parse_requested.emit("Gorrek", "/logs", "/tmp/out.png")
+
+    assert window._test_saved_folders == ["/logs"]
 
 
 def test_parse_requested_routes_error_to_input_view_with_dialog(qt_app):

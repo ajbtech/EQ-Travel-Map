@@ -151,6 +151,57 @@ def test_line_reader_is_line_loot_cash_null():
     assert line_reader.is_line_loot_cash(line) is False
 
 
+# Mob loot is capped at 99 cp / sp / pp per corpse, so any "You receive ..."
+# line that exceeds that cap on a non-gold denomination must be a self-corpse
+# retrieval, not mob loot. Gold can legitimately exceed 99 from mobs.
+def test_is_line_loot_cash_rejects_self_corpse_excess_platinum():
+    line = (
+        "[Sat Jan 07 14:38:52 2023] You receive 832 platinum, "
+        "11 gold, 54 silver and 88 copper as your split."
+    )
+    assert line_reader.is_line_loot_cash(line) is False
+
+
+def test_is_line_loot_cash_rejects_self_corpse_excess_silver():
+    line = (
+        "[Mon Oct 24 21:17:09 2022] You receive 29 platinum, "
+        "98 gold and 586 silver from the corpse."
+    )
+    assert line_reader.is_line_loot_cash(line) is False
+
+
+def test_is_line_loot_cash_rejects_self_corpse_excess_copper():
+    line = (
+        "[Wed Sep 28 06:21:23 2022] You receive 16 platinum, "
+        "19 gold, 49 silver and 248 copper from the corpse."
+    )
+    assert line_reader.is_line_loot_cash(line) is False
+
+
+def test_is_line_loot_cash_allows_high_gold():
+    line = (
+        "[Mon Oct 24 21:17:09 2022] You receive 29 platinum, "
+        "398 gold and 86 silver from the corpse."
+    )
+    assert line_reader.is_line_loot_cash(line) is True
+
+
+def test_is_line_loot_cash_allows_exactly_99():
+    line = (
+        "[Sat Sep 24 12:00:00 2022] You receive 99 platinum, "
+        "99 gold, 99 silver and 99 copper from the corpse."
+    )
+    assert line_reader.is_line_loot_cash(line) is True
+
+
+def test_classify_line_returns_empty_for_self_corpse_loot():
+    line = (
+        "[Mon Oct 31 22:34:19 2022] You receive 135 platinum "
+        "and 98 copper from the corpse."
+    )
+    assert line_reader.classify_line(line) == line_reader.EMPTY_LINE_EVENT
+
+
 def test_line_reader_is_line_merch_cash_positive():
     line = (
         "[Sun Jan 08 14:54:06 2023] You receive 5 platinum 1 gold "

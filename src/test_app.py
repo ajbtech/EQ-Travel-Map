@@ -51,6 +51,40 @@ def test_build_arg_parser_character_is_optional():
     assert args.character_name is None
 
 
+def test_build_arg_parser_log_folder_defaults_to_none():
+    # None signals "no explicit override" so run() can fall through to a
+    # persisted value before the built-in default.
+    parser = app.build_arg_parser()
+
+    args = parser.parse_args([])
+
+    assert args.log_folder is None
+
+
+def test_resolve_log_folder_prefers_cli_override(monkeypatch):
+    monkeypatch.setattr(app.settings, "load_log_folder", lambda: Path("/persisted"))
+
+    resolved = app._resolve_log_folder(Path("/explicit"))
+
+    assert resolved == Path("/explicit")
+
+
+def test_resolve_log_folder_uses_persisted_when_no_cli_override(monkeypatch):
+    monkeypatch.setattr(app.settings, "load_log_folder", lambda: Path("/persisted"))
+
+    resolved = app._resolve_log_folder(None)
+
+    assert resolved == Path("/persisted")
+
+
+def test_resolve_log_folder_falls_back_to_built_in_default(monkeypatch):
+    monkeypatch.setattr(app.settings, "load_log_folder", lambda: None)
+
+    resolved = app._resolve_log_folder(None)
+
+    assert resolved == Path(app.eq_parser.DEFAULT_LOG_FOLDER_PATH)
+
+
 def test_infer_character_names_returns_sorted_unique_names(tmp_path):
     (tmp_path / "eqlog_Gorrek_P1999Green.txt").write_text("")
     (tmp_path / "ARCHIVEeqlog_Gorrek_P1999Green.txt").write_text("")
