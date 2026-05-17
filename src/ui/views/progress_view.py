@@ -62,7 +62,7 @@ class ProgressView(QWidget):
 
         self.lines_label = QLabel("Lines parsed: 0")
         self.lines_label.setObjectName("progressDetail")
-        button_row.addWidget(self.lines_label)        
+        button_row.addWidget(self.lines_label)
         
         self.cancel_button = QPushButton("CANCEL")
         self.cancel_button.setObjectName("bronzeButton")
