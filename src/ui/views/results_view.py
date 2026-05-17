@@ -21,10 +21,33 @@ from ui.widgets.parchment_panel import ParchmentPanel
 
 class ResultsView(QWidget):
     back_requested = Signal()
-    preferred_window_size = (1200, 700)
+    # Target window height. The width is computed from this height in
+    # `preferred_window_size` so the window hugs the rendered map + button
+    # column with no blank space on the right.
+    _PREFERRED_HEIGHT = 700
+    # Vertical space the summary stone+parchment takes up: 18px stone bevel
+    # + 37px parchment border-image + 95px content + 37px border-image + 18px
+    # stone bevel. Drift here if the QSS border-widths change.
+    _SUMMARY_TOTAL_HEIGHT = 205
+    # Total width of the button column (buttons are setFixedWidth(200), plus
+    # the 18px stone bevel on each side).
+    _BUTTON_FRAME_WIDTH = 236
     # Matches QFrame#mapFrame border-width in the QSS theme; the bevel paints
     # an 18px stone border on each side of the contained MapCanvas.
     _MAP_FRAME_BORDER = 18
+    # Aspect ratio of zone_map.png (2700x1550). Used as a fallback when the
+    # rendered map hasn't been loaded yet (e.g. during view construction).
+    _FALLBACK_MAP_ASPECT = 2700 / 1550
+
+    @property
+    def preferred_window_size(self):
+        aspect = (
+            self.map_canvas.source_aspect_ratio() or self._FALLBACK_MAP_ASPECT
+        )
+        border = self._MAP_FRAME_BORDER
+        inner_h = self._PREFERRED_HEIGHT - self._SUMMARY_TOTAL_HEIGHT - 2 * border
+        map_w = int(round(inner_h * aspect)) + 2 * border
+        return (map_w + self._BUTTON_FRAME_WIDTH, self._PREFERRED_HEIGHT)
 
     def __init__(self, parent=None):
         super().__init__(parent)
