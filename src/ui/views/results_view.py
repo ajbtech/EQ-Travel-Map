@@ -125,7 +125,10 @@ class ResultsView(QWidget):
         if inner_h <= 0:
             return
         target = int(round(inner_h * aspect)) + 2 * border
-        if self.map_frame.minimumWidth() == target and self.map_frame.maximumWidth() == target:
+        if (
+            self.map_frame.minimumWidth() == target
+            and self.map_frame.maximumWidth() == target
+        ):
             return
         self.map_frame.setFixedWidth(target)
 
