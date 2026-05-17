@@ -6,6 +6,54 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-05-17
+
+First stable release. Rolls up the 0.1.1 → 0.1.14 patch series plus the
+metadata bumps that mark the project as production-stable.
+
+### Added
+- Remember the last log folder across app launches so the input view
+  starts pre-filled on subsequent runs.
+- Real progress-bar percentage during log parsing (was previously a
+  spinner-style indeterminate bar).
+- Saved map filenames are now prefixed with the character name
+  (e.g. `Gorrek_travel_map.png`) so multiple characters can coexist in
+  the same output folder.
+
+### Changed
+- Progress-bar fill colour switched from default blue to gold so it
+  matches the EverQuest palette.
+- Results window now caps to the active screen size and shrinks
+  proportionally on small displays, instead of overflowing.
+- Parchment title moved up to free vertical room for body content; the
+  stone-framed parchment construction is now shared between the input
+  and progress views.
+- Button styling updated to better match the original EverQuest UI.
+
+### Fixed
+- Coin retrieved from looting your *own* corpse is no longer added to
+  loot cash totals (previously inflated platinum/gold for any character
+  that died and recovered).
+- "Sirens Grotto" log spelling now aliases to the canonical "Siren's
+  Grotto" zone so trips into the zone draw correctly on the map.
+- ParchmentPanel no longer enforces a minimum height that overrode
+  `setFixedSize` on small windows.
+- Capitalisation of looted-item names normalised in the summary.
+
+### Internal
+- Bundle size reduced via PNG asset compression, stripped unused Qt
+  modules / Pillow plugins / stdlib modules, and a swap from matplotlib
+  to Pillow as the map renderer.
+- `html` stdlib module restored to the PyInstaller bundle (was being
+  pruned and broke the frozen exe on certain code paths).
+- Test coverage raised to 90 % with a `fail_under = 85` CI gate
+  (`pyproject.toml [tool.coverage]`), an end-to-end test against the
+  bundled `samples/sample_eqlog_Gorrek_P1999Green.txt`, and new tests
+  for `_split_error_message`, `MapCanvas` rescale, and the `ui/app.py`
+  stylesheet loader.
+- Release artifacts now ship with `SHA256SUMS.txt` and pinned
+  dependencies (`requirements-release.txt`) for reproducible builds.
+
 ## [0.1.0] - 2026-05-16
 
 First public release.
@@ -31,5 +79,6 @@ First public release.
   with ruff and black lint, plus an automated release workflow that builds
   and uploads the Windows zip on tag push.
 
-[Unreleased]: https://github.com/ajbtech/EQ-Travel-Map/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/ajbtech/EQ-Travel-Map/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/ajbtech/EQ-Travel-Map/compare/v0.1.0...v1.0.0
 [0.1.0]: https://github.com/ajbtech/EQ-Travel-Map/releases/tag/v0.1.0

@@ -152,9 +152,9 @@ EverQuest alive and to everyone who has reported issues against this tool.
 
 See [TODO.md](TODO.md) for the maintainer's working notes and
 [GitHub Issues](https://github.com/ajbtech/EQ-Travel-Map/issues) for
-discussion. Highlights for upcoming versions:
+discussion. Post-1.0 ideas under consideration:
 
 - Better Kunark zone center positions
 - Live "follow me" view that updates the map as you play
 - Zoom and pan in the desktop view
-- Replacing the placeholder pixel-art icon with commissioned art
+- Dynamic results-window resizing
