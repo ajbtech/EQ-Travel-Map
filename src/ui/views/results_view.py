@@ -41,9 +41,7 @@ class ResultsView(QWidget):
 
     @property
     def preferred_window_size(self):
-        aspect = (
-            self.map_canvas.source_aspect_ratio() or self._FALLBACK_MAP_ASPECT
-        )
+        aspect = self.map_canvas.source_aspect_ratio() or self._FALLBACK_MAP_ASPECT
         border = self._MAP_FRAME_BORDER
         inner_h = self._PREFERRED_HEIGHT - self._SUMMARY_TOTAL_HEIGHT - 2 * border
         map_w = int(round(inner_h * aspect)) + 2 * border
