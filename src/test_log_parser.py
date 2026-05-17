@@ -65,3 +65,30 @@ def test_parse_log_files_reports_progress(monkeypatch, tmp_path):
     assert log_parser.ParseProgress(log_file, 2) in progress_updates
     assert log_parser.ParseProgress(log_file, 4) in progress_updates
     assert progress_updates[-1] == log_parser.ParseProgress(log_file, 5)
+
+
+def test_count_lines_in_files_sums_lines_across_files(tmp_path):
+    a = tmp_path / "a.txt"
+    b = tmp_path / "b.txt"
+    a.write_text("line1\nline2\nline3\n")
+    b.write_text("only\n")
+
+    assert log_parser.count_lines_in_files([a, b]) == 4
+
+
+def test_count_lines_in_files_handles_empty_files(tmp_path):
+    empty = tmp_path / "empty.txt"
+    empty.write_text("")
+
+    assert log_parser.count_lines_in_files([empty]) == 0
+
+
+def test_count_lines_in_files_counts_final_line_without_newline(tmp_path):
+    log = tmp_path / "no_trailing_newline.txt"
+    log.write_text("first\nsecond")
+
+    assert log_parser.count_lines_in_files([log]) == 2
+
+
+def test_count_lines_in_files_returns_zero_for_no_files():
+    assert log_parser.count_lines_in_files([]) == 0

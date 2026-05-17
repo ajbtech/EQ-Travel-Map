@@ -66,6 +66,29 @@ class ParseProgress:
 
 
 PROGRESS_LINE_INTERVAL = 5000
+LINE_COUNT_CHUNK_SIZE = 1024 * 1024
+
+
+def count_lines_in_files(file_paths):
+    total = 0
+    for file_path in file_paths:
+        total += _count_lines_in_file(file_path)
+    return total
+
+
+def _count_lines_in_file(file_path):
+    line_count = 0
+    last_byte = b""
+    with open(file_path, "rb") as f:
+        while True:
+            chunk = f.read(LINE_COUNT_CHUNK_SIZE)
+            if not chunk:
+                break
+            line_count += chunk.count(b"\n")
+            last_byte = chunk[-1:]
+    if last_byte and last_byte != b"\n":
+        line_count += 1
+    return line_count
 
 
 def open_file_and_get_lines(file_path):

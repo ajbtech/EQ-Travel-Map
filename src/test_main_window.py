@@ -128,6 +128,51 @@ def test_progress_signal_updates_progress_view(qt_app):
     assert "12,345" in window.progress_view.lines_label.text()
 
 
+def test_totals_signal_sets_progress_bar_range(qt_app):
+    window = _make_window(qt_app)
+    window.show_progress("Gorrek")
+
+    window._on_worker_totals(50000)
+
+    bar = window.progress_view.progress_bar
+    assert bar.minimum() == 0
+    assert bar.maximum() == 50000
+
+
+def test_progress_signal_advances_progress_bar_value(qt_app):
+    window = _make_window(qt_app)
+    window.show_progress("Gorrek")
+    window._on_worker_totals(50000)
+
+    window._on_worker_progress("eqlog_Gorrek_P1999Green.txt", 12345)
+
+    assert window.progress_view.progress_bar.value() == 12345
+
+
+def test_show_progress_resets_progress_bar_to_indeterminate(qt_app):
+    window = _make_window(qt_app)
+    window.show_progress("Gorrek")
+    window._on_worker_totals(50000)
+    window._on_worker_progress("file.txt", 30000)
+
+    window.show_progress("Mortimer")
+
+    bar = window.progress_view.progress_bar
+    assert bar.minimum() == 0
+    assert bar.maximum() == 0
+
+
+def test_totals_of_zero_keeps_progress_bar_indeterminate(qt_app):
+    window = _make_window(qt_app)
+    window.show_progress("Gorrek")
+
+    window._on_worker_totals(0)
+
+    bar = window.progress_view.progress_bar
+    assert bar.minimum() == 0
+    assert bar.maximum() == 0
+
+
 def test_parse_requested_runs_worker_and_routes_finished_to_results(qt_app):
     sections = _sections(stats_lines=["Kill Count: 9001"])
 
