@@ -59,16 +59,17 @@ class ProgressView(QWidget):
 
         button_row = QHBoxLayout()
         button_row.addStretch(1)
+
+        self.lines_label = QLabel("Lines parsed: 0")
+        self.lines_label.setObjectName("progressDetail")
+        button_row.addWidget(self.lines_label)        
+        
         self.cancel_button = QPushButton("CANCEL")
         self.cancel_button.setObjectName("bronzeButton")
         self.cancel_button.setMinimumWidth(150)
         self.cancel_button.clicked.connect(self.cancel_requested.emit)
         button_row.addWidget(self.cancel_button)
         body.addLayout(button_row)
-
-        self.lines_label = QLabel("Lines parsed: 0")
-        self.lines_label.setObjectName("progressDetail")
-        button_row.addWidget(self.lines_label)
 
     def set_character(self, character_name):
         self.character_label.setText(f"Parsing logs for {character_name}...")
