@@ -143,9 +143,9 @@ class ResultsView(QWidget):
         self._fit_summary_to_upper_row()
 
     def _fit_summary_to_upper_row(self):
-        # Align the summary parchment under the map only; the button column
-        # stays clear so the stone bevels line up on the right.
-        summary_w = self.map_frame.width()
+        # Span the summary parchment under the map AND the button column so
+        # the stone bevels line up on the right.
+        summary_w = self.map_frame.width() + self.button_frame.sizeHint().width()
         if (
             self.summary_stone_frame.minimumWidth() != summary_w
             or self.summary_stone_frame.maximumWidth() != summary_w
