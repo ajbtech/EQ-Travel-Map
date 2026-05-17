@@ -130,11 +130,16 @@ class MainWindow(QMainWindow):
             return
         width, height = size
         # Cap to the active screen's available area minus a reserve for the
-        # window frame and title bar. Prevents the results window from
-        # overflowing a small display and pushing its title bar off-screen.
+        # window frame and title bar. When either dimension would overflow,
+        # shrink both proportionally so the view keeps its designed aspect
+        # ratio (e.g. results view at 1240x760 stays ~1.63:1 instead of
+        # turning wider-than-designed when only the height is clipped).
         available = self._available_geometry(self)
-        width = min(width, max(1, available.width() - _WINDOW_FRAME_RESERVE_W))
-        height = min(height, max(1, available.height() - _WINDOW_FRAME_RESERVE_H))
+        max_width = max(1, available.width() - _WINDOW_FRAME_RESERVE_W)
+        max_height = max(1, available.height() - _WINDOW_FRAME_RESERVE_H)
+        scale = min(1.0, max_width / width, max_height / height)
+        width = max(1, int(width * scale))
+        height = max(1, int(height * scale))
         self.setFixedSize(width, height)
         if not self.isVisible():
             return

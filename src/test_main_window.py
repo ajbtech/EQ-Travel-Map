@@ -300,7 +300,8 @@ def test_window_resizes_to_each_view_preferred_size(qt_app):
 
 
 def test_window_caps_to_available_screen_when_preferred_too_large(qt_app):
-    # Screen smaller than ResultsView.preferred_window_size of 1240x760.
+    # Screen narrower than ResultsView.preferred_window_size on both axes,
+    # so the cap definitely engages.
     small_screen = QRect(0, 0, 1024, 600)
     window = _make_window(qt_app, available_geometry=lambda _w: small_screen)
     window.show()
@@ -308,10 +309,29 @@ def test_window_caps_to_available_screen_when_preferred_too_large(qt_app):
     window.show_results(Path("/tmp/out.png"), _sections())
 
     w, h = window.size().toTuple()
-    # Width capped to screen.width() - 20 horizontal frame margin.
-    assert w == small_screen.width() - 20
-    # Height capped to screen.height() - 80 vertical frame/title margin.
-    assert h == small_screen.height() - 80
+    # Both axes must fit inside the screen's available area minus the
+    # frame/title reserve.
+    assert w <= small_screen.width() - 20
+    assert h <= small_screen.height() - 80
+
+
+def test_window_preserves_aspect_ratio_when_capping(qt_app):
+    # Screen that only clips the height. Preferred 1240x760 has aspect
+    # 1.6316; the capped window should keep that ratio (within 1px of
+    # int rounding) rather than only shrinking the height.
+    short_screen = QRect(0, 0, 4000, 700)
+    window = _make_window(qt_app, available_geometry=lambda _w: short_screen)
+    window.show()
+
+    window.show_results(Path("/tmp/out.png"), _sections())
+
+    w, h = window.size().toTuple()
+    pref_w, pref_h = window.results_view.preferred_window_size
+    pref_aspect = pref_w / pref_h
+    actual_aspect = w / h
+    assert abs(actual_aspect - pref_aspect) < 0.01
+    # And the height must respect the cap.
+    assert h <= short_screen.height() - 80
 
 
 def test_window_uses_preferred_size_when_screen_has_room(qt_app):
