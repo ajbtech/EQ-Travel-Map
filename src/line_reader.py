@@ -27,6 +27,9 @@ LEVEL_GAINED_TEXT = "You have gained a level! Welcome to level "
 LEVEL_LOST_TEXT = "You LOST a level! You are now level "
 LOGIN_TEXT = "Welcome to EverQuest!"
 ZONE_TEXT = "You have entered "
+PLAYER_DAMAGE_PATTERN = re.compile(
+    r"\bYou (\w+) .+ for (\d+) points? of (non-melee )?damage\."
+)
 
 
 class EventType(Enum):
@@ -160,6 +163,19 @@ def get_level(line):
         return None
 
     return int(level_text)
+
+
+def get_player_damage(line):
+    m = PLAYER_DAMAGE_PATTERN.search(line)
+    if m is None:
+        return None
+    verb = m.group(1)
+    amount = int(m.group(2))
+    if m.group(3) is not None:
+        return "spell", amount
+    if verb == "critically":
+        return "crit", amount
+    return verb, amount
 
 
 def classify_line(line):

@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ui.views.more_stats_view import MoreStatsDialog
 from ui.widgets.map_canvas import MapCanvas
 from ui.widgets.parchment_panel import ParchmentPanel
 
@@ -96,6 +97,12 @@ class ResultsView(QWidget):
         self.save_image_button.setFixedWidth(200)
         self.save_image_button.clicked.connect(self._on_save_image)
         button_column.addWidget(self.save_image_button)
+
+        self.more_stats_button = QPushButton("MORE STATS")
+        self.more_stats_button.setObjectName("bronzeButton")
+        self.more_stats_button.setFixedWidth(200)
+        self.more_stats_button.clicked.connect(self._on_more_stats)
+        button_column.addWidget(self.more_stats_button)
 
         button_column.addStretch(1)
         upper_row.addWidget(self.button_frame)
@@ -219,6 +226,12 @@ class ResultsView(QWidget):
         parts.append("")
         parts.extend(self._current_sections.stats_lines)
         return "\n".join(parts)
+
+    def _on_more_stats(self):
+        if self._current_sections is None:
+            return
+        dlg = MoreStatsDialog(self._current_sections, parent=self)
+        dlg.show()
 
     def _on_copy_text(self):
         QGuiApplication.clipboard().setText(self.summary_text())
