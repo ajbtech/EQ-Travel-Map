@@ -180,5 +180,5 @@ class ResultsView(QWidget):
         line = self._current_sections.character_line
         prefix = "Character: "
         if line.startswith(prefix):
-            return line[len(prefix):].strip()
+            return line[len(prefix) :].strip()
         return ""
