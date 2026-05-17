@@ -21,7 +21,10 @@ from ui.widgets.parchment_panel import ParchmentPanel
 
 class ResultsView(QWidget):
     back_requested = Signal()
-    preferred_window_size = (1240, 760)
+    preferred_window_size = (1200, 700)
+    # Matches QFrame#mapFrame border-width in the QSS theme; the bevel paints
+    # an 18px stone border on each side of the contained MapCanvas.
+    _MAP_FRAME_BORDER = 18
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -43,7 +46,11 @@ class ResultsView(QWidget):
         map_frame_layout.setContentsMargins(0, 0, 0, 0)
         self.map_canvas = MapCanvas()
         map_frame_layout.addWidget(self.map_canvas)
-        upper_row.addWidget(self.map_frame, 1)
+        # No stretch on the map frame: its width is driven by
+        # _fit_map_frame_to_image() so the stone bevel hugs the rendered
+        # map. Trailing stretch (added after the button column) absorbs any
+        # leftover horizontal space.
+        upper_row.addWidget(self.map_frame)
 
         self.button_frame = QFrame()
         self.button_frame.setObjectName("buttonFrame")
@@ -71,6 +78,7 @@ class ResultsView(QWidget):
 
         button_column.addStretch(1)
         upper_row.addWidget(self.button_frame)
+        upper_row.addStretch(1)
 
         outer.addLayout(upper_row, 1)
 
@@ -104,6 +112,26 @@ class ResultsView(QWidget):
         summary_stone_layout.addWidget(summary_parchment)
         outer.addWidget(self.summary_stone_frame)
 
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self._fit_map_frame_to_image()
+
+    def _fit_map_frame_to_image(self):
+        aspect = self.map_canvas.source_aspect_ratio()
+        if aspect is None:
+            return
+        border = self._MAP_FRAME_BORDER
+        inner_h = self.map_frame.height() - 2 * border
+        if inner_h <= 0:
+            return
+        target = int(round(inner_h * aspect)) + 2 * border
+        if (
+            self.map_frame.minimumWidth() == target
+            and self.map_frame.maximumWidth() == target
+        ):
+            return
+        self.map_frame.setFixedWidth(target)
+
     def _make_column(self):
         label = QLabel("")
         label.setObjectName("summaryColumn")
@@ -116,6 +144,7 @@ class ResultsView(QWidget):
         self._current_image_path = Path(image_path)
         self._current_sections = summary_sections
         self.map_canvas.load_image(self._current_image_path)
+        self._fit_map_frame_to_image()
         self._kills_column.setText(
             self._render_column_html(summary_sections.top_kills_lines)
         )
