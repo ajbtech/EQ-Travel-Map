@@ -50,9 +50,7 @@ class ProgressView(QWidget):
         self.file_label.setObjectName("progressDetail")
         body.addWidget(self.file_label)
 
-        self.lines_label = QLabel("Lines parsed: 0")
-        self.lines_label.setObjectName("progressDetail")
-        body.addWidget(self.lines_label)
+
 
         self.progress_bar = QProgressBar()
         self.progress_bar.setObjectName("stoneProgress")
@@ -69,6 +67,10 @@ class ProgressView(QWidget):
         self.cancel_button.clicked.connect(self.cancel_requested.emit)
         button_row.addWidget(self.cancel_button)
         body.addLayout(button_row)
+
+        self.lines_label = QLabel("Lines parsed: 0")
+        self.lines_label.setObjectName("progressDetail")
+        button_row.addWidget(self.lines_label)
 
     def set_character(self, character_name):
         self.character_label.setText(f"Parsing logs for {character_name}...")
