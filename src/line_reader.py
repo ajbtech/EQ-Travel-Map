@@ -145,9 +145,10 @@ def get_name(line):
 
 
 def get_zone(line):
-    name = _get_text_between(line, ZONE_TEXT, ".")
-    name = _clean_up_article(name)
-    return name
+    # Zone names are matched literally against zone_graph.json (with aliases
+    # for log-specific phrasings), so leading articles must be preserved -
+    # "an Arena (PvP) area" is its own zone phrase, not "The Arena".
+    return _get_text_between(line, ZONE_TEXT, ".")
 
 
 def get_level(line):
