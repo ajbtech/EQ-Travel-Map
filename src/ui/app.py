@@ -7,7 +7,7 @@ from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication
 
 import eq_parser
-from ui import asset_paths
+from ui import asset_paths, settings
 from ui.main_window import MainWindow
 
 _LOG_CHARACTER_PATTERN = re.compile(r"eqlog_(?P<character>[^_]+)_", re.IGNORECASE)
@@ -63,9 +63,12 @@ def build_arg_parser():
     )
     parser.add_argument(
         "--log-folder",
-        default=eq_parser.DEFAULT_LOG_FOLDER_PATH,
+        default=None,
         type=Path,
-        help="Folder containing EverQuest log files.",
+        help=(
+            "Folder containing EverQuest log files. If omitted, uses the "
+            "last folder remembered from a previous run."
+        ),
     )
     parser.add_argument(
         "--output",
@@ -76,15 +79,24 @@ def build_arg_parser():
     return parser
 
 
-def run(character_name=None, log_folder_path=None, output_path=None):
-    log_folder_path = Path(log_folder_path or eq_parser.DEFAULT_LOG_FOLDER_PATH)
-    output_path = Path(output_path or eq_parser.DEFAULT_MAP_OUTPUT_PATH)
-    if character_name is None:
-        character_name = _default_character_name(log_folder_path)
+def _resolve_log_folder(cli_value):
+    if cli_value is not None:
+        return Path(cli_value)
+    persisted = settings.load_log_folder()
+    if persisted is not None:
+        return Path(persisted)
+    return Path(eq_parser.DEFAULT_LOG_FOLDER_PATH)
 
+
+def run(character_name=None, log_folder_path=None, output_path=None):
     app = QApplication.instance() or QApplication(sys.argv)
     _load_stylesheet(app)
     _set_app_icon(app)
+
+    log_folder_path = _resolve_log_folder(log_folder_path)
+    output_path = Path(output_path or eq_parser.DEFAULT_MAP_OUTPUT_PATH)
+    if character_name is None:
+        character_name = _default_character_name(log_folder_path)
 
     window = MainWindow(
         default_log_folder=log_folder_path,
