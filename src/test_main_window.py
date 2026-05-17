@@ -42,6 +42,10 @@ def _make_window(qt_app, **overrides):
         return QRect(0, 0, 4000, 3000)
 
     folders_saved = []
+    results_saved = []
+
+    def default_save_last_results(character, image_path, sections):
+        results_saved.append((character, image_path, sections))
 
     window = MainWindow(
         default_log_folder=Path("/logs"),
@@ -54,10 +58,12 @@ def _make_window(qt_app, **overrides):
             "available_geometry", default_available_geometry
         ),
         save_log_folder=overrides.get("save_log_folder", folders_saved.append),
+        save_last_results=overrides.get("save_last_results", default_save_last_results),
     )
     window._test_workers = workers_built
     window._test_errors = errors_shown
     window._test_saved_folders = folders_saved
+    window._test_saved_results = results_saved
     return window
 
 
@@ -209,6 +215,49 @@ def test_parse_requested_persists_log_folder(qt_app):
     window.input_view.parse_requested.emit("Gorrek", "/logs", "/tmp/out.png")
 
     assert window._test_saved_folders == ["/logs"]
+
+
+def test_finished_worker_persists_last_results(qt_app):
+    sections = _sections(stats_lines=["Kill Count: 9001"])
+
+    def parse_fn(folder, name, progress_cb):
+        return None, None, None
+
+    def draw_fn(zones, output_path):
+        return None
+
+    def summary_fn(*_args, **_kwargs):
+        return sections
+
+    def factory(character, folder, output):
+        return ParseWorker(
+            character,
+            folder,
+            output,
+            parse_fn=parse_fn,
+            draw_fn=draw_fn,
+            summary_fn=summary_fn,
+        )
+
+    window = _make_window(qt_app, worker_factory=factory)
+
+    window.input_view.parse_requested.emit("Gorrek", "/logs", "/tmp/out.png")
+
+    assert window._test_saved_results == [("Gorrek", Path("/tmp/out.png"), sections)]
+
+
+def test_failed_worker_does_not_persist_last_results(qt_app):
+    def parse_fn(folder, name, progress_cb):
+        raise RuntimeError("disk on fire")
+
+    def factory(character, folder, output):
+        return ParseWorker(character, folder, output, parse_fn=parse_fn)
+
+    window = _make_window(qt_app, worker_factory=factory)
+
+    window.input_view.parse_requested.emit("Gorrek", "/logs", "/tmp/out.png")
+
+    assert window._test_saved_results == []
 
 
 def test_parse_requested_routes_error_to_input_view_with_dialog(qt_app):
