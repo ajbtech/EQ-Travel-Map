@@ -38,3 +38,14 @@ def test_map_frame_width_matches_image_aspect_ratio(qt_app):
     inner_h = view.map_frame.height() - 2 * border
     expected_width = int(round(inner_h * aspect)) + 2 * border
     assert view.map_frame.width() == expected_width
+
+
+def test_summary_frame_spans_map_and_buttons(qt_app):
+    sample_image = Path(__file__).resolve().parents[1] / "docs" / "sample_map.png"
+    view = ResultsView()
+    view.resize(1200, 700)
+    view.set_results(sample_image, _sections())
+    qt_app.processEvents()
+
+    expected = view.map_frame.width() + view.button_frame.sizeHint().width()
+    assert view.summary_stone_frame.width() == expected

@@ -110,7 +110,17 @@ class ResultsView(QWidget):
 
         summary_parchment.set_fill_child(columns_container)
         summary_stone_layout.addWidget(summary_parchment)
-        outer.addWidget(self.summary_stone_frame)
+
+        # Wrap the summary in an HBox with a trailing stretch so it can be
+        # sized to match the upper row's content width (map_frame +
+        # button_frame) rather than spanning the full window. The stretch
+        # absorbs any leftover space on the right.
+        summary_row = QHBoxLayout()
+        summary_row.setContentsMargins(0, 0, 0, 0)
+        summary_row.setSpacing(0)
+        summary_row.addWidget(self.summary_stone_frame)
+        summary_row.addStretch(1)
+        outer.addLayout(summary_row)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -126,11 +136,21 @@ class ResultsView(QWidget):
             return
         target = int(round(inner_h * aspect)) + 2 * border
         if (
-            self.map_frame.minimumWidth() == target
-            and self.map_frame.maximumWidth() == target
+            self.map_frame.minimumWidth() != target
+            or self.map_frame.maximumWidth() != target
         ):
-            return
-        self.map_frame.setFixedWidth(target)
+            self.map_frame.setFixedWidth(target)
+        self._fit_summary_to_upper_row()
+
+    def _fit_summary_to_upper_row(self):
+        # Span the summary parchment under the map AND the button column so
+        # the stone bevels line up on the right.
+        summary_w = self.map_frame.width() + self.button_frame.sizeHint().width()
+        if (
+            self.summary_stone_frame.minimumWidth() != summary_w
+            or self.summary_stone_frame.maximumWidth() != summary_w
+        ):
+            self.summary_stone_frame.setFixedWidth(summary_w)
 
     def _make_column(self):
         label = QLabel("")
