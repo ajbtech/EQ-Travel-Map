@@ -58,9 +58,7 @@ def _make_window(qt_app, **overrides):
             "available_geometry", default_available_geometry
         ),
         save_log_folder=overrides.get("save_log_folder", folders_saved.append),
-        save_last_results=overrides.get(
-            "save_last_results", default_save_last_results
-        ),
+        save_last_results=overrides.get("save_last_results", default_save_last_results),
     )
     window._test_workers = workers_built
     window._test_errors = errors_shown

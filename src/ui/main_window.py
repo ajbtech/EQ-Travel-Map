@@ -80,9 +80,7 @@ class MainWindow(QMainWindow):
         self._error_dialog = error_dialog or _default_error_dialog
         self._available_geometry = available_geometry or _default_available_geometry
         self._save_log_folder = save_log_folder or user_settings.save_log_folder
-        self._save_last_results = (
-            save_last_results or user_settings.save_last_results
-        )
+        self._save_last_results = save_last_results or user_settings.save_last_results
 
         self._stack = QStackedWidget(self)
         self._stack.setObjectName("rootStack")
@@ -204,9 +202,7 @@ class MainWindow(QMainWindow):
     @Slot(object, object)
     def _on_worker_finished(self, image_path, summary_sections):
         self.show_results(image_path, summary_sections)
-        self._save_last_results(
-            self._active_character, image_path, summary_sections
-        )
+        self._save_last_results(self._active_character, image_path, summary_sections)
         self._clear_worker()
 
     @Slot(str)

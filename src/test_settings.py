@@ -116,9 +116,7 @@ def test_clear_last_results_removes_persisted_state(qt_app, tmp_path, monkeypatc
     assert settings.load_last_results() is None
 
 
-def test_load_last_results_returns_none_on_corrupt_json(
-    qt_app, tmp_path, monkeypatch
-):
+def test_load_last_results_returns_none_on_corrupt_json(qt_app, tmp_path, monkeypatch):
     _redirect_to_ini(monkeypatch, tmp_path)
     image_path = tmp_path / "map.png"
     image_path.write_bytes(b"PNG")
