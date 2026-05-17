@@ -1,12 +1,24 @@
 from pathlib import Path
 
 from PySide6.QtCore import QThread, Slot
+from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import QMainWindow, QMessageBox, QStackedWidget
 
 from ui.parse_worker import ParseWorker
 from ui.views.input_view import InputView
 from ui.views.progress_view import ProgressView
 from ui.views.results_view import ResultsView
+
+# Conservative reserve for the OS window frame and title bar when capping
+# the window to the available screen area. Covers Windows/macOS/Linux
+# without per-platform tuning.
+_WINDOW_FRAME_RESERVE_W = 20
+_WINDOW_FRAME_RESERVE_H = 80
+
+
+def _default_available_geometry(window):
+    screen = window.screen() or QGuiApplication.primaryScreen()
+    return screen.availableGeometry()
 
 
 def _default_worker_factory(character, folder, output):
@@ -53,6 +65,7 @@ class MainWindow(QMainWindow):
         worker_factory=None,
         run_worker=None,
         error_dialog=None,
+        available_geometry=None,
         parent=None,
     ):
         super().__init__(parent)
@@ -62,6 +75,7 @@ class MainWindow(QMainWindow):
         self._worker_factory = worker_factory or _default_worker_factory
         self._run_worker = run_worker or self._run_worker_on_thread
         self._error_dialog = error_dialog or _default_error_dialog
+        self._available_geometry = available_geometry or _default_available_geometry
 
         self._stack = QStackedWidget(self)
         self._stack.setObjectName("rootStack")
@@ -112,16 +126,19 @@ class MainWindow(QMainWindow):
         if size is None:
             return
         width, height = size
-        if not self.isVisible():
-            self.setFixedSize(width, height)
-            return
-        # Preserve the visual center so growing the window (e.g. progress ->
-        # results) expands in all directions instead of pushing the bottom
-        # right offscreen.
-        old_center = self.frameGeometry().center()
+        # Cap to the active screen's available area minus a reserve for the
+        # window frame and title bar. Prevents the results window from
+        # overflowing a small display and pushing its title bar off-screen.
+        available = self._available_geometry(self)
+        width = min(width, max(1, available.width() - _WINDOW_FRAME_RESERVE_W))
+        height = min(height, max(1, available.height() - _WINDOW_FRAME_RESERVE_H))
         self.setFixedSize(width, height)
+        if not self.isVisible():
+            return
+        # Re-center on the active screen each time the view changes, so the
+        # window never lands off-screen when switching to a larger view.
         new_geom = self.frameGeometry()
-        new_geom.moveCenter(old_center)
+        new_geom.moveCenter(available.center())
         self.move(new_geom.topLeft())
 
     def show_progress(self, character_name):
