@@ -128,3 +128,29 @@ def test_parse_log_lines_empty_max_damage_when_no_damage_lines():
 def test_build_empty_summary_has_empty_max_damage():
     summary = log_parser.build_empty_summary()
     assert summary.max_damage == {}
+
+
+def test_parse_log_lines_tracks_spell_casts():
+    lines = [
+        "[Sat Sep 24 20:30:45 2022] You begin casting Spirit of Wolf.",
+        "[Sat Sep 24 20:31:00 2022] You begin casting Haste.",
+        "[Sat Sep 24 20:31:30 2022] You begin casting Spirit of Wolf.",
+    ]
+    _, _, summary = log_parser.parse_log_lines(lines)
+    top = summary.spell_list.get_count_alpha_sorted_eq_list()
+    assert ("Spirit of Wolf", 2) in top
+    assert ("Haste", 1) in top
+
+
+def test_parse_log_lines_empty_spell_list_when_no_casts():
+    lines = [
+        "[Sat Sep 24 19:51:48 2022] Welcome to EverQuest!",
+        "[Sun Jan 08 15:01:29 2023] You have entered Lake Rathetear.",
+    ]
+    _, _, summary = log_parser.parse_log_lines(lines)
+    assert summary.spell_list.get_raw_eq_list() == []
+
+
+def test_build_empty_summary_has_empty_spell_list():
+    summary = log_parser.build_empty_summary()
+    assert summary.spell_list.get_raw_eq_list() == []

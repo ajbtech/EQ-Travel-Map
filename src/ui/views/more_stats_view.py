@@ -28,6 +28,7 @@ class MoreStatsDialog(QDialog):
         for section_lines in [
             sections.extended_zones_lines,
             sections.extended_kills_lines,
+            sections.extended_spells_lines,
             sections.max_damage_lines,
         ]:
             label = QLabel(self._render_html(section_lines))

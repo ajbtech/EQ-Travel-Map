@@ -205,6 +205,26 @@ def test_build_summary_sections_includes_max_damage_lines():
     assert any("slash: 15" in l for l in sections.max_damage_lines)
 
 
+def test_build_summary_sections_includes_extended_spells_top_25():
+    kill_list = EQList()
+    zone_list = EQList()
+    zone_list.add("Grobb")
+    zone_list.sort_lists()
+    summary = log_parser.build_empty_summary()
+    from eq_list import EQList as EQL
+    spell_list = EQL()
+    for spell in ["Spirit of Wolf"] * 10 + ["Haste"] * 5:
+        spell_list.add(spell)
+    spell_list.sort_lists()
+    summary.spell_list = spell_list
+
+    sections = summary_formatter.build_summary_sections(kill_list, zone_list, summary)
+
+    assert sections.extended_spells_lines[0] == "Top 25 cast spells:"
+    assert "1. Spirit of Wolf: 10" in sections.extended_spells_lines
+    assert "2. Haste: 5" in sections.extended_spells_lines
+
+
 def test_build_summary_sections_omits_character_line_when_no_name():
     kill_list = EQList()
     zone_list = EQList()

@@ -10,6 +10,7 @@ def _sections():
         stats_lines=["Total logs: 0"],
         extended_kills_lines=["Top 25 killed creatures:", "1. ghoul: 30"],
         extended_zones_lines=["Top 25 visited zones:", "1. Grobb: 10"],
+        extended_spells_lines=["Top 25 cast spells:", "1. Spirit of Wolf: 10"],
         max_damage_lines=["Max hit by damage type:", "slash: 25"],
     )
 
@@ -29,7 +30,7 @@ def test_more_stats_dialog_has_expected_title(qt_app):
     assert dlg.windowTitle() == "More Statistics"
 
 
-def test_more_stats_dialog_renders_all_three_sections(qt_app):
+def test_more_stats_dialog_renders_all_four_sections(qt_app):
     from PySide6.QtWidgets import QLabel
 
     dlg = MoreStatsDialog(_sections())
@@ -37,6 +38,7 @@ def test_more_stats_dialog_renders_all_three_sections(qt_app):
     all_text = " ".join(lbl.text() for lbl in labels)
     assert "Top 25 visited zones" in all_text
     assert "Top 25 killed creatures" in all_text
+    assert "Top 25 cast spells" in all_text
     assert "Max hit by damage type" in all_text
 
 

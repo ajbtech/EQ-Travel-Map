@@ -454,3 +454,32 @@ def test_get_player_damage_none_for_kill_line():
 
 def test_get_player_damage_none_for_empty():
     assert line_reader.get_player_damage("") is None
+
+
+def test_get_spell_cast_simple_name():
+    line = "[Sat Sep 24 20:30:45 2022] You begin casting Haste."
+    assert line_reader.get_spell_cast(line) == "Haste"
+
+
+def test_get_spell_cast_multiword_name():
+    line = "[Sat Sep 24 20:30:45 2022] You begin casting Spirit of Wolf."
+    assert line_reader.get_spell_cast(line) == "Spirit of Wolf"
+
+
+def test_get_spell_cast_name_with_apostrophe():
+    line = "[Sat Sep 24 20:30:45 2022] You begin casting Shaman's Bulwark."
+    assert line_reader.get_spell_cast(line) == "Shaman's Bulwark"
+
+
+def test_get_spell_cast_none_for_non_casting_line():
+    line = "[Sat Sep 24 20:30:45 2022] You slash a froglok tad for 6 points of damage."
+    assert line_reader.get_spell_cast(line) is None
+
+
+def test_get_spell_cast_none_for_kill_line():
+    line = "[Sat Sep 24 20:30:45 2022] You have slain a froglok tad!"
+    assert line_reader.get_spell_cast(line) is None
+
+
+def test_get_spell_cast_none_for_empty():
+    assert line_reader.get_spell_cast("") is None

@@ -30,6 +30,7 @@ ZONE_TEXT = "You have entered "
 PLAYER_DAMAGE_PATTERN = re.compile(
     r"\bYou (\w+) .+ for (\d+) points? of (non-melee )?damage\."
 )
+SPELL_CAST_PATTERN = re.compile(r"\bYou begin casting (.+)\.")
 
 
 class EventType(Enum):
@@ -176,6 +177,13 @@ def get_player_damage(line):
     if verb == "critically":
         return "crit", amount
     return verb, amount
+
+
+def get_spell_cast(line):
+    m = SPELL_CAST_PATTERN.search(line)
+    if m is None:
+        return None
+    return m.group(1)
 
 
 def classify_line(line):

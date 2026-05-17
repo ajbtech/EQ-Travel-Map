@@ -49,6 +49,7 @@ def save_last_results(character_name, image_path, sections):
                 "stats_lines": list(sections.stats_lines),
                 "extended_kills_lines": list(sections.extended_kills_lines),
                 "extended_zones_lines": list(sections.extended_zones_lines),
+                "extended_spells_lines": list(sections.extended_spells_lines),
                 "max_damage_lines": list(sections.max_damage_lines),
             }
         ),
@@ -78,6 +79,7 @@ def load_last_results():
         stats_lines=list(data.get("stats_lines", [])),
         extended_kills_lines=list(data.get("extended_kills_lines", [])),
         extended_zones_lines=list(data.get("extended_zones_lines", [])),
+        extended_spells_lines=list(data.get("extended_spells_lines", [])),
         max_damage_lines=list(data.get("max_damage_lines", [])),
     )
     return str(character), image_path, sections

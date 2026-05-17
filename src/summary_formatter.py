@@ -9,6 +9,7 @@ class SummarySections:
     stats_lines: list = field(default_factory=list)
     extended_kills_lines: list = field(default_factory=list)
     extended_zones_lines: list = field(default_factory=list)
+    extended_spells_lines: list = field(default_factory=list)
     max_damage_lines: list = field(default_factory=list)
 
 
@@ -36,6 +37,9 @@ def build_summary_sections(kill_list, zone_list, summary, character_name=None):
     extended_zones_lines = build_top_count_lines(
         "Top 25 visited zones", zone_list, limit=25
     )
+    extended_spells_lines = build_top_count_lines(
+        "Top 25 cast spells", summary.spell_list, limit=25
+    )
     max_damage_lines = build_max_damage_lines(summary.max_damage)
     return SummarySections(
         character_line=character_line,
@@ -44,6 +48,7 @@ def build_summary_sections(kill_list, zone_list, summary, character_name=None):
         stats_lines=stats_lines,
         extended_kills_lines=extended_kills_lines,
         extended_zones_lines=extended_zones_lines,
+        extended_spells_lines=extended_spells_lines,
         max_damage_lines=max_damage_lines,
     )
 
