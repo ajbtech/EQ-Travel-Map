@@ -21,6 +21,19 @@ class MapCanvas(QLabel):
         self.setMinimumSize(400, 250)
         self.setText("(no map loaded)")
 
+    def source_aspect_ratio(self):
+        """Return width/height of the loaded source pixmap, or None if absent.
+
+        Used by ResultsView to size the surrounding stone bevel so it hugs
+        the rendered map instead of leaving empty space on either side.
+        """
+        if self._source_pixmap is None or self._source_pixmap.isNull():
+            return None
+        h = self._source_pixmap.height()
+        if h == 0:
+            return None
+        return self._source_pixmap.width() / h
+
     def load_image(self, image_path):
         path = Path(image_path)
         if not path.exists():
