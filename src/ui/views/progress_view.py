@@ -34,7 +34,7 @@ class ProgressView(QWidget):
         outer.addWidget(stone_frame, 1)
 
         body = QVBoxLayout(parchment)
-        body.setContentsMargins(28, 16, 28, 20)
+        body.setContentsMargins(28, 4, 28, 20)
         body.setSpacing(12)
 
         title = QLabel("EverQuest Travel Map")

@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from PySide6.QtCore import QRect
+
 import summary_formatter
 from ui.main_window import MainWindow, _split_error_message
 from ui.parse_worker import ParseWorker
@@ -34,6 +36,11 @@ def _make_window(qt_app, **overrides):
         workers_built.append(worker)
         return worker
 
+    # Default to a screen large enough to fit every view's preferred size
+    # so existing tests aren't affected by the test runner's actual display.
+    def default_available_geometry(_window):
+        return QRect(0, 0, 4000, 3000)
+
     window = MainWindow(
         default_log_folder=Path("/logs"),
         default_output_path=Path("/tmp/out.png"),
@@ -41,6 +48,9 @@ def _make_window(qt_app, **overrides):
         worker_factory=overrides.get("worker_factory", default_worker_factory),
         run_worker=overrides.get("run_worker", lambda worker: worker.run()),
         error_dialog=overrides.get("error_dialog", fake_error_dialog),
+        available_geometry=overrides.get(
+            "available_geometry", default_available_geometry
+        ),
     )
     window._test_workers = workers_built
     window._test_errors = errors_shown
@@ -230,6 +240,44 @@ def test_window_resizes_to_each_view_preferred_size(qt_app):
 
     window.show_input()
     assert window.size().toTuple() == window.input_view.preferred_window_size
+
+
+def test_window_caps_to_available_screen_when_preferred_too_large(qt_app):
+    # Screen smaller than ResultsView.preferred_window_size of 1240x760.
+    small_screen = QRect(0, 0, 1024, 600)
+    window = _make_window(qt_app, available_geometry=lambda _w: small_screen)
+    window.show()
+
+    window.show_results(Path("/tmp/out.png"), _sections())
+
+    w, h = window.size().toTuple()
+    # Width capped to screen.width() - 20 horizontal frame margin.
+    assert w == small_screen.width() - 20
+    # Height capped to screen.height() - 80 vertical frame/title margin.
+    assert h == small_screen.height() - 80
+
+
+def test_window_uses_preferred_size_when_screen_has_room(qt_app):
+    # Generous screen — the preferred size fits.
+    big_screen = QRect(0, 0, 4000, 3000)
+    window = _make_window(qt_app, available_geometry=lambda _w: big_screen)
+    window.show()
+
+    window.show_results(Path("/tmp/out.png"), _sections())
+
+    assert window.size().toTuple() == window.results_view.preferred_window_size
+
+
+def test_window_centers_on_active_screen(qt_app):
+    # Screen positioned at non-zero origin (e.g. secondary monitor).
+    screen = QRect(100, 200, 1600, 1000)
+    window = _make_window(qt_app, available_geometry=lambda _w: screen)
+    window.show()
+
+    window.show_results(Path("/tmp/out.png"), _sections())
+
+    # The frame center should match the available area's center.
+    assert window.frameGeometry().center() == screen.center()
 
 
 class _ProgressStub:
