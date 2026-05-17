@@ -73,6 +73,19 @@ class ProgressView(QWidget):
     def set_character(self, character_name):
         self.character_label.setText(f"Parsing logs for {character_name}...")
 
+    def set_total(self, total_lines):
+        if total_lines > 0:
+            self.progress_bar.setRange(0, total_lines)
+        else:
+            self.progress_bar.setRange(0, 0)
+
+    def reset_progress(self):
+        self.progress_bar.setRange(0, 0)
+        self.progress_bar.reset()
+        self.set_progress("—", 0)
+
     def set_progress(self, file_name, line_count):
         self.file_label.setText(f"Current file: {file_name}")
         self.lines_label.setText(f"Lines parsed: {_format_count(line_count)}")
+        if self.progress_bar.maximum() > 0:
+            self.progress_bar.setValue(line_count)

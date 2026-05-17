@@ -11,8 +11,14 @@ class _ParseCanceled(Exception):
     pass
 
 
+def _default_count_fn(folder, character_name):
+    log_files = log_parser.find_log_files(folder, character_name)
+    return log_parser.count_lines_in_files(log_files)
+
+
 class ParseWorker(QObject):
     progress = Signal(str, int)
+    totals = Signal(int)
     finished = Signal(object, object)
     error = Signal(str)
     canceled = Signal()
@@ -26,6 +32,7 @@ class ParseWorker(QObject):
         parse_fn=None,
         draw_fn=None,
         summary_fn=None,
+        count_fn=None,
     ):
         super().__init__()
         self.character_name = character_name
@@ -34,6 +41,7 @@ class ParseWorker(QObject):
         self._parse_fn = parse_fn or log_parser.parse_character_logs
         self._draw_fn = draw_fn or eq_parser.draw_zone_path
         self._summary_fn = summary_fn or summary_formatter.build_summary_sections
+        self._count_fn = count_fn or _default_count_fn
         self._cancel_requested = False
         self._finished = False
 
@@ -46,6 +54,11 @@ class ParseWorker(QObject):
     @Slot()
     def run(self):
         try:
+            total_lines = self._count_fn(self.log_folder_path, self.character_name)
+            self.totals.emit(total_lines)
+            if self._cancel_requested:
+                raise _ParseCanceled()
+
             kill_list, zone_list, summary = self._parse_fn(
                 self.log_folder_path,
                 self.character_name,

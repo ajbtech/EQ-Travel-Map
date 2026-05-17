@@ -48,6 +48,7 @@ def _make_worker(qt_app, **overrides):
         parse_fn=overrides.get("parse_fn", default_parse),
         draw_fn=overrides.get("draw_fn", default_draw),
         summary_fn=overrides.get("summary_fn", default_summary),
+        count_fn=overrides.get("count_fn", lambda folder, name: 0),
     )
     worker._test_calls = {
         "parse": parse_calls,
@@ -144,23 +145,87 @@ def test_run_emits_error_when_draw_raises(qt_app):
 
 def test_cancel_during_parse_emits_canceled_and_skips_finished(qt_app):
     progress_calls = []
+    worker_holder = {}
 
     def parse(folder, name, progress_cb):
         progress_calls.append(1)
+        worker_holder["worker"].cancel()
         progress_cb(log_parser.ParseProgress(Path("file.txt"), 100))
         progress_calls.append(2)  # should not get here if cancellation worked
         return _FakeList(), _FakeList(), log_parser.build_empty_summary()
 
     worker = _make_worker(qt_app, parse_fn=parse)
+    worker_holder["worker"] = worker
     canceled = _spy(worker.canceled)
     finished = _spy(worker.finished)
 
-    worker.cancel()
     worker.run()
 
     assert canceled == [()]
     assert finished == []
     assert progress_calls == [1]
+
+
+def test_cancel_before_run_emits_canceled_without_parsing(qt_app):
+    parse_calls = []
+
+    def parse(folder, name, progress_cb):
+        parse_calls.append(1)
+        return _FakeList(), _FakeList(), log_parser.build_empty_summary()
+
+    worker = _make_worker(qt_app, parse_fn=parse)
+    canceled = _spy(worker.canceled)
+
+    worker.cancel()
+    worker.run()
+
+    assert canceled == [()]
+    assert parse_calls == []
+
+
+def test_run_emits_totals_signal_with_expected_count(qt_app):
+    worker = _make_worker(qt_app, count_fn=lambda folder, name: 12345)
+    totals = _spy(worker.totals)
+
+    worker.run()
+
+    assert totals == [(12345,)]
+
+
+def test_totals_signal_is_emitted_before_first_progress(qt_app):
+    events = []
+
+    def parse(folder, name, progress_cb):
+        progress_cb(log_parser.ParseProgress(Path("a.txt"), 100))
+        return _FakeList(), _FakeList(), log_parser.build_empty_summary()
+
+    worker = _make_worker(
+        qt_app,
+        parse_fn=parse,
+        count_fn=lambda folder, name: 500,
+    )
+    worker.totals.connect(lambda total: events.append(("totals", total)))
+    worker.progress.connect(
+        lambda file_name, lines: events.append(("progress", file_name, lines))
+    )
+
+    worker.run()
+
+    assert events[0] == ("totals", 500)
+    assert events[1] == ("progress", "a.txt", 100)
+
+
+def test_count_fn_receives_folder_and_character_name(qt_app):
+    received = []
+
+    def count_fn(folder, name):
+        received.append((folder, name))
+        return 7
+
+    worker = _make_worker(qt_app, count_fn=count_fn)
+    worker.run()
+
+    assert received == [(Path("/logs"), "Gorrek")]
 
 
 def test_cancel_after_run_completes_does_not_emit_canceled(qt_app):

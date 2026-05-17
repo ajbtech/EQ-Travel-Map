@@ -143,7 +143,7 @@ class MainWindow(QMainWindow):
 
     def show_progress(self, character_name):
         self.progress_view.set_character(character_name)
-        self.progress_view.set_progress("—", 0)
+        self.progress_view.reset_progress()
         self._stack.setCurrentWidget(self.progress_view)
 
     def show_results(self, image_path, summary_sections):
@@ -156,6 +156,7 @@ class MainWindow(QMainWindow):
     def _on_parse_requested(self, character, folder, output):
         worker = self._worker_factory(character, folder, output)
         self._active_worker = worker
+        worker.totals.connect(self._on_worker_totals)
         worker.progress.connect(self._on_worker_progress)
         worker.finished.connect(self._on_worker_finished)
         worker.error.connect(self._on_worker_error)
@@ -174,6 +175,10 @@ class MainWindow(QMainWindow):
         thread.finished.connect(thread.deleteLater)
         self._active_thread = thread
         thread.start()
+
+    @Slot(int)
+    def _on_worker_totals(self, total_lines):
+        self.progress_view.set_total(total_lines)
 
     @Slot(str, int)
     def _on_worker_progress(self, file_name, line_count):
