@@ -298,6 +298,13 @@ def test_get_zone_3():
     assert line_reader.get_zone(line) == "The Feerrott"
 
 
+def test_get_zone_preserves_leading_article():
+    # "an Arena (PvP) area" is its own log phrase; collapsing the article
+    # would conflate it with the proper-noun zone "The Arena".
+    line = "[Sat Mar 09 15:24:26 2024] You have entered an Arena (PvP) area."
+    assert line_reader.get_zone(line) == "an Arena (PvP) area"
+
+
 def test_is_line_help_positive():
     line = (
         "[Sat Sep 24 19:51:48 2022] If you need help, click on the EQ Menu "

@@ -1,6 +1,5 @@
 {
   "aliases": {
-    "Arena (PvP) area": "The Arena",
     "Cazic-Thule": "Cazic Thule",
     "City of Thurgadin": "Thurgadin",
     "Eastern Plains of Karana": "East Karana",
@@ -26,7 +25,8 @@
     "The Overthere": "Overthere",
     "The Wakening Lands": "Wakening Land",
     "Warrens": "The Warrens",
-    "Western Plains of Karana": "West Karana"
+    "Western Plains of Karana": "West Karana",
+    "an Arena (PvP) area": "The Arena"
   },
   "description": "Zone adjacency graph transcribed from the local Project 1999 zone_map.png. Edges represent non-directional visible map connections between zones.",
   "edges": [

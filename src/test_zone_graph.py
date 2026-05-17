@@ -71,6 +71,15 @@ def test_zone_graph_includes_plane_of_sky_connection_to_east_freeport():
     assert frozenset(("Plane of Sky", "East Freeport")) in edges
 
 
+def test_zone_graph_aliases_an_arena_pvp_area_to_the_arena():
+    # EQ logs write "You have entered an Arena (PvP) area." verbatim; the
+    # alias resolves that literal phrase to the canonical "The Arena" node
+    # without relying on article stripping.
+    graph = load_zone_graph()
+
+    assert graph["aliases"].get("an Arena (PvP) area") == "The Arena"
+
+
 def test_zone_graph_aliases_log_name_without_apostrophe_for_sirens_grotto():
     # EQ logs write "You have entered Sirens Grotto." with no apostrophe,
     # but the graph node uses the canonical "Siren's Grotto" spelling.
