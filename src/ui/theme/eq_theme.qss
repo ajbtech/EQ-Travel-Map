@@ -32,7 +32,6 @@ ParchmentPanel {{
     border-width: 50px;
     background: transparent;
     min-width: 540px;
-    min-height: 240px;
 }}
 
 /* Parchment title: dark brown ink, painted on parchment, sits at the top
