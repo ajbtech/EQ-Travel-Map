@@ -8,6 +8,7 @@ helper is similarly small but worth pinning so `--log-folder` and
 
 from pathlib import Path
 
+import summary_formatter
 from ui import app
 
 
@@ -102,3 +103,91 @@ def test_default_character_name_returns_sole_name_else_empty(tmp_path):
 
     (tmp_path / "eqlog_Aelinor_P1999Green.txt").write_text("")
     assert app._default_character_name(tmp_path) == ""
+
+
+def _sample_sections():
+    return summary_formatter.SummarySections(
+        character_line="Character: Gorrek",
+        top_kills_lines=["Top 5 killed creatures:"],
+        top_zones_lines=["Top 5 visited zones:"],
+        stats_lines=["Total logs: 99"],
+    )
+
+
+def test_restore_last_results_shows_results_view_when_state_valid(qt_app, tmp_path):
+    image_path = tmp_path / "map.png"
+    image_path.write_bytes(b"PNG")
+    sections = _sample_sections()
+
+    window = _StubWindow()
+    cleared = []
+
+    app._restore_last_results(
+        window,
+        cli_character=None,
+        load_last_results=lambda: ("Gorrek", image_path, sections),
+        clear_last_results=lambda: cleared.append(True),
+    )
+
+    assert window.shown == [("results", image_path, sections)]
+    assert cleared == []
+
+
+def test_restore_last_results_skips_when_no_persisted_state(qt_app, tmp_path):
+    window = _StubWindow()
+    cleared = []
+
+    app._restore_last_results(
+        window,
+        cli_character=None,
+        load_last_results=lambda: None,
+        clear_last_results=lambda: cleared.append(True),
+    )
+
+    assert window.shown == []
+    assert cleared == []
+
+
+def test_restore_last_results_skips_when_cli_character_provided(qt_app, tmp_path):
+    image_path = tmp_path / "map.png"
+    image_path.write_bytes(b"PNG")
+    sections = _sample_sections()
+
+    window = _StubWindow()
+    cleared = []
+
+    app._restore_last_results(
+        window,
+        cli_character="Mortimer",
+        load_last_results=lambda: ("Gorrek", image_path, sections),
+        clear_last_results=lambda: cleared.append(True),
+    )
+
+    assert window.shown == []
+    assert cleared == []
+
+
+def test_restore_last_results_clears_when_image_missing(qt_app, tmp_path):
+    image_path = tmp_path / "gone.png"  # never created
+    sections = _sample_sections()
+
+    window = _StubWindow()
+    cleared = []
+
+    app._restore_last_results(
+        window,
+        cli_character=None,
+        load_last_results=lambda: ("Gorrek", image_path, sections),
+        clear_last_results=lambda: cleared.append(True),
+    )
+
+    assert window.shown == []
+    assert cleared == [True]
+
+
+class _StubWindow:
+    def __init__(self):
+        self.shown = []
+
+    def show_results(self, image_path, sections):
+        self.shown.append(("results", image_path, sections))

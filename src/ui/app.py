@@ -88,11 +88,35 @@ def _resolve_log_folder(cli_value):
     return Path(eq_parser.DEFAULT_LOG_FOLDER_PATH)
 
 
+def _restore_last_results(
+    window,
+    cli_character,
+    load_last_results=None,
+    clear_last_results=None,
+):
+    # When the user explicitly passes a character on the CLI, they're asking
+    # to start a new run — don't bypass that with stale results.
+    if cli_character:
+        return False
+    load = load_last_results or settings.load_last_results
+    clear = clear_last_results or settings.clear_last_results
+    restored = load()
+    if restored is None:
+        return False
+    _character, image_path, sections = restored
+    if not Path(image_path).exists():
+        clear()
+        return False
+    window.show_results(image_path, sections)
+    return True
+
+
 def run(character_name=None, log_folder_path=None, output_path=None):
     app = QApplication.instance() or QApplication(sys.argv)
     _load_stylesheet(app)
     _set_app_icon(app)
 
+    cli_character = character_name
     log_folder_path = _resolve_log_folder(log_folder_path)
     output_path = Path(output_path or eq_parser.DEFAULT_MAP_OUTPUT_PATH)
     if character_name is None:
@@ -103,6 +127,7 @@ def run(character_name=None, log_folder_path=None, output_path=None):
         default_output_path=output_path,
         default_character_name=character_name,
     )
+    _restore_last_results(window, cli_character)
     window.show()
     return app.exec()
 

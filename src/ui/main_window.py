@@ -68,6 +68,7 @@ class MainWindow(QMainWindow):
         error_dialog=None,
         available_geometry=None,
         save_log_folder=None,
+        save_last_results=None,
         parent=None,
     ):
         super().__init__(parent)
@@ -79,6 +80,9 @@ class MainWindow(QMainWindow):
         self._error_dialog = error_dialog or _default_error_dialog
         self._available_geometry = available_geometry or _default_available_geometry
         self._save_log_folder = save_log_folder or user_settings.save_log_folder
+        self._save_last_results = (
+            save_last_results or user_settings.save_last_results
+        )
 
         self._stack = QStackedWidget(self)
         self._stack.setObjectName("rootStack")
@@ -110,6 +114,8 @@ class MainWindow(QMainWindow):
 
         self._active_worker = None
         self._active_thread = None
+        self._active_character = ""
+        self._active_output_path = None
 
         self.show_input()
 
@@ -165,6 +171,8 @@ class MainWindow(QMainWindow):
         self._save_log_folder(folder)
         worker = self._worker_factory(character, folder, output)
         self._active_worker = worker
+        self._active_character = character
+        self._active_output_path = Path(output)
         worker.totals.connect(self._on_worker_totals)
         worker.progress.connect(self._on_worker_progress)
         worker.finished.connect(self._on_worker_finished)
@@ -196,6 +204,9 @@ class MainWindow(QMainWindow):
     @Slot(object, object)
     def _on_worker_finished(self, image_path, summary_sections):
         self.show_results(image_path, summary_sections)
+        self._save_last_results(
+            self._active_character, image_path, summary_sections
+        )
         self._clear_worker()
 
     @Slot(str)
@@ -217,3 +228,5 @@ class MainWindow(QMainWindow):
     def _clear_worker(self):
         self._active_worker = None
         self._active_thread = None
+        self._active_character = ""
+        self._active_output_path = None
