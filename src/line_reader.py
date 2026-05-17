@@ -9,7 +9,13 @@ import re
 from dataclasses import dataclass
 from enum import Enum
 
+import money_sorter
+
 COIN_TYPES = ("platinum", "gold", "silver", "copper")
+# Mob loot is capped at 99 cp / sp / pp per corpse; gold can exceed 99.
+# A loot-cash line above this on any non-gold denom must be a self-corpse
+# retrieval (the player's own dropped purse), not mob loot.
+MOB_COIN_CAP = 99
 # Matches chat verbs (says/say/shouts/shout/auctions/auction/tells/tell/told)
 # followed by an optional target phrase, then the comma + opening quote that
 # always precedes spoken text in EQ logs.
@@ -69,12 +75,24 @@ def is_line_loot(line):
     return "--You have looted a " in line
 
 
-# Returns True for looting corpses, NOT for selling items
+# Returns True for looting mob corpses, NOT for selling items or for
+# retrieving the player's own corpse (detected via the mob coin cap).
 def is_line_loot_cash(line):
     receive = "You receive" in line
     coin = any(coin_type in line for coin_type in COIN_TYPES)
     for_the = "for the" in line
-    return receive and coin and not for_the
+    if not (receive and coin and not for_the):
+        return False
+    return not _exceeds_mob_coin_cap(line)
+
+
+def _exceeds_mob_coin_cap(line):
+    cash = money_sorter.parse_cash(line)
+    return (
+        cash.platinum > MOB_COIN_CAP
+        or cash.silver > MOB_COIN_CAP
+        or cash.copper > MOB_COIN_CAP
+    )
 
 
 # Returns True for selling items, NOT for looting corpses
