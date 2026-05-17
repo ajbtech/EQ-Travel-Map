@@ -223,7 +223,7 @@ QPushButton#bronzeButton:disabled {{
     color: #4a4438;
 }}
 
-/* === Stone-groove progress bar with rune-blue fill ======================= */
+/* === Stone-groove progress bar with rune-gold fill ======================= */
 
 QProgressBar#stoneProgress {{
     background: #2c2620;
@@ -239,7 +239,7 @@ QProgressBar#stoneProgress {{
 QProgressBar#stoneProgress::chunk {{
     background: qlineargradient(
         x1:0, y1:0, x2:0, y2:1,
-        stop:0 #6fdbe8, stop:0.5 #3aa6c8, stop:1 #1e6f8a
+        stop:0 #fff0a8, stop:0.5 #f5c542, stop:1 #a87a1a
     );
     border: none;
 }}
