@@ -50,8 +50,6 @@ class ProgressView(QWidget):
         self.file_label.setObjectName("progressDetail")
         body.addWidget(self.file_label)
 
-
-
         self.progress_bar = QProgressBar()
         self.progress_bar.setObjectName("stoneProgress")
         self.progress_bar.setRange(0, 0)
