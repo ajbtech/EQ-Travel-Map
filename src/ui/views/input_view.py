@@ -41,7 +41,7 @@ class InputView(QWidget):
         outer.addWidget(stone_frame, 1)
 
         body = QVBoxLayout(parchment)
-        body.setContentsMargins(16, 16, 16, 16)
+        body.setContentsMargins(16, 4, 16, 16)
         body.setSpacing(10)
 
         title = QLabel("EverQuest Travel Map")
