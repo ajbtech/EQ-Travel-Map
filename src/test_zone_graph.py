@@ -71,6 +71,14 @@ def test_zone_graph_includes_plane_of_sky_connection_to_east_freeport():
     assert frozenset(("Plane of Sky", "East Freeport")) in edges
 
 
+def test_zone_graph_aliases_log_name_without_apostrophe_for_sirens_grotto():
+    # EQ logs write "You have entered Sirens Grotto." with no apostrophe,
+    # but the graph node uses the canonical "Siren's Grotto" spelling.
+    graph = load_zone_graph()
+
+    assert graph["aliases"].get("Sirens Grotto") == "Siren's Grotto"
+
+
 def test_zone_graph_includes_boat_connections_from_map_dotted_lines():
     graph = load_zone_graph()
     edges = {frozenset((edge["from"], edge["to"])) for edge in graph["edges"]}
