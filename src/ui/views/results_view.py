@@ -156,7 +156,7 @@ class ResultsView(QWidget):
     def _on_save_image(self):
         if self._current_image_path is None or not self._current_image_path.exists():
             return
-        suggested = str(Path.home() / self._current_image_path.name)
+        suggested = str(Path.home() / self._suggested_save_filename())
         chosen, _filter = QFileDialog.getSaveFileName(
             self,
             "Save map as",
@@ -166,3 +166,19 @@ class ResultsView(QWidget):
         if not chosen:
             return
         shutil.copyfile(self._current_image_path, chosen)
+
+    def _suggested_save_filename(self):
+        original = self._current_image_path.name
+        character = self._character_name()
+        if not character:
+            return original
+        return f"{character}_{original}"
+
+    def _character_name(self):
+        if self._current_sections is None:
+            return ""
+        line = self._current_sections.character_line
+        prefix = "Character: "
+        if line.startswith(prefix):
+            return line[len(prefix):].strip()
+        return ""
