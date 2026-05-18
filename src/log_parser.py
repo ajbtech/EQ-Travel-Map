@@ -23,6 +23,8 @@ LOG_ENCODING = "utf-8"
 class ParserState:
     kill_list: EQList = field(default_factory=EQList)
     zone_list: EQList = field(default_factory=EQList)
+    spell_list: EQList = field(default_factory=EQList)
+    max_damage: dict = field(default_factory=dict)
     first_login_message: str = ""
     line_count: int = 0
     login_count: int = 0
@@ -57,6 +59,8 @@ class ParseSummary:
     merch_cash_count: int
     loot_cash: money_sorter.Cash
     merch_cash: money_sorter.Cash
+    max_damage: dict = field(default_factory=dict)
+    spell_list: EQList = field(default_factory=EQList)
 
 
 @dataclass(frozen=True)
@@ -147,6 +151,8 @@ def build_empty_summary():
         merch_cash_count=0,
         loot_cash=money_sorter.Cash(),
         merch_cash=money_sorter.Cash(),
+        max_damage={},
+        spell_list=EQList(),
     )
 
 
@@ -216,6 +222,21 @@ def add_merchant_cash(line, event, state):
     state.merch_cash = state.merch_cash.add(money_sorter.parse_cash(line))
 
 
+def record_player_damage(line, state):
+    result = line_reader.get_player_damage(line)
+    if result is None:
+        return
+    damage_type, amount = result
+    if amount > state.max_damage.get(damage_type, 0):
+        state.max_damage[damage_type] = amount
+
+
+def record_spell_cast(line, state):
+    spell = line_reader.get_spell_cast(line)
+    if spell is not None:
+        state.spell_list.add(spell)
+
+
 EVENT_HANDLERS = {
     line_reader.EventType.LOGIN: record_login,
     line_reader.EventType.DEATH: record_death,
@@ -241,6 +262,8 @@ def process_line_event(line, event, state):
 
     update_previous_line_flags(event, state)
     update_event_counts(line, event, state)
+    record_player_damage(line, state)
+    record_spell_cast(line, state)
 
 
 def process_log_line(line, state):
@@ -265,6 +288,7 @@ def normalize_cash_totals(state):
 def sort_result_lists(state):
     state.kill_list.sort_lists()
     state.zone_list.sort_lists()
+    state.spell_list.sort_lists()
 
 
 def build_summary(state):
@@ -283,6 +307,8 @@ def build_summary(state):
         merch_cash_count=state.merch_cash_count,
         loot_cash=state.loot_cash,
         merch_cash=state.merch_cash,
+        max_damage=dict(state.max_damage),
+        spell_list=state.spell_list,
     )
 
 

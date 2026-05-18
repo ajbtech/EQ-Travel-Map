@@ -128,6 +128,102 @@ def test_build_summary_sections_groups_by_section():
     ]
 
 
+def test_build_summary_sections_includes_extended_kills_top_25():
+    kill_list = EQList()
+    for name in ["ghoul"] * 30 + ["orc"] * 20:
+        kill_list.add(name)
+    kill_list.sort_lists()
+    zone_list = EQList()
+    zone_list.add("Grobb")
+    zone_list.sort_lists()
+    summary = log_parser.build_empty_summary()
+
+    sections = summary_formatter.build_summary_sections(kill_list, zone_list, summary)
+
+    assert sections.extended_kills_lines[0] == "Top 25 killed creatures:"
+    assert "1. ghoul: 30" in sections.extended_kills_lines
+    assert len(sections.extended_kills_lines) <= 26
+
+
+def test_build_summary_sections_includes_extended_zones_top_25():
+    kill_list = EQList()
+    zone_list = EQList()
+    for zone in ["Grobb"] * 10 + ["Innothule Swamp"] * 5:
+        zone_list.add(zone)
+    zone_list.sort_lists()
+    summary = log_parser.build_empty_summary()
+
+    sections = summary_formatter.build_summary_sections(kill_list, zone_list, summary)
+
+    assert sections.extended_zones_lines[0] == "Top 25 visited zones:"
+    assert "1. Grobb: 10" in sections.extended_zones_lines
+
+
+def test_build_max_damage_lines_formats_known_types():
+    max_damage = {"slash": 30, "backstab": 80, "spell": 99}
+    lines = summary_formatter.build_max_damage_lines(max_damage)
+    assert lines[0] == "Max hit by damage type:"
+    assert any("slash: 30" in line for line in lines)
+    assert any("backstab: 80" in line for line in lines)
+    assert any("spell: 99" in line for line in lines)
+
+
+def test_build_max_damage_lines_empty():
+    lines = summary_formatter.build_max_damage_lines({})
+    assert lines[0] == "Max hit by damage type:"
+    assert len(lines) == 2
+    assert "(no data)" in lines[1]
+
+
+def test_build_summary_sections_includes_max_damage_lines():
+    kill_list = EQList()
+    zone_list = EQList()
+    zone_list.add("Grobb")
+    zone_list.sort_lists()
+    summary = log_parser.build_empty_summary()
+    summary = log_parser.ParseSummary(
+        first_login_message="",
+        most_recent_message="",
+        line_count=0,
+        login_count=0,
+        death_count=0,
+        zone_count=0,
+        kill_count=0,
+        level_count=0,
+        level_lost_count=0,
+        current_level=1,
+        loot_cash_count=0,
+        merch_cash_count=0,
+        loot_cash=money_sorter.Cash(),
+        merch_cash=money_sorter.Cash(),
+        max_damage={"slash": 15, "bash": 8},
+    )
+
+    sections = summary_formatter.build_summary_sections(kill_list, zone_list, summary)
+
+    assert sections.max_damage_lines[0] == "Max hit by damage type:"
+    assert any("slash: 15" in line for line in sections.max_damage_lines)
+
+
+def test_build_summary_sections_includes_extended_spells_top_25():
+    kill_list = EQList()
+    zone_list = EQList()
+    zone_list.add("Grobb")
+    zone_list.sort_lists()
+    summary = log_parser.build_empty_summary()
+    spell_list = EQList()
+    for spell in ["Spirit of Wolf"] * 10 + ["Haste"] * 5:
+        spell_list.add(spell)
+    spell_list.sort_lists()
+    summary.spell_list = spell_list
+
+    sections = summary_formatter.build_summary_sections(kill_list, zone_list, summary)
+
+    assert sections.extended_spells_lines[0] == "Top 25 cast spells:"
+    assert "1. Spirit of Wolf: 10" in sections.extended_spells_lines
+    assert "2. Haste: 5" in sections.extended_spells_lines
+
+
 def test_build_summary_sections_omits_character_line_when_no_name():
     kill_list = EQList()
     zone_list = EQList()

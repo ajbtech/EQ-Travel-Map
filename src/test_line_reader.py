@@ -408,3 +408,86 @@ def test_is_line_chat_null():
 def test_classify_line_returns_empty_for_chat():
     line = "[Thu Oct 31 05:34:59 2024] Rezbish says, '50m'"
     assert line_reader.classify_line(line) == line_reader.EMPTY_LINE_EVENT
+
+
+def test_get_player_damage_slash():
+    line = "[Sat Sep 24 20:30:45 2022] You slash a froglok tad for 6 points of damage."
+    assert line_reader.get_player_damage(line) == ("slash", 6)
+
+
+def test_get_player_damage_backstab():
+    line = "[Sat Sep 24 20:30:45 2022] You backstab a goblin for 123 points of damage."
+    assert line_reader.get_player_damage(line) == ("backstab", 123)
+
+
+def test_get_player_damage_bash():
+    line = "[Sat Sep 24 20:30:45 2022] You bash a skeleton for 12 points of damage."
+    assert line_reader.get_player_damage(line) == ("bash", 12)
+
+
+def test_get_player_damage_pierce():
+    line = "[Sat Sep 24 20:30:45 2022] You pierce a gnoll for 45 points of damage."
+    assert line_reader.get_player_damage(line) == ("pierce", 45)
+
+
+def test_get_player_damage_singular_point():
+    line = "[Sat Sep 24 20:30:45 2022] You slash a rat for 1 point of damage."
+    assert line_reader.get_player_damage(line) == ("slash", 1)
+
+
+def test_get_player_damage_non_melee_maps_to_spell():
+    line = "You hit a goblin for 99 points of non-melee damage."
+    assert line_reader.get_player_damage(line) == ("spell", 99)
+
+
+def test_get_player_damage_critically_maps_to_crit():
+    line = "You critically hit a troll for 200 points of damage."
+    assert line_reader.get_player_damage(line) == ("crit", 200)
+
+
+def test_get_player_damage_none_for_third_person():
+    line = "Jaranab slashes Basher Stizik for 51 points of damage."
+    assert line_reader.get_player_damage(line) is None
+
+
+def test_get_player_damage_none_for_incoming_damage():
+    line = "[Sat Sep 24 20:42:30 2022] A froglok hits YOU for 1 point of damage."
+    assert line_reader.get_player_damage(line) is None
+
+
+def test_get_player_damage_none_for_kill_line():
+    line = "[Sat Sep 24 20:30:45 2022] You have slain a froglok tad!"
+    assert line_reader.get_player_damage(line) is None
+
+
+def test_get_player_damage_none_for_empty():
+    assert line_reader.get_player_damage("") is None
+
+
+def test_get_spell_cast_simple_name():
+    line = "[Sat Sep 24 20:30:45 2022] You begin casting Haste."
+    assert line_reader.get_spell_cast(line) == "Haste"
+
+
+def test_get_spell_cast_multiword_name():
+    line = "[Sat Sep 24 20:30:45 2022] You begin casting Spirit of Wolf."
+    assert line_reader.get_spell_cast(line) == "Spirit of Wolf"
+
+
+def test_get_spell_cast_name_with_apostrophe():
+    line = "[Sat Sep 24 20:30:45 2022] You begin casting Shaman's Bulwark."
+    assert line_reader.get_spell_cast(line) == "Shaman's Bulwark"
+
+
+def test_get_spell_cast_none_for_non_casting_line():
+    line = "[Sat Sep 24 20:30:45 2022] You slash a froglok tad for 6 points of damage."
+    assert line_reader.get_spell_cast(line) is None
+
+
+def test_get_spell_cast_none_for_kill_line():
+    line = "[Sat Sep 24 20:30:45 2022] You have slain a froglok tad!"
+    assert line_reader.get_spell_cast(line) is None
+
+
+def test_get_spell_cast_none_for_empty():
+    assert line_reader.get_spell_cast("") is None

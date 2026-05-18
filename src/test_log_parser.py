@@ -92,3 +92,65 @@ def test_count_lines_in_files_counts_final_line_without_newline(tmp_path):
 
 def test_count_lines_in_files_returns_zero_for_no_files():
     assert log_parser.count_lines_in_files([]) == 0
+
+
+def test_parse_log_lines_tracks_max_damage_per_type():
+    lines = [
+        "You slash a goblin for 10 points of damage.",
+        "You slash a troll for 25 points of damage.",
+        "You slash a rat for 5 points of damage.",
+        "You backstab a zombie for 80 points of damage.",
+    ]
+    _, _, summary = log_parser.parse_log_lines(lines)
+    assert summary.max_damage["slash"] == 25
+    assert summary.max_damage["backstab"] == 80
+    assert "pierce" not in summary.max_damage
+
+
+def test_parse_log_lines_tracks_spell_damage():
+    lines = [
+        "You hit a goblin for 30 points of non-melee damage.",
+        "You hit an orc for 99 points of non-melee damage.",
+    ]
+    _, _, summary = log_parser.parse_log_lines(lines)
+    assert summary.max_damage["spell"] == 99
+
+
+def test_parse_log_lines_empty_max_damage_when_no_damage_lines():
+    lines = [
+        "[Sat Sep 24 19:51:48 2022] Welcome to EverQuest!",
+        "[Sun Jan 08 15:01:29 2023] You have entered Lake Rathetear.",
+    ]
+    _, _, summary = log_parser.parse_log_lines(lines)
+    assert summary.max_damage == {}
+
+
+def test_build_empty_summary_has_empty_max_damage():
+    summary = log_parser.build_empty_summary()
+    assert summary.max_damage == {}
+
+
+def test_parse_log_lines_tracks_spell_casts():
+    lines = [
+        "[Sat Sep 24 20:30:45 2022] You begin casting Spirit of Wolf.",
+        "[Sat Sep 24 20:31:00 2022] You begin casting Haste.",
+        "[Sat Sep 24 20:31:30 2022] You begin casting Spirit of Wolf.",
+    ]
+    _, _, summary = log_parser.parse_log_lines(lines)
+    top = summary.spell_list.get_count_alpha_sorted_eq_list()
+    assert ("Spirit of Wolf", 2) in top
+    assert ("Haste", 1) in top
+
+
+def test_parse_log_lines_empty_spell_list_when_no_casts():
+    lines = [
+        "[Sat Sep 24 19:51:48 2022] Welcome to EverQuest!",
+        "[Sun Jan 08 15:01:29 2023] You have entered Lake Rathetear.",
+    ]
+    _, _, summary = log_parser.parse_log_lines(lines)
+    assert summary.spell_list.get_raw_eq_list() == []
+
+
+def test_build_empty_summary_has_empty_spell_list():
+    summary = log_parser.build_empty_summary()
+    assert summary.spell_list.get_raw_eq_list() == []
