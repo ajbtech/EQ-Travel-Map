@@ -29,7 +29,7 @@ LEVEL_LOST_TEXT = "You LOST a level! You are now level "
 LOGIN_TEXT = "Welcome to EverQuest!"
 ZONE_TEXT = "You have entered "
 PLAYER_DAMAGE_PATTERN = re.compile(
-    r"\bYou (\w+) .+ for (\d+) points? of (non-melee )?damage\."
+    r"\bYou (?!have\b)(\w+) .+ for (\d+) points? of (non-melee )?damage\."
 )
 SPELL_CAST_PATTERN = re.compile(r"\bYou begin casting (.+)\.")
 
