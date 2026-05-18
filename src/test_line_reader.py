@@ -491,3 +491,39 @@ def test_get_spell_cast_none_for_kill_line():
 
 def test_get_spell_cast_none_for_empty():
     assert line_reader.get_spell_cast("") is None
+
+
+def test_classify_line_extracts_player_damage_event():
+    line = "[Sat Sep 24 20:30:45 2022] You slash a froglok tad for 6 points of damage."
+
+    event = line_reader.classify_line(line)
+
+    assert event.kind == line_reader.EventType.PLAYER_DAMAGE
+    assert event.value == ("slash", 6)
+
+
+def test_classify_line_extracts_spell_cast_event():
+    line = "[Sat Sep 24 20:30:45 2022] You begin casting Spirit of Wolf."
+
+    event = line_reader.classify_line(line)
+
+    assert event.kind == line_reader.EventType.SPELL_CAST
+    assert event.value == "Spirit of Wolf"
+
+
+def test_classify_line_returns_empty_for_incoming_damage():
+    # Cheap " of damage." prefilter must not produce a damage event on
+    # lines where YOU are the target, not the attacker.
+    line = "[Sat Sep 24 20:42:30 2022] A froglok hits YOU for 1 point of damage."
+
+    assert line_reader.classify_line(line) == line_reader.EMPTY_LINE_EVENT
+
+
+def test_is_line_player_damage_prefilter_skips_non_damage_line():
+    line = "[Mon Dec 12 06:17:40 2022] You feel the spirit of wolf enter you."
+    assert line_reader.is_line_player_damage(line) is False
+
+
+def test_is_line_spell_cast_prefilter_skips_non_casting_line():
+    line = "[Sat Sep 24 20:30:45 2022] You slash a froglok tad for 6 points of damage."
+    assert line_reader.is_line_spell_cast(line) is False

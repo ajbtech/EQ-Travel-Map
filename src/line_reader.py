@@ -28,6 +28,10 @@ LEVEL_GAINED_TEXT = "You have gained a level! Welcome to level "
 LEVEL_LOST_TEXT = "You LOST a level! You are now level "
 LOGIN_TEXT = "Welcome to EverQuest!"
 ZONE_TEXT = "You have entered "
+# Cheap substring prefilters so the player-damage / spell-cast regexes
+# only run on candidate lines, not every line of a multi-GB log.
+PLAYER_DAMAGE_TEXT = " damage."
+SPELL_CAST_TEXT = "You begin casting "
 PLAYER_DAMAGE_PATTERN = re.compile(
     r"\bYou (\w+) .+ for (\d+) points? of (non-melee )?damage\."
 )
@@ -44,13 +48,15 @@ class EventType(Enum):
     LOGIN = "login"
     LOOT_CASH = "loot_cash"
     MERCHANT_CASH = "merchant_cash"
+    PLAYER_DAMAGE = "player_damage"
+    SPELL_CAST = "spell_cast"
     ZONE = "zone"
 
 
 @dataclass(frozen=True)
 class LineEvent:
     kind: EventType = EventType.EMPTY
-    value: str | int | None = None
+    value: str | int | tuple | None = None
 
 
 EMPTY_LINE_EVENT = LineEvent()
@@ -110,6 +116,14 @@ def is_line_zone(line):
 
 def is_line_help(line):
     return HELP_TEXT in line
+
+
+def is_line_player_damage(line):
+    return PLAYER_DAMAGE_TEXT in line
+
+
+def is_line_spell_cast(line):
+    return SPELL_CAST_TEXT in line
 
 
 def is_line_chat(line):
@@ -204,4 +218,12 @@ def classify_line(line):
         return LineEvent(EventType.MERCHANT_CASH)
     if is_line_loot_cash(line):
         return LineEvent(EventType.LOOT_CASH)
+    if is_line_spell_cast(line):
+        spell = get_spell_cast(line)
+        if spell is not None:
+            return LineEvent(EventType.SPELL_CAST, spell)
+    if is_line_player_damage(line):
+        damage = get_player_damage(line)
+        if damage is not None:
+            return LineEvent(EventType.PLAYER_DAMAGE, damage)
     return EMPTY_LINE_EVENT
