@@ -163,9 +163,9 @@ def test_build_max_damage_lines_formats_known_types():
     max_damage = {"slash": 30, "backstab": 80, "spell": 99}
     lines = summary_formatter.build_max_damage_lines(max_damage)
     assert lines[0] == "Max hit by damage type:"
-    assert any("slash: 30" in l for l in lines)
-    assert any("backstab: 80" in l for l in lines)
-    assert any("spell: 99" in l for l in lines)
+    assert any("slash: 30" in line for line in lines)
+    assert any("backstab: 80" in line for line in lines)
+    assert any("spell: 99" in line for line in lines)
 
 
 def test_build_max_damage_lines_empty():
@@ -202,7 +202,7 @@ def test_build_summary_sections_includes_max_damage_lines():
     sections = summary_formatter.build_summary_sections(kill_list, zone_list, summary)
 
     assert sections.max_damage_lines[0] == "Max hit by damage type:"
-    assert any("slash: 15" in l for l in sections.max_damage_lines)
+    assert any("slash: 15" in line for line in sections.max_damage_lines)
 
 
 def test_build_summary_sections_includes_extended_spells_top_25():

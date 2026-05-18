@@ -428,17 +428,17 @@ def test_get_player_damage_singular_point():
 
 
 def test_get_player_damage_non_melee_maps_to_spell():
-    line = "[Sat Sep 24 20:30:45 2022] You hit a goblin for 99 points of non-melee damage."
+    line = "You hit a goblin for 99 points of non-melee damage."
     assert line_reader.get_player_damage(line) == ("spell", 99)
 
 
 def test_get_player_damage_critically_maps_to_crit():
-    line = "[Sat Sep 24 20:30:45 2022] You critically hit a troll for 200 points of damage."
+    line = "You critically hit a troll for 200 points of damage."
     assert line_reader.get_player_damage(line) == ("crit", 200)
 
 
 def test_get_player_damage_none_for_third_person():
-    line = "[Sat Sep 24 20:07:28 2022] Jaranab slashes Basher Stizik for 51 points of damage."
+    line = "Jaranab slashes Basher Stizik for 51 points of damage."
     assert line_reader.get_player_damage(line) is None
 
 
