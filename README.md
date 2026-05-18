@@ -3,7 +3,7 @@
 Generate a visual travel map and play summary from your EverQuest character's
 log files. Drop in your logs, pick your character, click Generate.
 
-![Sample travel map for Gorrek on Project 1999](example.PNG)
+![Results window for Gorrek on Project 1999 — rendered travel map, top kills, top zones, major statistics, and the NEW INPUT / COPY TEXT / SAVE MAP / MORE STATS buttons](example.PNG)
 
 [![tests](https://github.com/ajbtech/EQ-Travel-Map/actions/workflows/test.yml/badge.svg)](https://github.com/ajbtech/EQ-Travel-Map/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -20,6 +20,33 @@ summary of kills, deaths, level-ups, looted coin, and merchant earnings.
 The map shown above was generated from the bundled sample log
 (`samples/sample_eqlog_Gorrek_P1999Green.txt`), a real Project 1999 character
 trimmed down to ~1.3 MB so the project ships with a working first-run example.
+
+### What you see on the output page
+
+The results window has three things side-by-side under the rendered map:
+
+- **Top 5 killed creatures** and **Top 5 visited zones** — the headline
+  highlights of where you spent your time and what you fought there.
+- **Major Statistics** — first log timestamp, total log lines, logins,
+  deaths, zones visited, kills, levels lost, current level, looted coin,
+  and coin earned from merchants.
+
+Four buttons sit to the right of the map: **NEW INPUT** to parse another
+character, **COPY TEXT** to put the summary on your clipboard, **SAVE MAP**
+to export the rendered PNG anywhere on disk, and **MORE STATS** to open the
+extra-stats window described below.
+
+### Extra stats (MORE STATS button)
+
+Click **MORE STATS** on the results window for a deeper breakdown that
+doesn't fit on the main summary:
+
+- **Top 25 visited zones** — the long tail of where your character has been.
+- **Top 25 killed creatures** — the long tail of what your character has killed.
+- **Top 25 cast spells** — which spells you've leaned on the most.
+- **Max hit by damage type** — your biggest single hit broken down by
+  `slash`, `pierce`, `backstab`, `bash`, `spell`, `crit`, and any other
+  damage types that turned up in the logs.
 
 ---
 
