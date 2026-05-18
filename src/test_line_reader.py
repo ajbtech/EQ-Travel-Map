@@ -456,6 +456,11 @@ def test_get_player_damage_none_for_empty():
     assert line_reader.get_player_damage("") is None
 
 
+def test_get_player_damage_none_for_incoming_have_line():
+    line = "You have been slammed for 338 points of damage."
+    assert line_reader.get_player_damage(line) is None
+
+
 def test_get_spell_cast_simple_name():
     line = "[Sat Sep 24 20:30:45 2022] You begin casting Haste."
     assert line_reader.get_spell_cast(line) == "Haste"
