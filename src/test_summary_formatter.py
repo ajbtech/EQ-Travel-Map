@@ -211,9 +211,7 @@ def test_build_summary_sections_includes_extended_spells_top_25():
     zone_list.add("Grobb")
     zone_list.sort_lists()
     summary = log_parser.build_empty_summary()
-    from eq_list import EQList as EQL
-
-    spell_list = EQL()
+    spell_list = EQList()
     for spell in ["Spirit of Wolf"] * 10 + ["Haste"] * 5:
         spell_list.add(spell)
     spell_list.sort_lists()
