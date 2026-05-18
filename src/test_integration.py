@@ -29,7 +29,7 @@ def test_bundled_sample_log_parses_to_expected_totals():
     assert summary.kill_count == 5123
     assert summary.level_lost_count == 4
     assert summary.current_level == 51
-    assert summary.loot_cash.platinum == 8773
+    assert summary.loot_cash.platinum == 11551
     assert summary.merch_cash.platinum == 9525
     assert len(zone_list.get_raw_eq_list()) == summary.zone_count
 
