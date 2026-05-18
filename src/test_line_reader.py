@@ -151,13 +151,21 @@ def test_line_reader_is_line_loot_cash_null():
     assert line_reader.is_line_loot_cash(line) is False
 
 
-# Mob loot is capped at 99 cp / sp / pp per corpse, so any "You receive ..."
-# line that exceeds that cap on a non-gold denomination must be a self-corpse
-# retrieval, not mob loot. Gold can legitimately exceed 99 from mobs.
+# Mob loot never exceeds ~200 of any single denomination per corpse, so
+# any "You receive ..." line with a denom above that must be a self-corpse
+# retrieval, not mob loot. The check is on raw per-denom counts.
 def test_is_line_loot_cash_rejects_self_corpse_excess_platinum():
     line = (
         "[Sat Jan 07 14:38:52 2023] You receive 832 platinum, "
         "11 gold, 54 silver and 88 copper as your split."
+    )
+    assert line_reader.is_line_loot_cash(line) is False
+
+
+def test_is_line_loot_cash_rejects_self_corpse_excess_gold():
+    line = (
+        "[Mon Oct 24 21:17:09 2022] You receive 29 platinum, "
+        "398 gold and 86 silver from the corpse."
     )
     assert line_reader.is_line_loot_cash(line) is False
 
@@ -178,26 +186,26 @@ def test_is_line_loot_cash_rejects_self_corpse_excess_copper():
     assert line_reader.is_line_loot_cash(line) is False
 
 
-def test_is_line_loot_cash_allows_high_gold():
+def test_is_line_loot_cash_allows_exactly_200():
     line = (
-        "[Mon Oct 24 21:17:09 2022] You receive 29 platinum, "
-        "398 gold and 86 silver from the corpse."
+        "[Sat Sep 24 12:00:00 2022] You receive 200 platinum, "
+        "200 gold, 200 silver and 200 copper from the corpse."
     )
     assert line_reader.is_line_loot_cash(line) is True
 
 
-def test_is_line_loot_cash_allows_exactly_99():
+def test_is_line_loot_cash_allows_moderate_platinum():
     line = (
-        "[Sat Sep 24 12:00:00 2022] You receive 99 platinum, "
-        "99 gold, 99 silver and 99 copper from the corpse."
+        "[Mon Oct 31 22:34:19 2022] You receive 135 platinum "
+        "and 98 copper from the corpse."
     )
     assert line_reader.is_line_loot_cash(line) is True
 
 
 def test_classify_line_returns_empty_for_self_corpse_loot():
     line = (
-        "[Mon Oct 31 22:34:19 2022] You receive 135 platinum "
-        "and 98 copper from the corpse."
+        "[Sat Jan 07 14:38:52 2023] You receive 832 platinum, "
+        "11 gold, 54 silver and 88 copper as your split."
     )
     assert line_reader.classify_line(line) == line_reader.EMPTY_LINE_EVENT
 
