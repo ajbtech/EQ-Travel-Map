@@ -176,12 +176,12 @@ QLabel#mapCanvas {{
 QPushButton#bronzeButton {{
     background-color: qlineargradient(
         x1:0, y1:0, x2:0, y2:1,
-        stop:0 #e0d4b2, stop:0.5 #d3c5a0, stop:1 #c0b088
+        stop:0 #f6efdc, stop:0.5 #ece4ca, stop:1 #ddd2b3
     );
-    border-top: 2px solid #f2e8c8;
-    border-left: 2px solid #d8cba6;
-    border-right: 2px solid #6c5a36;
-    border-bottom: 2px solid #4a3a1c;
+    border-top: 2px solid #fbf5e4;
+    border-left: 2px solid #ebe2c6;
+    border-right: 2px solid #8a7850;
+    border-bottom: 2px solid #5e4d2a;
     border-radius: 0;
     color: #0a0805;
     font-family: "Georgia", "Times New Roman", serif;
@@ -195,32 +195,32 @@ QPushButton#bronzeButton {{
 QPushButton#bronzeButton:hover {{
     background-color: qlineargradient(
         x1:0, y1:0, x2:0, y2:1,
-        stop:0 #ece1be, stop:0.5 #ddd0ad, stop:1 #ccbc94
+        stop:0 #fbf5e4, stop:0.5 #f3ecd4, stop:1 #e6dcbe
     );
-    border-top: 2px solid #faf0d4;
-    border-left: 2px solid #e6d8b4;
+    border-top: 2px solid #ffffff;
+    border-left: 2px solid #f3ecd0;
 }}
 
 QPushButton#bronzeButton:pressed {{
     background-color: qlineargradient(
         x1:0, y1:0, x2:0, y2:1,
-        stop:0 #7a6a44, stop:0.5 #948361, stop:1 #a89572
+        stop:0 #9a8c66, stop:0.5 #b3a684, stop:1 #c7bb98
     );
-    border-top: 2px solid #4a3a1c;
-    border-left: 2px solid #6c5a36;
-    border-right: 2px solid #d8cba6;
-    border-bottom: 2px solid #f2e8c8;
+    border-top: 2px solid #5e4d2a;
+    border-left: 2px solid #8a7850;
+    border-right: 2px solid #ebe2c6;
+    border-bottom: 2px solid #fbf5e4;
     color: #0a0805;
     padding: 3px 21px 1px 23px;
 }}
 
 QPushButton#bronzeButton:disabled {{
-    background-color: #b8b0a0;
-    border-top: 2px solid #c8c0b0;
-    border-left: 2px solid #b8b0a0;
-    border-right: 2px solid #6a604c;
-    border-bottom: 2px solid #4a3a2c;
-    color: #4a4438;
+    background-color: #d4cdb8;
+    border-top: 2px solid #e2dcc8;
+    border-left: 2px solid #d4cdb8;
+    border-right: 2px solid #8a7e62;
+    border-bottom: 2px solid #5e5340;
+    color: #5a5448;
 }}
 
 /* === Stone-groove progress bar with rune-gold fill ======================= */
