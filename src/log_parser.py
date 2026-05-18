@@ -222,19 +222,14 @@ def add_merchant_cash(line, event, state):
     state.merch_cash = state.merch_cash.add(money_sorter.parse_cash(line))
 
 
-def record_player_damage(line, state):
-    result = line_reader.get_player_damage(line)
-    if result is None:
-        return
-    damage_type, amount = result
+def record_player_damage(_line, event, state):
+    damage_type, amount = event.value
     if amount > state.max_damage.get(damage_type, 0):
         state.max_damage[damage_type] = amount
 
 
-def record_spell_cast(line, state):
-    spell = line_reader.get_spell_cast(line)
-    if spell is not None:
-        state.spell_list.add(spell)
+def record_spell_cast(_line, event, state):
+    state.spell_list.add(event.value)
 
 
 EVENT_HANDLERS = {
@@ -245,6 +240,8 @@ EVENT_HANDLERS = {
     line_reader.EventType.LEVEL_LOST: record_level_loss,
     line_reader.EventType.LOOT_CASH: add_loot_cash,
     line_reader.EventType.MERCHANT_CASH: add_merchant_cash,
+    line_reader.EventType.PLAYER_DAMAGE: record_player_damage,
+    line_reader.EventType.SPELL_CAST: record_spell_cast,
 }
 
 
@@ -262,8 +259,6 @@ def process_line_event(line, event, state):
 
     update_previous_line_flags(event, state)
     update_event_counts(line, event, state)
-    record_player_damage(line, state)
-    record_spell_cast(line, state)
 
 
 def process_log_line(line, state):
