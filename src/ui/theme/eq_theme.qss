@@ -178,16 +178,13 @@ QPushButton#bronzeButton {{
         x1:0, y1:0, x2:0, y2:1,
         stop:0 #f6efdc, stop:0.5 #ece4ca, stop:1 #ddd2b3
     );
-    border-top: 2px solid #fbf5e4;
-    border-left: 2px solid #ebe2c6;
-    border-right: 2px solid #8a7850;
-    border-bottom: 2px solid #5e4d2a;
+    border: 1px solid #2c2620;
     border-radius: 0;
     color: #0a0805;
     font-family: "Georgia", "Times New Roman", serif;
     font-size: 15pt;
     font-weight: normal;
-    padding: 2px 22px;
+    padding: 3px 23px;
     min-height: 24px;
     max-height: 34px;
 }}
@@ -197,8 +194,7 @@ QPushButton#bronzeButton:hover {{
         x1:0, y1:0, x2:0, y2:1,
         stop:0 #fbf5e4, stop:0.5 #f3ecd4, stop:1 #e6dcbe
     );
-    border-top: 2px solid #ffffff;
-    border-left: 2px solid #f3ecd0;
+    border: 1px solid #2c2620;
 }}
 
 QPushButton#bronzeButton:pressed {{
@@ -206,20 +202,14 @@ QPushButton#bronzeButton:pressed {{
         x1:0, y1:0, x2:0, y2:1,
         stop:0 #9a8c66, stop:0.5 #b3a684, stop:1 #c7bb98
     );
-    border-top: 2px solid #5e4d2a;
-    border-left: 2px solid #8a7850;
-    border-right: 2px solid #ebe2c6;
-    border-bottom: 2px solid #fbf5e4;
+    border: 1px solid #2c2620;
     color: #0a0805;
-    padding: 3px 21px 1px 23px;
+    padding: 4px 22px 2px 24px;
 }}
 
 QPushButton#bronzeButton:disabled {{
     background-color: #d4cdb8;
-    border-top: 2px solid #e2dcc8;
-    border-left: 2px solid #d4cdb8;
-    border-right: 2px solid #8a7e62;
-    border-bottom: 2px solid #5e5340;
+    border: 1px solid #3a342a;
     color: #5a5448;
 }}
 
