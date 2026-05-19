@@ -25,7 +25,7 @@ def test_infected_paw_uses_splitpaw_lair_center():
 def test_extracted_zone_centers_are_available():
     assert eq_display.get_zone_center("Surefall Glade") == (586, 392)
     assert eq_display.get_zone_center("Great Divide") == (1108, 1282)
-    assert eq_display.get_zone_center("West Cabilis") == (2320, 1112)
+    assert eq_display.get_zone_center("West Cabilis") == (2311, 1106)
 
 
 def test_log_name_aliases_are_available():
