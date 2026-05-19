@@ -181,6 +181,8 @@ credits live in [assets/ATTRIBUTION.md](assets/ATTRIBUTION.md).
 Special thanks to the **Project 1999** community for keeping classic
 EverQuest alive and to everyone who has reported issues against this tool.
 
+> Made by **Gorrek** on the **Green** server.
+
 ---
 
 ## Roadmap
