@@ -642,14 +642,14 @@
     },
     "Cazic Thule": {
       "center": [
-        1245,
-        846
+        1236,
+        843
       ]
     },
     "Charasis (H. Stones)": {
       "center": [
-        2169,
-        918
+        2163,
+        922
       ]
     },
     "Chardok": {
@@ -660,8 +660,8 @@
     },
     "City of Mist": {
       "center": [
-        2600,
-        990
+        2612,
+        991
       ]
     },
     "Cobalt Scar": {
@@ -678,14 +678,14 @@
     },
     "Crypt of Dalnir": {
       "center": [
-        2241,
-        995
+        2234,
+        991
       ]
     },
     "Crystal Cavern": {
       "center": [
-        1220,
-        1252
+        1213,
+        1249
       ]
     },
     "Dagnor's Cauldron": {
@@ -702,14 +702,14 @@
     },
     "Dreadlands": {
       "center": [
-        2131,
-        1217
+        2125,
+        1203
       ]
     },
     "East Cabilis": {
       "center": [
-        2400,
-        1110
+        2385,
+        1103
       ]
     },
     "East Commonlands": {
@@ -732,14 +732,14 @@
     },
     "Eastern Wastes": {
       "center": [
-        1220,
-        1322
+        1215,
+        1313
       ]
     },
     "Emerald Jungle": {
       "center": [
-        2600,
-        1068
+        2615,
+        1065
       ]
     },
     "Erud's Crossing": {
@@ -780,20 +780,20 @@
     },
     "Field of Bone": {
       "center": [
-        2465,
-        1075
+        2459,
+        1067
       ]
     },
     "Firiona Vie": {
       "center": [
-        2363,
-        1190
+        2344,
+        1180
       ]
     },
     "Frontier Mountains": {
       "center": [
-        2140,
-        1090
+        2137,
+        1093
       ]
     },
     "Gorge of King Xorbb": {
@@ -840,8 +840,8 @@
     },
     "Iceclad Ocean": {
       "center": [
-        1335,
-        1322
+        1320,
+        1315
       ]
     },
     "Icewell Keep": {
@@ -864,14 +864,14 @@
     },
     "Kaesora": {
       "center": [
-        2524,
-        1087
+        2538,
+        1095
       ]
     },
     "Karnor's Castle": {
       "center": [
-        2130,
-        1278
+        2125,
+        1279
       ]
     },
     "Kedge Keep": {
@@ -894,8 +894,8 @@
     },
     "Kurn's Tower": {
       "center": [
-        2465,
-        992
+        2459,
+        991
       ]
     },
     "Lake Rathetear": {
@@ -906,8 +906,8 @@
     },
     "Lake of Ill Omen": {
       "center": [
-        2241,
-        1152
+        2237,
+        1136
       ]
     },
     "Lavastorm Mountains": {
@@ -924,14 +924,14 @@
     },
     "Lower Guk": {
       "center": [
-        1670,
-        758
+        1662,
+        756
       ]
     },
     "Mines of Nurga": {
       "center": [
-        2070,
-        1107
+        2068,
+        1098
       ]
     },
     "Misty Thicket": {
@@ -942,8 +942,8 @@
     },
     "Nagafen's Lair": {
       "center": [
-        1314,
-        100
+        1318,
+        110
       ]
     },
     "Najena": {
@@ -984,8 +984,8 @@
     },
     "North Freeport": {
       "center": [
-        1450,
-        390
+        1456,
+        403
       ]
     },
     "North Kaladim": {
@@ -1002,8 +1002,8 @@
     },
     "North Qeynos": {
       "center": [
-        660,
-        505
+        664,
+        488
       ]
     },
     "Northern Desert of Ro": {
@@ -1032,8 +1032,8 @@
     },
     "Old Sebilis": {
       "center": [
-        2603,
-        1240
+        2612,
+        1218
       ]
     },
     "Overthere": {
@@ -1068,8 +1068,8 @@
     },
     "Plane of Hate": {
       "center": [
-        2503,
-        249
+        2492,
+        250
       ]
     },
     "Plane of Mischief": {
@@ -1080,20 +1080,20 @@
     },
     "Plane of Sky": {
       "center": [
-        1604,
-        390
+        1596,
+        386
       ]
     },
     "Qeynos Catacombs": {
       "center": [
-        735,
-        543
+        725,
+        554
       ]
     },
     "Qeynos Hills": {
       "center": [
-        660,
-        438
+        661,
+        424
       ]
     },
     "Rathe Mountains": {
@@ -1116,8 +1116,8 @@
     },
     "Siren's Grotto": {
       "center": [
-        878,
-        1283
+        876,
+        1284
       ]
     },
     "Skyfire Mountains": {
@@ -1134,8 +1134,8 @@
     },
     "Sleeper's Tomb": {
       "center": [
-        1220,
-        1389
+        1210,
+        1381
       ]
     },
     "Solusek's Eye": {
@@ -1164,8 +1164,8 @@
     },
     "South Qeynos": {
       "center": [
-        660,
-        580
+        661,
+        567
       ]
     },
     "Southern Desert of Ro": {
@@ -1200,20 +1200,20 @@
     },
     "Swamp of No Hope": {
       "center": [
-        2476,
-        1155
+        2459,
+        1141
       ]
     },
     "Temple of Droga": {
       "center": [
-        2070,
-        1033
+        2063,
+        1029
       ]
     },
     "Temple of Sol. Ro": {
       "center": [
-        1468,
-        105
+        1466,
+        112
       ]
     },
     "Temple of Veeshan": {
@@ -1272,8 +1272,8 @@
     },
     "Trakanon's Teeth": {
       "center": [
-        2600,
-        1148
+        2612,
+        1141
       ]
     },
     "Upper Guk": {
@@ -1302,14 +1302,14 @@
     },
     "Warsliks Woods": {
       "center": [
-        2241,
-        1078
+        2234,
+        1067
       ]
     },
     "West Cabilis": {
       "center": [
-        2320,
-        1112
+        2311,
+        1106
       ]
     },
     "West Commonlands": {
