@@ -223,27 +223,6 @@ QPushButton#bronzeButton:disabled {{
     color: #5a5448;
 }}
 
-/* === Stone-groove progress bar with rune-gold fill ======================= */
-
-QProgressBar#stoneProgress {{
-    background: #2c2620;
-    border: 2px inset #6c6358;
-    border-radius: 0;
-    text-align: center;
-    color: #f7eccd;
-    font-family: "Georgia", "Times New Roman", serif;
-    font-size: 10pt;
-    min-height: 18px;
-}}
-
-QProgressBar#stoneProgress::chunk {{
-    background: qlineargradient(
-        x1:0, y1:0, x2:0, y2:1,
-        stop:0 #fff0a8, stop:0.5 #f5c542, stop:1 #a87a1a
-    );
-    border: none;
-}}
-
 /* === Scrollbars on summary text ========================================== */
 
 QScrollBar:vertical {{
