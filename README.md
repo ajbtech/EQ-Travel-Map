@@ -2,7 +2,9 @@
 
 Instructions:
 
-- Project 1999: Download the [latest release](https://github.com/ajbtech/EQ-Travel-Map/releases/latest), unzip it and run EQTravelMap.exe
+- **Windows:** Download the [latest release](https://github.com/ajbtech/EQ-Travel-Map/releases/latest), unzip `EQTravelMap-vX.Y.Z-windows.zip`, and run `EQTravelMap.exe`
+- **macOS:** Download `EQTravelMap-vX.Y.Z-macos.zip`, unzip it, and open `EQTravelMap.app` (right-click → Open the first time to bypass Gatekeeper)
+- **Linux:** Download `EQTravelMap-vX.Y.Z-linux.tar.gz`, extract it, and run `./EQTravelMap/EQTravelMap`
 
 
 # EverQuest Travel Map
@@ -59,27 +61,49 @@ doesn't fit on the main summary:
 
 ## For EverQuest players (no Python or terminal needed)
 
-> **Note:** A pre-built `EQTravelMap.exe` is attached to each
-> [GitHub release](https://github.com/ajbtech/EQ-Travel-Map/releases).
-> Download it from there — there is nothing to install and no terminal
+> **Note:** Pre-built bundles for Windows, macOS, and Linux are attached to
+> each [GitHub release](https://github.com/ajbtech/EQ-Travel-Map/releases).
+> Download the one for your OS — there is nothing to install and no terminal
 > commands to run.
+
+### Download and launch
+
+| OS | File | How to open |
+|---|---|---|
+| Windows | `EQTravelMap-vX.Y.Z-windows.zip` | Unzip anywhere, double-click `EQTravelMap.exe` |
+| macOS | `EQTravelMap-vX.Y.Z-macos.zip` | Unzip, then right-click `EQTravelMap.app` → **Open** (required the first time to bypass Gatekeeper) |
+| Linux | `EQTravelMap-vX.Y.Z-linux.tar.gz` | Extract, then run `./EQTravelMap/EQTravelMap` from a terminal |
+
+> **macOS note:** The app is ad-hoc signed but not notarized, so macOS will
+> warn you the first time. Right-click → **Open** to proceed; after that it
+> opens normally.
 
 ### Use it with your own EverQuest logs
 
 1. In-game, type **`/log on`** once. EverQuest will start writing per-character
    log files into its `Logs` folder.
 2. In the app, click **Browse** next to *Log folder* and pick that `Logs`
-   folder. Common locations on Windows:
+   folder. Common locations by OS:
+
+   **Windows**
    - `%USERPROFILE%\EverQuest\Logs`
    - `C:\EverQuest\Logs`
    - `C:\Program Files\Sony\EverQuest\Logs`
    - `C:\Program Files (x86)\Sony\EverQuest\Logs`
+
+   **macOS**
+   - `~/EverQuest/Logs`
+   - `~/Library/Application Support/EverQuest/Logs`
+
+   **Linux**
+   - `~/EverQuest/Logs`
+   - `~/.everquest/logs`
+
 3. Type your character's name exactly as it appears in the filename
    (`eqlog_<Character>_P1999Green.txt` → enter `<Character>`).
 4. Click **Generate**. The longer your log history, the longer the parse
    takes — a multi-year archive can take a couple of minutes.
-5. Use **Save Map As…** to keep the rendered PNG anywhere you like, or
-   **Open Output Folder** to find the default copy in Explorer.
+5. Use **Save Map As…** to keep the rendered PNG anywhere you like.
 
 If anything goes wrong, the app shows a friendly explanation with a
 "Show Details" button for the technical message — paste that into a
@@ -90,17 +114,15 @@ and we'll take a look.
 
 1. Download both files from the
    [latest release](https://github.com/ajbtech/EQ-Travel-Map/releases/latest):
-   `EQTravelMap-vX.Y.Z-windows.zip` and `EQTravelMap-samples.zip`.
-2. Right-click → **Extract All…** on the windows zip anywhere on your computer.
-3. Extract `EQTravelMap-samples.zip` *into the same extracted folder* so that
-   `samples/` ends up next to `EQTravelMap.exe`.
-4. Double-click **`EQTravelMap.exe`**. The form will be pre-filled with the
-   bundled `samples/` folder and character name `Gorrek`. Click **Generate**.
-5. After a few seconds you'll see the map and a summary with the option to
-   copy them, save the map elsewhere, or open the output folder in Explorer.
+   the bundle for your OS and `EQTravelMap-samples.zip`.
+2. Extract both archives. Move the `samples/` folder so it sits next to the
+   `EQTravelMap` executable (or `.app` on macOS).
+3. Launch the app. The form will be pre-filled with the `samples/` folder and
+   character name `Gorrek`. Click **Generate**.
+4. After a few seconds you'll see the map and summary.
 
-> The sample logs ship as a separate, optional download so the main `.exe`
-> bundle stays small for users who already have their own EverQuest logs.
+> The sample logs ship as a separate, optional download so the main bundles
+> stay small for users who already have their own EverQuest logs.
 
 
 ---
@@ -109,6 +131,7 @@ and we'll take a look.
 
 If you have Python 3.10+ and prefer running from source:
 
+**Windows (PowerShell)**
 ```powershell
 git clone https://github.com/ajbtech/EQ-Travel-Map.git
 cd EQ-Travel-Map
@@ -117,19 +140,43 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
+**macOS / Linux**
+```bash
+git clone https://github.com/ajbtech/EQ-Travel-Map.git
+cd EQ-Travel-Map
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
 Launch the desktop GUI:
 
+**Windows**
 ```powershell
 python src\desktop_app.py            # GUI, defaults pre-filled
 python src\desktop_app.py Gorrek     # GUI, character name pre-filled
 ```
 
+**macOS / Linux**
+```bash
+python src/desktop_app.py            # GUI, defaults pre-filled
+python src/desktop_app.py Gorrek     # GUI, character name pre-filled
+```
+
 Or run the parser directly without the GUI:
 
+**Windows**
 ```powershell
-python src\eq_parser.py Gorrek                          # uses default paths
-python src\eq_parser.py Gorrek --log-folder samples     # use bundled sample
+python src\eq_parser.py Gorrek                              # uses default paths
+python src\eq_parser.py Gorrek --log-folder samples         # use bundled sample
 python src\eq_parser.py Gorrek --log-folder C:\path\to\logs --output map.png
+```
+
+**macOS / Linux**
+```bash
+python src/eq_parser.py Gorrek                              # uses default paths
+python src/eq_parser.py Gorrek --log-folder samples         # use bundled sample
+python src/eq_parser.py Gorrek --log-folder ~/path/to/logs --output map.png
 ```
 
 `eq_parser.py` prints the summary to stdout and writes the map PNG to
@@ -140,14 +187,19 @@ python src\eq_parser.py Gorrek --log-folder C:\path\to\logs --output map.png
 ## For developers
 
 Full setup, testing, and packaging instructions live in
-[CONTRIBUTING.md](CONTRIBUTING.md). The short version:
+[CONTRIBUTING.md](CONTRIBUTING.md). The short version (commands are the same
+on all platforms; Windows users use `python` instead of `python3`):
 
-```powershell
+```bash
 pip install -e ".[dev]"
 python -m pytest -q src
 ruff check src && black --check src
 pyinstaller --noconfirm --clean EQTravelMap.spec   # build the redistributable
 ```
+
+The spec auto-detects the host OS: it picks `icon.ico` on Windows,
+`icon.icns` on macOS (generated by the CI build step), and `icon.png` on
+Linux, and applies ad-hoc codesigning on macOS.
 
 Architecture and module conventions are documented in [CLAUDE.md](CLAUDE.md).
 Open work and good-first-issue ideas live in [TODO.md](TODO.md).
