@@ -85,7 +85,7 @@ def build_max_damage_lines(max_damage):
     known = [(t, max_damage[t]) for t in _DAMAGE_TYPE_ORDER if t in max_damage]
     extra = sorted((t, v) for t, v in max_damage.items() if t not in _DAMAGE_TYPE_ORDER)
     for damage_type, amount in known + extra:
-        lines.append(f"{damage_type}: {format_number(amount)}")
+        lines.append(f"{damage_type.capitalize()}: {format_number(amount)}")
     return lines
 
 
