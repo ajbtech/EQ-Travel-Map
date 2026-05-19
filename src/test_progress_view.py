@@ -56,6 +56,21 @@ def test_lines_label_width_is_stable_across_counts(qt_app):
     assert small_x == large_x
 
 
+def test_lines_label_left_of_cancel_button_with_gap(qt_app):
+    view = ProgressView()
+    view.resize(720, 360)
+    view.show()
+    view.set_progress("file.txt", 999_999_999)
+    label_left = view.lines_label.mapTo(view, view.lines_label.rect().topLeft()).x()
+    label_right = label_left + view.lines_label.width()
+    button = view.cancel_button
+    button_left = button.mapTo(view, button.rect().topLeft()).x()
+    button_right = button_left + button.width()
+    assert label_left < 80
+    assert label_right <= button_left
+    assert button_right >= view.width() - 80
+
+
 def test_cancel_button_emits_cancel_requested(qt_app):
     view = ProgressView()
     received = []
