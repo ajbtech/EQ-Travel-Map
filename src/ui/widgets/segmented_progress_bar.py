@@ -1,4 +1,4 @@
-from PySide6.QtCore import QSize, Qt
+from PySide6.QtCore import QRectF, QSize, Qt
 from PySide6.QtGui import QColor, QLinearGradient, QPainter, QPainterPath
 from PySide6.QtWidgets import QSizePolicy, QWidget
 
@@ -22,6 +22,12 @@ class SegmentedProgressBar(QWidget):
     _GREY_TOP = QColor("#c8c0b0")
     _GREY_MID = QColor("#8a8070")
     _GREY_BOT = QColor("#504840")
+
+    # Blue sub-indicator gradient stops
+    _BLUE_TOP = QColor("#a8d4ff")
+    _BLUE_MID = QColor("#3a7fd4")
+    _BLUE_BOT = QColor("#1a3f6f")
+    _BLUE_BG = QColor("#0a1a2e")
 
     # Structural colours
     _BG = QColor("#1a1208")
@@ -102,8 +108,35 @@ class SegmentedProgressBar(QWidget):
             seg_fill = max(0.0, min(1.0, filled_float - i))
             self._draw_segment(painter, x, 0, seg_w, h, seg_fill)
 
+        self._draw_sub_indicator(painter, bar_left, bar_right, h)
+
         self._draw_cap(painter, 0, h)
         self._draw_cap(painter, w, h)
+
+    def _blue_fraction(self):
+        """Blue line's fill ratio: cycles 0→1 once per fifth of yellow progress."""
+        if self._maximum <= 0:
+            return 0.0
+        yellow_frac = self._value / self._maximum
+        if yellow_frac >= 1.0:
+            return 1.0
+        return (yellow_frac * self.segment_count) % 1.0
+
+    def _draw_sub_indicator(self, painter, x_start, x_end, h):
+        bar_w = x_end - x_start
+        line_h = max(2.0, h * 0.12)
+        line_y = (h - line_h) / 2.0
+
+        painter.fillRect(QRectF(x_start, line_y, bar_w, line_h), self._BLUE_BG)
+
+        blue_frac = self._blue_fraction()
+        if blue_frac > 0:
+            fill_w = bar_w * blue_frac
+            grad = QLinearGradient(x_start, line_y, x_start, line_y + line_h)
+            grad.setColorAt(0.0, self._BLUE_TOP)
+            grad.setColorAt(0.5, self._BLUE_MID)
+            grad.setColorAt(1.0, self._BLUE_BOT)
+            painter.fillRect(QRectF(x_start, line_y, fill_w, line_h), grad)
 
     # ------------------------------------------------------------------
     # Drawing helpers

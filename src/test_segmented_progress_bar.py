@@ -67,6 +67,39 @@ def test_segment_count_is_five(qt_app):
     assert bar.segment_count == 5
 
 
+def test_blue_fraction_is_zero_when_maximum_is_zero(qt_app):
+    bar = SegmentedProgressBar()
+    assert bar._blue_fraction() == 0.0
+
+
+def test_blue_fraction_is_zero_at_value_zero(qt_app):
+    bar = SegmentedProgressBar()
+    bar.setRange(0, 100)
+    bar.setValue(0)
+    assert bar._blue_fraction() == 0.0
+
+
+def test_blue_fraction_is_half_mid_first_fifth(qt_app):
+    bar = SegmentedProgressBar()
+    bar.setRange(0, 100)
+    bar.setValue(10)  # halfway through 0-20%
+    assert bar._blue_fraction() == pytest.approx(0.5)
+
+
+def test_blue_fraction_wraps_in_second_fifth(qt_app):
+    bar = SegmentedProgressBar()
+    bar.setRange(0, 100)
+    bar.setValue(30)  # halfway through 20-40% → cycle is 0.5 again
+    assert bar._blue_fraction() == pytest.approx(0.5)
+
+
+def test_blue_fraction_is_one_at_max(qt_app):
+    bar = SegmentedProgressBar()
+    bar.setRange(0, 100)
+    bar.setValue(100)
+    assert bar._blue_fraction() == 1.0
+
+
 def test_paint_event_does_not_crash(qt_app):
     bar = SegmentedProgressBar()
     bar.resize(200, 22)
