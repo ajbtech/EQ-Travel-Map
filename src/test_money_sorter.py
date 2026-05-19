@@ -228,3 +228,24 @@ def test_sort_case_6():
     assert gold_sorted == 4
     assert silver_sorted == 6
     assert copper_sorted == 6
+
+
+# Combined regex: parse_cash extracts all four denominations in one pass
+def test_parse_cash_single_denomination():
+    line = "[Wed Oct 26 22:04:16 2022] You receive 7 copper from the corpse."
+    assert money_sorter.parse_cash(line) == money_sorter.Cash(copper=7)
+
+
+def test_parse_cash_no_denomination():
+    line = "[Sun Jan 08 15:01:29 2023] You have entered Lake Rathetear."
+    assert money_sorter.parse_cash(line) == money_sorter.Cash()
+
+
+def test_parse_cash_all_four_denominations():
+    line = (
+        "[Thu Oct 27 21:00:52 2022] You receive 17 platinum, 512 gold, "
+        "3 silver and 325 copper from the corpse."
+    )
+    assert money_sorter.parse_cash(line) == money_sorter.Cash(
+        platinum=17, gold=512, silver=3, copper=325
+    )

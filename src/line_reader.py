@@ -88,18 +88,16 @@ def is_line_loot(line):
 
 # Returns True for looting mob corpses, NOT for selling items or for
 # retrieving the player's own corpse (detected via the mob coin cap).
-def is_line_loot_cash(line):
-    receive = "You receive" in line
-    coin = any(coin_type in line for coin_type in COIN_TYPES)
-    for_the = "for the" in line
-    if not (receive and coin and not for_the):
-        return False
-    return not _exceeds_mob_coin_cap(line)
-
-
-def _exceeds_mob_coin_cap(line):
+def _try_classify_loot_cash(line):
+    """Return parsed Cash if this is a valid mob-loot cash line, else None."""
+    if not ("You receive" in line and any(ct in line for ct in COIN_TYPES) and "for the" not in line):
+        return None
     cash = money_sorter.parse_cash(line)
-    return any(amount > MOB_COIN_CAP for amount in cash)
+    return None if any(amount > MOB_COIN_CAP for amount in cash) else cash
+
+
+def is_line_loot_cash(line):
+    return _try_classify_loot_cash(line) is not None
 
 
 # Returns True for selling items, NOT for looting corpses
@@ -127,7 +125,7 @@ def is_line_spell_cast(line):
 
 
 def is_line_chat(line):
-    return CHAT_PATTERN.search(line) is not None
+    return ", '" in line and CHAT_PATTERN.search(line) is not None
 
 
 def _clean_up_article(name):
@@ -215,9 +213,10 @@ def classify_line(line):
     if is_line_level_lost(line):
         return LineEvent(EventType.LEVEL_LOST, get_level(line))
     if is_line_merch_cash(line):
-        return LineEvent(EventType.MERCHANT_CASH)
-    if is_line_loot_cash(line):
-        return LineEvent(EventType.LOOT_CASH)
+        return LineEvent(EventType.MERCHANT_CASH, money_sorter.parse_cash(line))
+    cash = _try_classify_loot_cash(line)
+    if cash is not None:
+        return LineEvent(EventType.LOOT_CASH, cash)
     if is_line_spell_cast(line):
         spell = get_spell_cast(line)
         if spell is not None:

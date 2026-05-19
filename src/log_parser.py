@@ -212,14 +212,14 @@ def record_level_loss(line, event, state):
     state.current_level = event.value
 
 
-def add_loot_cash(line, event, state):
+def add_loot_cash(_line, event, state):
     state.loot_cash_count += 1
-    state.loot_cash = state.loot_cash.add(money_sorter.parse_cash(line))
+    state.loot_cash = state.loot_cash.add(event.value)
 
 
-def add_merchant_cash(line, event, state):
+def add_merchant_cash(_line, event, state):
     state.merch_cash_count += 1
-    state.merch_cash = state.merch_cash.add(money_sorter.parse_cash(line))
+    state.merch_cash = state.merch_cash.add(event.value)
 
 
 def record_player_damage(_line, event, state):
@@ -310,13 +310,16 @@ def build_summary(state):
 def parse_log_lines(lines):
     state = ParserState()
 
-    if len(lines) == 0:
+    if not lines:
         return state.kill_list, state.zone_list, build_empty_summary()
 
-    events = [line_reader.classify_line(line) for line in lines]
-    add_starting_zones(events, state)
-    for line, event in zip(lines, events):
+    first_lines = lines[:4]
+    first_events = [line_reader.classify_line(l) for l in first_lines]
+    add_starting_zones(first_events, state)
+    for line, event in zip(first_lines, first_events):
         process_line_event(line, event, state)
+    for line in lines[4:]:
+        process_log_line(line, state)
 
     normalize_cash_totals(state)
     sort_result_lists(state)
