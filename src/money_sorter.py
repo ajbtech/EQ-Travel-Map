@@ -47,23 +47,3 @@ def parse_cash(line):
 
 def get_coin_value(coin_type, line):
     return getattr(parse_cash(line), coin_type)
-
-
-def get_plat(line):
-    return get_coin_value("platinum", line)
-
-
-def get_gold(line):
-    return get_coin_value("gold", line)
-
-
-def get_silver(line):
-    return get_coin_value("silver", line)
-
-
-def get_copper(line):
-    return get_coin_value("copper", line)
-
-
-def sort_cash(plat, gold, silver, copper):
-    return Cash(plat, gold, silver, copper).normalize()

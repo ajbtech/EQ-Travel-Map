@@ -12,18 +12,6 @@ import eq_display
 import log_parser
 import map_path
 import summary_formatter
-from log_parser import (  # noqa: F401 - compatibility exports for existing users
-    ParseSummary,
-    build_empty_summary,
-    find_log_files,
-    get_first_log_timestamp,
-    get_line_timestamp,
-    open_file_and_get_lines,
-    open_files_and_get_lines,
-    parse_character_logs,
-    parse_log_files,
-    parse_log_lines,
-)
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
@@ -74,14 +62,7 @@ def draw_zone_path(my_zone_list, output_path=None):
 
 
 def draw_map_event(map_renderer, draw_event):
-    if isinstance(draw_event, map_path.MapLine):
-        map_renderer.draw_line(
-            draw_event.start_loc,
-            draw_event.end_loc,
-            percent=draw_event.percent,
-        )
-    elif isinstance(draw_event, map_path.MapDot):
-        map_renderer.draw_dot(draw_event.loc, percent=draw_event.percent)
+    draw_event.draw(map_renderer)
 
 
 def build_arg_parser():

@@ -98,12 +98,6 @@ class MainWindow(QMainWindow):
         self._stack.addWidget(self.progress_view)
         self._stack.addWidget(self.results_view)
 
-        self._view_by_widget = {
-            self.input_view: "input",
-            self.progress_view: "progress",
-            self.results_view: "results",
-        }
-
         self.input_view.parse_requested.connect(self._on_parse_requested)
         self.progress_view.cancel_requested.connect(self._on_cancel_requested)
         self.results_view.back_requested.connect(self.show_input)
@@ -121,7 +115,7 @@ class MainWindow(QMainWindow):
 
     @property
     def current_view_name(self):
-        return self._view_by_widget.get(self._stack.currentWidget(), "")
+        return self._stack.currentWidget().objectName().removesuffix("View")
 
     def show_input(self):
         self._stack.setCurrentWidget(self.input_view)

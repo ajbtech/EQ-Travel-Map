@@ -5,6 +5,7 @@ Windows, plist on macOS, ``~/.config`` on Linux). Tests redirect
 ``_make_settings`` to an ini file in a temp dir for isolation.
 """
 
+import dataclasses
 import json
 from pathlib import Path
 
@@ -39,21 +40,7 @@ def save_last_results(character_name, image_path, sections):
     s = _make_settings()
     s.setValue(_LAST_CHARACTER_KEY, str(character_name))
     s.setValue(_LAST_IMAGE_PATH_KEY, str(image_path))
-    s.setValue(
-        _LAST_SUMMARY_SECTIONS_KEY,
-        json.dumps(
-            {
-                "character_line": sections.character_line,
-                "top_kills_lines": list(sections.top_kills_lines),
-                "top_zones_lines": list(sections.top_zones_lines),
-                "stats_lines": list(sections.stats_lines),
-                "extended_kills_lines": list(sections.extended_kills_lines),
-                "extended_zones_lines": list(sections.extended_zones_lines),
-                "extended_spells_lines": list(sections.extended_spells_lines),
-                "max_damage_lines": list(sections.max_damage_lines),
-            }
-        ),
-    )
+    s.setValue(_LAST_SUMMARY_SECTIONS_KEY, json.dumps(dataclasses.asdict(sections)))
 
 
 def load_last_results():
@@ -69,19 +56,10 @@ def load_last_results():
         return None
     try:
         data = json.loads(str(sections_json))
+        sections = summary_formatter.SummarySections(**data)
     except (ValueError, TypeError):
         clear_last_results()
         return None
-    sections = summary_formatter.SummarySections(
-        character_line=data.get("character_line", ""),
-        top_kills_lines=list(data.get("top_kills_lines", [])),
-        top_zones_lines=list(data.get("top_zones_lines", [])),
-        stats_lines=list(data.get("stats_lines", [])),
-        extended_kills_lines=list(data.get("extended_kills_lines", [])),
-        extended_zones_lines=list(data.get("extended_zones_lines", [])),
-        extended_spells_lines=list(data.get("extended_spells_lines", [])),
-        max_damage_lines=list(data.get("max_damage_lines", [])),
-    )
     return str(character), image_path, sections
 
 

@@ -11,11 +11,17 @@ class MapLine:
     end_loc: tuple[float, float]
     percent: float
 
+    def draw(self, renderer):
+        renderer.draw_line(self.start_loc, self.end_loc, percent=self.percent)
+
 
 @dataclass(frozen=True)
 class MapDot:
     loc: tuple[float, float]
     percent: float
+
+    def draw(self, renderer):
+        renderer.draw_dot(self.loc, percent=self.percent)
 
 
 def build_map_events(zone_list):
@@ -55,4 +61,4 @@ def build_map_events(zone_list):
 
 
 def get_known_zones(zone_list):
-    return [zone for zone in zone_list if eq_display.has_zone_center(zone)]
+    return [zone for zone in zone_list if zone_graph.has_zone_center(zone)]

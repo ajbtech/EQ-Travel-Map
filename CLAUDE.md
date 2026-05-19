@@ -47,6 +47,8 @@ python -m pytest -q src
 
 **Use test-driven development for all new behavior.** Write a failing test first, then implement until it passes. Tests live in `src/test_*.py` alongside the module they cover.
 
+**Before committing, always run `ruff check src` and `black src` and fix any issues first.**
+
 ## TODO tracking
 
 Open work items live in `TODO.md`, grouped under Bugs / Features / Polish / Deferred. When you finish a task, check `TODO.md` for related items and tick them off. When the user defers something mid-conversation ("not now", "later", "next time"), append it to the relevant section rather than relying on memory.
