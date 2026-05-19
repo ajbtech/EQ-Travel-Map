@@ -1,5 +1,4 @@
 import pytest
-from PySide6.QtWidgets import QApplication
 
 from ui.widgets.segmented_progress_bar import SegmentedProgressBar
 

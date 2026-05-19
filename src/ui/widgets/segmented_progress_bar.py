@@ -155,13 +155,27 @@ class SegmentedProgressBar(QWidget):
 
         if fill_fraction <= 0.0:
             self._fill_gradient(
-                painter, inner_x, inner_y, inner_w, inner_h, radius * 0.7,
-                self._GREY_TOP, self._GREY_MID, self._GREY_BOT,
+                painter,
+                inner_x,
+                inner_y,
+                inner_w,
+                inner_h,
+                radius * 0.7,
+                self._GREY_TOP,
+                self._GREY_MID,
+                self._GREY_BOT,
             )
         elif fill_fraction >= 1.0:
             self._fill_gradient(
-                painter, inner_x, inner_y, inner_w, inner_h, radius * 0.7,
-                self._GOLD_TOP, self._GOLD_MID, self._GOLD_BOT,
+                painter,
+                inner_x,
+                inner_y,
+                inner_w,
+                inner_h,
+                radius * 0.7,
+                self._GOLD_TOP,
+                self._GOLD_MID,
+                self._GOLD_BOT,
             )
         else:
             # Split: gold on left, grey on right
@@ -169,33 +183,59 @@ class SegmentedProgressBar(QWidget):
             gold_w = split_x - inner_x
             grey_w = inner_w - gold_w
 
-            gold_clip = self._rounded_rect(inner_x, inner_y, gold_w, inner_h, radius * 0.7)
-            grey_clip = self._rounded_rect(split_x, inner_y, grey_w, inner_h, radius * 0.7)
+            gold_clip = self._rounded_rect(
+                inner_x, inner_y, gold_w, inner_h, radius * 0.7
+            )
+            grey_clip = self._rounded_rect(
+                split_x, inner_y, grey_w, inner_h, radius * 0.7
+            )
 
             if gold_w > 0:
                 self._fill_gradient(
-                    painter, inner_x, inner_y, inner_w, inner_h, radius * 0.7,
-                    self._GOLD_TOP, self._GOLD_MID, self._GOLD_BOT,
+                    painter,
+                    inner_x,
+                    inner_y,
+                    inner_w,
+                    inner_h,
+                    radius * 0.7,
+                    self._GOLD_TOP,
+                    self._GOLD_MID,
+                    self._GOLD_BOT,
                     clip_path=gold_clip,
                 )
             if grey_w > 0:
                 self._fill_gradient(
-                    painter, inner_x, inner_y, inner_w, inner_h, radius * 0.7,
-                    self._GREY_TOP, self._GREY_MID, self._GREY_BOT,
+                    painter,
+                    inner_x,
+                    inner_y,
+                    inner_w,
+                    inner_h,
+                    radius * 0.7,
+                    self._GREY_TOP,
+                    self._GREY_MID,
+                    self._GREY_BOT,
                     clip_path=grey_clip,
                 )
 
         # Top sheen stripe
-        sheen_path = self._rounded_rect(inner_x, inner_y, inner_w, inner_h * 0.4, radius * 0.7)
+        sheen_path = self._rounded_rect(
+            inner_x, inner_y, inner_w, inner_h * 0.4, radius * 0.7
+        )
         painter.fillPath(sheen_path, self._SHEEN)
 
-    def _fill_gradient(self, painter, x, y, w, h, radius, top, mid, bot, clip_path=None):
+    def _fill_gradient(
+        self, painter, x, y, w, h, radius, top, mid, bot, clip_path=None
+    ):
         grad = QLinearGradient(x, y, x, y + h)
         grad.setColorAt(0.0, top)
         grad.setColorAt(0.5, mid)
         grad.setColorAt(1.0, bot)
 
-        path = clip_path if clip_path is not None else self._rounded_rect(x, y, w, h, radius)
+        path = (
+            clip_path
+            if clip_path is not None
+            else self._rounded_rect(x, y, w, h, radius)
+        )
         painter.fillPath(path, grad)
 
     def _draw_cap(self, painter, center_x, h):
@@ -211,10 +251,13 @@ class SegmentedProgressBar(QWidget):
         # Ring stroke
         painter.setPen(self._CAP_RING)
         painter.setBrush(Qt.BrushStyle.NoBrush)
-        painter.drawEllipse(int(cx - r + 1), int(cy - r + 1), int(r * 2 - 2), int(r * 2 - 2))
+        painter.drawEllipse(
+            int(cx - r + 1), int(cy - r + 1), int(r * 2 - 2), int(r * 2 - 2)
+        )
 
         # Spokes
         import math
+
         spoke_inner = r * 0.45
         spoke_outer = r * 0.88
         spoke_count = 8
