@@ -1,12 +1,7 @@
 import re
 from dataclasses import dataclass
 
-COIN_PATTERNS = {
-    "platinum": re.compile(r"(\d+)\s?(?=platinum)"),
-    "gold": re.compile(r"(\d+)\s?(?=gold)"),
-    "silver": re.compile(r"(\d+)\s?(?=silver)"),
-    "copper": re.compile(r"(\d+)\s?(?=copper)"),
-}
+COIN_COMBINED_PATTERN = re.compile(r"(\d+)\s?(platinum|gold|silver|copper)")
 
 
 @dataclass(frozen=True)
@@ -41,19 +36,17 @@ class Cash:
 
 
 def parse_cash(line):
+    values = {m.group(2): int(m.group(1)) for m in COIN_COMBINED_PATTERN.finditer(line)}
     return Cash(
-        platinum=get_coin_value("platinum", line),
-        gold=get_coin_value("gold", line),
-        silver=get_coin_value("silver", line),
-        copper=get_coin_value("copper", line),
+        platinum=values.get("platinum", 0),
+        gold=values.get("gold", 0),
+        silver=values.get("silver", 0),
+        copper=values.get("copper", 0),
     )
 
 
 def get_coin_value(coin_type, line):
-    match = COIN_PATTERNS[coin_type].search(line)
-    if match is None:
-        return 0
-    return int(match.group(1))
+    return getattr(parse_cash(line), coin_type)
 
 
 def get_plat(line):

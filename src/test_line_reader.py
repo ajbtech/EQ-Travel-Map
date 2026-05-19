@@ -532,3 +532,38 @@ def test_is_line_player_damage_prefilter_skips_non_damage_line():
 def test_is_line_spell_cast_prefilter_skips_non_casting_line():
     line = "[Sat Sep 24 20:30:45 2022] You slash a froglok tad for 6 points of damage."
     assert line_reader.is_line_spell_cast(line) is False
+
+
+# Chat prefilter: lines lacking ", '" must not trigger the regex
+def test_is_line_chat_prefilter_skips_line_without_comma_quote():
+    # Contains "says" but no ", '" — must not be classified as chat
+    line = "[Sat Sep 24 20:30:45 2022] You have slain a froglok tad!"
+    assert line_reader.is_line_chat(line) is False
+
+
+# LOOT_CASH event value should be the parsed Cash object (no re-parse needed)
+def test_classify_loot_cash_event_carries_cash_value():
+    line = (
+        "[Sun Jan 08 14:51:27 2023] You receive 2 platinum, "
+        "3 gold, 3 silver and 4 copper as your split."
+    )
+    import money_sorter
+
+    event = line_reader.classify_line(line)
+
+    assert event.kind == line_reader.EventType.LOOT_CASH
+    assert event.value == money_sorter.Cash(platinum=2, gold=3, silver=3, copper=4)
+
+
+# MERCHANT_CASH event value should be the parsed Cash object
+def test_classify_merchant_cash_event_carries_cash_value():
+    line = (
+        "[Sun Jan 08 14:54:06 2023] You receive 5 platinum 1 gold "
+        "2 silver 3 copper from Ulan Meadowgreen for the Fine Steel Warhammer(s)."
+    )
+    import money_sorter
+
+    event = line_reader.classify_line(line)
+
+    assert event.kind == line_reader.EventType.MERCHANT_CASH
+    assert event.value == money_sorter.Cash(platinum=5, gold=1, silver=2, copper=3)
