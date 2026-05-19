@@ -24,9 +24,9 @@ class SegmentedProgressBar(QWidget):
     _GREY_BOT = QColor("#504840")
 
     # Blue sub-indicator gradient stops
-    _BLUE_TOP = QColor("#a8d4ff")
-    _BLUE_MID = QColor("#3a7fd4")
-    _BLUE_BOT = QColor("#1a3f6f")
+    _BLUE_TOP = QColor("#3a7fd4")
+    _BLUE_MID = QColor("#1a3f6f")
+    _BLUE_BOT = QColor("#0a1a38")
 
     # Structural colours
     _BG = QColor("#1a1208")
