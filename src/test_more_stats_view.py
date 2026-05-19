@@ -11,7 +11,7 @@ def _sections():
         extended_kills_lines=["Top 25 killed creatures:", "1. ghoul: 30"],
         extended_zones_lines=["Top 25 visited zones:", "1. Grobb: 10"],
         extended_spells_lines=["Top 25 cast spells:", "1. Spirit of Wolf: 10"],
-        max_damage_lines=["Max hit by damage type:", "slash: 25"],
+        max_damage_lines=["Max hit by damage type:", "Slash: 25"],
     )
 
 
