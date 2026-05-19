@@ -41,19 +41,20 @@ def test_set_progress_updates_file_and_line_labels(qt_app):
     assert "50" in view.lines_label.text()
 
 
-def test_lines_label_width_is_stable_across_counts(qt_app):
+def test_lines_label_left_edge_is_stable_and_text_not_clipped(qt_app):
     view = ProgressView()
     view.resize(720, 360)
     view.show()
     view.set_total(0)
     view.set_progress("file.txt", 1)
-    small_width = view.lines_label.width()
+    qt_app.processEvents()
     small_x = view.lines_label.mapTo(view, view.lines_label.rect().topLeft()).x()
     view.set_progress("file.txt", 999_999_999)
-    large_width = view.lines_label.width()
+    qt_app.processEvents()
     large_x = view.lines_label.mapTo(view, view.lines_label.rect().topLeft()).x()
-    assert small_width == large_width
     assert small_x == large_x
+    natural = view.lines_label.sizeHint().width()
+    assert view.lines_label.width() >= natural
 
 
 def test_lines_label_left_of_cancel_button_with_gap(qt_app):
