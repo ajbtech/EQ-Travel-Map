@@ -47,5 +47,3 @@ def parse_cash(line):
 
 def get_coin_value(coin_type, line):
     return getattr(parse_cash(line), coin_type)
-
-

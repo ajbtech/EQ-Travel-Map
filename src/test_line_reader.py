@@ -115,7 +115,6 @@ def test_classify_line_extracts_merchant_cash_event():
     assert event.kind == line_reader.EventType.MERCHANT_CASH
 
 
-
 def test_line_reader_is_line_loot_cash_positive():
     line = (
         "[Sun Jan 08 14:51:27 2023] You receive 2 platinum, "
