@@ -27,7 +27,6 @@ class SegmentedProgressBar(QWidget):
     _BLUE_TOP = QColor("#a8d4ff")
     _BLUE_MID = QColor("#3a7fd4")
     _BLUE_BOT = QColor("#1a3f6f")
-    _BLUE_BG = QColor("#0a1a2e")
 
     # Structural colours
     _BG = QColor("#1a1208")
@@ -123,20 +122,20 @@ class SegmentedProgressBar(QWidget):
         return (yellow_frac * self.segment_count) % 1.0
 
     def _draw_sub_indicator(self, painter, x_start, x_end, h):
+        blue_frac = self._blue_fraction()
+        if blue_frac <= 0:
+            return
+
         bar_w = x_end - x_start
         line_h = max(2.0, h * 0.12)
         line_y = (h - line_h) / 2.0
+        fill_w = bar_w * blue_frac
 
-        painter.fillRect(QRectF(x_start, line_y, bar_w, line_h), self._BLUE_BG)
-
-        blue_frac = self._blue_fraction()
-        if blue_frac > 0:
-            fill_w = bar_w * blue_frac
-            grad = QLinearGradient(x_start, line_y, x_start, line_y + line_h)
-            grad.setColorAt(0.0, self._BLUE_TOP)
-            grad.setColorAt(0.5, self._BLUE_MID)
-            grad.setColorAt(1.0, self._BLUE_BOT)
-            painter.fillRect(QRectF(x_start, line_y, fill_w, line_h), grad)
+        grad = QLinearGradient(x_start, line_y, x_start, line_y + line_h)
+        grad.setColorAt(0.0, self._BLUE_TOP)
+        grad.setColorAt(0.5, self._BLUE_MID)
+        grad.setColorAt(1.0, self._BLUE_BOT)
+        painter.fillRect(QRectF(x_start, line_y, fill_w, line_h), grad)
 
     # ------------------------------------------------------------------
     # Drawing helpers
