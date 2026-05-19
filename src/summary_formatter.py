@@ -94,12 +94,11 @@ def format_number(value):
 
 
 def format_cash(cash):
-    plat, gold, silver, copper = cash
     return (
-        f"{format_number(plat)}p "
-        f"{format_number(gold)}g "
-        f"{format_number(silver)}s "
-        f"{format_number(copper)}c"
+        f"{format_number(cash.platinum)}p "
+        f"{format_number(cash.gold)}g "
+        f"{format_number(cash.silver)}s "
+        f"{format_number(cash.copper)}c"
     )
 
 

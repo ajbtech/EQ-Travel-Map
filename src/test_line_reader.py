@@ -115,20 +115,6 @@ def test_classify_line_extracts_merchant_cash_event():
     assert event.kind == line_reader.EventType.MERCHANT_CASH
 
 
-def test_line_reader_is_line_loot_positive():
-    line = "[Sun Jan 08 14:50:05 2023] --You have looted a Bronze Long Sword.--"
-    assert line_reader.is_line_loot(line) is True
-
-
-def test_line_reader_is_line_loot_negative():
-    line = "[Tue Jan 10 22:35:28 2023] You are too far away to loot that corpse."
-    assert line_reader.is_line_loot(line) is False
-
-
-def test_line_reader_is_line_loot_null():
-    line = ""
-    assert line_reader.is_line_loot(line) is False
-
 
 def test_line_reader_is_line_loot_cash_positive():
     line = (

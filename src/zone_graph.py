@@ -24,27 +24,27 @@ def get_canonical_zone_name(zone_name):
     return graph["aliases"].get(zone_name, zone_name)
 
 
-@lru_cache(maxsize=1)
 def get_adjacent_zone_pairs():
     graph = load_zone_graph()
     return {frozenset((edge["from"], edge["to"])) for edge in graph["edges"]}
 
 
-def are_adjacent(source_zone, target_zone):
-    source_zone = get_canonical_zone_name(source_zone)
-    target_zone = get_canonical_zone_name(target_zone)
+def _canonicalize_pair(a, b):
+    return get_canonical_zone_name(a), get_canonical_zone_name(b)
 
+
+def are_adjacent(source_zone, target_zone):
+    source_zone, target_zone = _canonicalize_pair(source_zone, target_zone)
     if source_zone == target_zone:
         return False
-
     return frozenset((source_zone, target_zone)) in get_adjacent_zone_pairs()
 
 
 def is_same_zone(source_zone, target_zone):
-    return get_canonical_zone_name(source_zone) == get_canonical_zone_name(target_zone)
+    source_zone, target_zone = _canonicalize_pair(source_zone, target_zone)
+    return source_zone == target_zone
 
 
-@lru_cache(maxsize=1)
 def get_zone_centers():
     graph = load_zone_graph()
     centers = {

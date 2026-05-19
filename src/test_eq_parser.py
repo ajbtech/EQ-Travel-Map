@@ -1,4 +1,5 @@
 import eq_parser
+import log_parser
 import money_sorter
 import summary_formatter
 from eq_list import EQList
@@ -13,7 +14,7 @@ def test_find_log_files_returns_character_archives_in_chronological_order(tmp_pa
     earlier_log.write_text("[Sat Sep 24 19:51:48 2022] Welcome to EverQuest!\n")
     other_character_log.write_text("[Sat Sep 24 19:51:48 2022] Welcome to EverQuest!\n")
 
-    log_files = eq_parser.find_log_files(tmp_path, "Gorrek")
+    log_files = log_parser.find_log_files(tmp_path, "Gorrek")
 
     assert log_files == [earlier_log, later_log]
 
@@ -24,7 +25,7 @@ def test_open_files_and_get_lines_combines_files_in_order(tmp_path):
     first_log.write_text("line 1\nline 2\n")
     second_log.write_text("line 3\n")
 
-    lines = eq_parser.open_files_and_get_lines([first_log, second_log])
+    lines = log_parser.open_files_and_get_lines([first_log, second_log])
 
     assert lines == ["line 1\n", "line 2\n", "line 3\n"]
 
@@ -33,7 +34,7 @@ def test_open_file_and_get_lines_handles_unexpected_bytes(tmp_path):
     log_file = tmp_path / "ARCHIVEeqlog_Gorrek_P1999Green.txt"
     log_file.write_bytes(b"[Sat Sep 24 19:51:48 2022] odd byte: \x90\n")
 
-    lines = eq_parser.open_file_and_get_lines(log_file)
+    lines = log_parser.open_file_and_get_lines(log_file)
 
     assert len(lines) == 1
     assert "odd byte" in lines[0]
@@ -48,7 +49,7 @@ def test_parse_character_logs_combines_matching_files(tmp_path):
     )
     second_log.write_text("[Sat Oct 29 13:05:25 2024] You have slain a ghoul!\n")
 
-    kill_list, zone_list, summary = eq_parser.parse_character_logs(tmp_path, "Gorrek")
+    kill_list, zone_list, summary = log_parser.parse_character_logs(tmp_path, "Gorrek")
 
     assert summary.login_count == 1
     assert summary.zone_count == 1
@@ -69,7 +70,7 @@ def test_parse_character_logs_counts_starting_zone_in_each_file(tmp_path):
         "[Sat May 11 20:23:18 2024] You have entered Lake Rathetear.\n"
     )
 
-    _, zone_list, summary = eq_parser.parse_character_logs(tmp_path, "Gorrek")
+    _, zone_list, summary = log_parser.parse_character_logs(tmp_path, "Gorrek")
 
     assert summary.zone_count == 2
     assert zone_list.get_raw_eq_list() == ["Grobb", "Lake Rathetear"]
@@ -98,7 +99,7 @@ def test_main_prints_summary_and_draws_map(monkeypatch, capsys, tmp_path):
     zone_list = EQList()
     output_path = tmp_path / "map.png"
 
-    summary = eq_parser.ParseSummary(
+    summary = log_parser.ParseSummary(
         first_login_message="[Sat Sep 24 19:51:48 2022] Welcome to EverQuest!",
         most_recent_message="[Sat Sep 24 19:52:00 2022] Logging is on.",
         line_count=2,
@@ -396,7 +397,7 @@ def test_parser_returns_summary_counts():
         "[Sat Oct 29 13:05:25 2022] You have slain a ghoul!",
     ]
 
-    kill_list, zone_list, summary = eq_parser.parse_log_lines(lines)
+    kill_list, zone_list, summary = log_parser.parse_log_lines(lines)
 
     assert summary.login_count == 1
     assert summary.zone_count == 1
@@ -406,7 +407,7 @@ def test_parser_returns_summary_counts():
 
 
 def test_parser_handles_empty_log():
-    kill_list, zone_list, summary = eq_parser.parse_log_lines([])
+    kill_list, zone_list, summary = log_parser.parse_log_lines([])
 
     assert kill_list.get_raw_eq_list() == []
     assert zone_list.get_raw_eq_list() == []
@@ -423,7 +424,7 @@ def test_parser_counts_deaths_levels_and_level_loss():
         "[Sat Sep 24 20:41:47 2022] You have been slain by a froglok!",
     ]
 
-    _, _, summary = eq_parser.parse_log_lines(lines)
+    _, _, summary = log_parser.parse_log_lines(lines)
 
     assert summary.level_count == 1
     assert summary.level_lost_count == 1
@@ -438,7 +439,7 @@ def test_parser_uses_most_recent_level_event_as_current_level():
         "[Thu Oct 27 21:05:18 2022] You have gained a level! Welcome to level 37!",
     ]
 
-    _, _, summary = eq_parser.parse_log_lines(lines)
+    _, _, summary = log_parser.parse_log_lines(lines)
 
     assert summary.level_count == 2
     assert summary.level_lost_count == 1
@@ -457,7 +458,7 @@ def test_parser_summarizes_loot_and_merchant_cash():
         ),
     ]
 
-    _, _, summary = eq_parser.parse_log_lines(lines)
+    _, _, summary = log_parser.parse_log_lines(lines)
 
     assert summary.loot_cash_count == 1
     assert summary.merch_cash_count == 1
@@ -471,7 +472,7 @@ def test_parser_characterizes_zone_after_login_behavior():
         "[Sun Jan 08 15:01:29 2023] You have entered Lake Rathetear.",
     ]
 
-    _, zone_list, summary = eq_parser.parse_log_lines(lines)
+    _, zone_list, summary = log_parser.parse_log_lines(lines)
 
     assert summary.zone_count == 1
     assert zone_list.get_raw_eq_list() == ["Lake Rathetear"]
@@ -508,7 +509,7 @@ def test_print_summary_only_includes_requested_rollups(capsys):
 
     kill_list.sort_lists()
     zone_list.sort_lists()
-    summary = eq_parser.ParseSummary(
+    summary = log_parser.ParseSummary(
         first_login_message="[Sat Sep 24 19:51:48 2022] Welcome to EverQuest!",
         most_recent_message="[Tue Nov 25 01:28:08 2025] Logging is on.",
         line_count=100,

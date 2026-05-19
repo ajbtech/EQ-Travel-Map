@@ -82,8 +82,8 @@ def is_line_level_lost(line):
     return LEVEL_LOST_TEXT in line
 
 
-def is_line_loot(line):
-    return "--You have looted a " in line
+def _is_cash_receive_line(line):
+    return "You receive" in line and any(coin_type in line for coin_type in COIN_TYPES)
 
 
 # Returns True for looting mob corpses, NOT for selling items or for
@@ -106,10 +106,7 @@ def is_line_loot_cash(line):
 
 # Returns True for selling items, NOT for looting corpses
 def is_line_merch_cash(line):
-    receive = "You receive" in line
-    coin = any(coin_type in line for coin_type in COIN_TYPES)
-    for_the = "for the" in line
-    return receive and coin and for_the
+    return _is_cash_receive_line(line) and "for the" in line
 
 
 def is_line_zone(line):

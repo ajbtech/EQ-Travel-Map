@@ -321,10 +321,13 @@ def parse_log_lines(lines):
     for line in lines[4:]:
         process_log_line(line, state)
 
+    _finalize_state(state)
+    return state.kill_list, state.zone_list, build_summary(state)
+
+
+def _finalize_state(state):
     normalize_cash_totals(state)
     sort_result_lists(state)
-
-    return state.kill_list, state.zone_list, build_summary(state)
 
 
 def process_log_file(log_file, state, progress_callback=None):
@@ -362,9 +365,7 @@ def parse_log_files(log_files, progress_callback=None):
     if state.line_count == 0:
         return state.kill_list, state.zone_list, build_empty_summary()
 
-    normalize_cash_totals(state)
-    sort_result_lists(state)
-
+    _finalize_state(state)
     return state.kill_list, state.zone_list, build_summary(state)
 
 
