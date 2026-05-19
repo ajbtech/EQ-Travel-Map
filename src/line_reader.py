@@ -90,7 +90,11 @@ def is_line_loot(line):
 # retrieving the player's own corpse (detected via the mob coin cap).
 def _try_classify_loot_cash(line):
     """Return parsed Cash if this is a valid mob-loot cash line, else None."""
-    if not ("You receive" in line and any(ct in line for ct in COIN_TYPES) and "for the" not in line):
+    if not (
+        "You receive" in line
+        and any(ct in line for ct in COIN_TYPES)
+        and "for the" not in line
+    ):
         return None
     cash = money_sorter.parse_cash(line)
     return None if any(amount > MOB_COIN_CAP for amount in cash) else cash

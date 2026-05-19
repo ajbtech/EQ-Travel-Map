@@ -314,7 +314,7 @@ def parse_log_lines(lines):
         return state.kill_list, state.zone_list, build_empty_summary()
 
     first_lines = lines[:4]
-    first_events = [line_reader.classify_line(l) for l in first_lines]
+    first_events = [line_reader.classify_line(ln) for ln in first_lines]
     add_starting_zones(first_events, state)
     for line, event in zip(first_lines, first_events):
         process_line_event(line, event, state)
