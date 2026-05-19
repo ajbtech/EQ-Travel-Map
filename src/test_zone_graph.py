@@ -88,6 +88,46 @@ def test_zone_graph_aliases_log_name_without_apostrophe_for_sirens_grotto():
     assert graph["aliases"].get("Sirens Grotto") == "Siren's Grotto"
 
 
+def test_zone_graph_aliases_high_keep_to_highpass_keep():
+    # EQ logs write "You have entered High Keep." (zone: highkeep), but the
+    # map node uses "Highpass Keep" to distinguish it from Highpass Hold.
+    graph = load_zone_graph()
+
+    assert graph["aliases"].get("High Keep") == "Highpass Keep"
+
+
+def test_zone_graph_aliases_qeynos_aqueduct_system_to_qeynos_catacombs():
+    # EQ logs write "You have entered The Qeynos Aqueduct System." (zone: qcat),
+    # but the map node uses the colloquial name "Qeynos Catacombs".
+    graph = load_zone_graph()
+
+    assert graph["aliases"].get("The Qeynos Aqueduct System") == "Qeynos Catacombs"
+
+
+def test_zone_graph_aliases_northern_felwithe_to_north_felwithe():
+    # EQ logs write "You have entered Northern Felwithe." (zone: felwithea),
+    # but the map node uses the abbreviated "North Felwithe".
+    graph = load_zone_graph()
+
+    assert graph["aliases"].get("Northern Felwithe") == "North Felwithe"
+
+
+def test_zone_graph_aliases_southern_felwithe_to_south_felwithe():
+    # EQ logs write "You have entered Southern Felwithe." (zone: felwitheb),
+    # but the map node uses the abbreviated "South Felwithe".
+    graph = load_zone_graph()
+
+    assert graph["aliases"].get("Southern Felwithe") == "South Felwithe"
+
+
+def test_zone_graph_aliases_temple_of_solusek_ro_to_temple_of_sol_ro():
+    # EQ logs write "You have entered The Temple of Solusek Ro." (zone: soltemple),
+    # but the map node uses the abbreviated "Temple of Sol. Ro".
+    graph = load_zone_graph()
+
+    assert graph["aliases"].get("The Temple of Solusek Ro") == "Temple of Sol. Ro"
+
+
 def test_zone_graph_includes_boat_connections_from_map_dotted_lines():
     graph = load_zone_graph()
     edges = {frozenset((edge["from"], edge["to"])) for edge in graph["edges"]}
