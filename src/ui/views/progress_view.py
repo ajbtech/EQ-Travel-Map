@@ -2,13 +2,13 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
-    QProgressBar,
     QPushButton,
     QVBoxLayout,
     QWidget,
 )
 
 from ui.widgets.parchment_panel import build_stone_framed_parchment
+from ui.widgets.segmented_progress_bar import SegmentedProgressBar
 
 
 def _format_count(value):
@@ -50,8 +50,8 @@ class ProgressView(QWidget):
         self.file_label.setObjectName("progressDetail")
         body.addWidget(self.file_label)
 
-        self.progress_bar = QProgressBar()
-        self.progress_bar.setObjectName("stoneProgress")
+        self.progress_bar = SegmentedProgressBar()
+        self.progress_bar.setMinimumHeight(28)
         self.progress_bar.setRange(0, 0)
         body.addWidget(self.progress_bar)
 
