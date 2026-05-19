@@ -1,3 +1,10 @@
+# THIS PROGRAM WORKS SOLELY BY READING YOUR LOG FILE.
+
+Instructions:
+
+- Project 1999: Download the [latest release](https://github.com/ajbtech/EQ-Travel-Map/releases/latest), unzip it and run EQTravelMap.exe
+
+
 # EverQuest Travel Map
 
 Generate a visual travel map and play summary from your EverQuest character's
