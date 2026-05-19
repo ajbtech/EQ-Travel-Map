@@ -64,22 +64,6 @@ doesn't fit on the main summary:
 > Download it from there — there is nothing to install and no terminal
 > commands to run.
 
-### Try it on the bundled sample (no logs of your own required)
-
-1. Download both files from the
-   [latest release](https://github.com/ajbtech/EQ-Travel-Map/releases/latest):
-   `EQTravelMap-vX.Y.Z-windows.zip` and `EQTravelMap-samples.zip`.
-2. Right-click → **Extract All…** on the windows zip anywhere on your computer.
-3. Extract `EQTravelMap-samples.zip` *into the same extracted folder* so that
-   `samples/` ends up next to `EQTravelMap.exe`.
-4. Double-click **`EQTravelMap.exe`**. The form will be pre-filled with the
-   bundled `samples/` folder and character name `Gorrek`. Click **Generate**.
-5. After a few seconds you'll see the map and a summary with the option to
-   copy them, save the map elsewhere, or open the output folder in Explorer.
-
-> The sample logs ship as a separate, optional download so the main `.exe`
-> bundle stays small for users who already have their own EverQuest logs.
-
 ### Use it with your own EverQuest logs
 
 1. In-game, type **`/log on`** once. EverQuest will start writing per-character
@@ -101,6 +85,23 @@ If anything goes wrong, the app shows a friendly explanation with a
 "Show Details" button for the technical message — paste that into a
 [bug report](https://github.com/ajbtech/EQ-Travel-Map/issues/new?template=bug_report.md)
 and we'll take a look.
+
+### Try it on the bundled sample (no logs of your own required)
+
+1. Download both files from the
+   [latest release](https://github.com/ajbtech/EQ-Travel-Map/releases/latest):
+   `EQTravelMap-vX.Y.Z-windows.zip` and `EQTravelMap-samples.zip`.
+2. Right-click → **Extract All…** on the windows zip anywhere on your computer.
+3. Extract `EQTravelMap-samples.zip` *into the same extracted folder* so that
+   `samples/` ends up next to `EQTravelMap.exe`.
+4. Double-click **`EQTravelMap.exe`**. The form will be pre-filled with the
+   bundled `samples/` folder and character name `Gorrek`. Click **Generate**.
+5. After a few seconds you'll see the map and a summary with the option to
+   copy them, save the map elsewhere, or open the output folder in Explorer.
+
+> The sample logs ship as a separate, optional download so the main `.exe`
+> bundle stays small for users who already have their own EverQuest logs.
+
 
 ---
 
