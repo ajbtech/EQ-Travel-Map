@@ -62,10 +62,6 @@ class ProgressView(QWidget):
         self.lines_label = QLabel("Lines parsed: 0")
         self.lines_label.setObjectName("progressDetail")
         self.lines_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-        reserved = self.lines_label.fontMetrics().horizontalAdvance(
-            f"Lines parsed: {_format_count(999_999_999)}"
-        )
-        self.lines_label.setFixedWidth(reserved)
         button_row.addWidget(self.lines_label)
 
         button_row.addStretch(1)
