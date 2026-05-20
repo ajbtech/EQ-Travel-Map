@@ -97,6 +97,12 @@ class ResultsView(QWidget):
 
         # Match the flat dark-brown Georgia title used on the input screen
         # (QLabel#parchmentTitle in the QSS theme), kept large for the corner.
+        # Name and level share a tight sub-layout so the level sits just under
+        # the name rather than a full button-spacing gap away.
+        name_block = QVBoxLayout()
+        name_block.setContentsMargins(0, 0, 0, 0)
+        name_block.setSpacing(0)
+
         self.character_heading = EngravedHeading()
         heading_font = self.character_heading.font()
         heading_font.setPointSize(32)
@@ -105,7 +111,7 @@ class ResultsView(QWidget):
         self.character_heading.set_engraved(False)
         self.character_heading.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
         self.character_heading.setFixedWidth(200)
-        button_column.addWidget(self.character_heading)
+        name_block.addWidget(self.character_heading)
 
         self.level_heading = EngravedHeading()
         level_font = self.level_heading.font()
@@ -115,7 +121,9 @@ class ResultsView(QWidget):
         self.level_heading.set_engraved(False)
         self.level_heading.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
         self.level_heading.setFixedWidth(200)
-        button_column.addWidget(self.level_heading)
+        name_block.addWidget(self.level_heading)
+
+        button_column.addLayout(name_block)
 
         # Stretch between the heading (pinned top) and the buttons pushes the
         # button stack down to the bottom of the column.
