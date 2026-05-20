@@ -75,6 +75,13 @@ def test_character_heading_matches_input_title_style(qt_app):
     assert view.character_heading.font().bold()
 
 
+def test_character_heading_is_centered(qt_app):
+    from PySide6.QtCore import Qt
+
+    view = ResultsView()
+    assert view.character_heading._alignment & Qt.AlignHCenter
+
+
 def test_make_video_button_disabled_without_timeline(qt_app):
     view = ResultsView()
     view.set_results(Path("/tmp/map.png"), _sections())

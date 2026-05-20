@@ -23,12 +23,17 @@ class EngravedHeading(QWidget):
         self._shadow = self.DEFAULT_SHADOW
         self._highlight = self.DEFAULT_HIGHLIGHT
         self._engraved = True
+        self._alignment = Qt.AlignLeft | Qt.AlignVCenter
         font = QFont("Georgia", 22)
         font.setBold(True)
         self.setFont(font)
 
     def set_color(self, fill):
         self._fill = QColor(fill)
+        self.update()
+
+    def setAlignment(self, alignment):
+        self._alignment = alignment
         self.update()
 
     def set_engraved(self, enabled):
@@ -78,7 +83,7 @@ class EngravedHeading(QWidget):
         painter.setRenderHint(QPainter.TextAntialiasing, True)
         painter.setFont(self._effective_font())
         rect = self.rect()
-        align = Qt.AlignLeft | Qt.AlignVCenter
+        align = self._alignment
 
         if self._engraved:
             painter.setPen(self._highlight)

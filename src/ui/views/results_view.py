@@ -103,6 +103,7 @@ class ResultsView(QWidget):
         self.character_heading.setFont(heading_font)
         self.character_heading.set_color(QColor("#2a1c0e"))
         self.character_heading.set_engraved(False)
+        self.character_heading.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
         self.character_heading.setFixedWidth(200)
         button_column.addWidget(self.character_heading)
 
