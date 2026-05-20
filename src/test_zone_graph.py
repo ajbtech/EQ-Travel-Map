@@ -96,6 +96,45 @@ def test_zone_graph_aliases_log_name_without_apostrophe_for_sleepers_tomb():
     assert graph["aliases"].get("Sleepers Tomb") == "Sleeper's Tomb"
 
 
+def test_zone_graph_aliases_eqemu_the_prefix_zones():
+    # EQEmu zone constants include "The " on many zone long names that P99 may
+    # emit verbatim. These aliases are defensive: if P99 already logs the name
+    # without "The" the alias is unused; if it includes "The" the alias resolves
+    # the zone correctly. Confirmed from eq_constants.h short → long mapping.
+    graph = load_zone_graph()
+    aliases = graph["aliases"]
+
+    expected = {
+        "The Crypt of Dalnir": "Crypt of Dalnir",
+        "The Erudin Palace": "Erudin Palace",
+        "The Field of Bone": "Field of Bone",
+        "The Howling Stones": "Charasis (H. Stones)",
+        "The Mines of Nurga": "Mines of Nurga",
+        "The Plane of Growth": "Plane of Growth",
+        "The Plane of Mischief": "Plane of Mischief",
+        "The Sleeper's Tomb": "Sleeper's Tomb",
+        "The Sleepers Tomb": "Sleeper's Tomb",
+        "The Swamp of No Hope": "Swamp of No Hope",
+        "The Temple of Droga": "Temple of Droga",
+        "The Temple of Veeshan": "Temple of Veeshan",
+        "The Tower of Frozen Shadow": "Tower of Frozen Shadow",
+        "The Wakening Land": "Wakening Land",
+        "The Warsliks Woods": "Warsliks Woods",
+        "The Western Wastes": "Western Wastes",
+    }
+
+    missing = {k: v for k, v in expected.items() if aliases.get(k) != v}
+    assert missing == {}, f"Missing or wrong aliases: {missing}"
+
+
+def test_zone_graph_aliases_stonebrunt_mountains_to_abbreviated_node():
+    # EQ logs "You have entered Stonebrunt Mountains." (P99 wiki confirms no
+    # "The"), but the map node uses the abbreviated label "Stonebrunt Mtns.".
+    graph = load_zone_graph()
+
+    assert graph["aliases"].get("Stonebrunt Mountains") == "Stonebrunt Mtns."
+
+
 def test_zone_graph_includes_boat_connections_from_map_dotted_lines():
     graph = load_zone_graph()
     edges = {frozenset((edge["from"], edge["to"])) for edge in graph["edges"]}
