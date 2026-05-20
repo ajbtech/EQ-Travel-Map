@@ -82,6 +82,15 @@ class VideoWorker(QObject):
         try:
             frame = next(self._frame_iter)
         except StopIteration:
+            # Closing the writer is where ffmpeg finalizes (and writes) the file,
+            # so a failure here (e.g. ffmpeg died mid-stream) means the export did
+            # NOT succeed. Surface it as an error instead of a false "finished".
+            try:
+                self._finalize_writer()
+            except Exception as exc:
+                self._cleanup(delete_output=True)
+                self.error.emit(str(exc))
+                return
             self._cleanup()
             self.finished.emit(str(self._output_path))
             return
@@ -106,6 +115,12 @@ class VideoWorker(QObject):
 
         self.progress.emit(frame.frame_index + 1, frame.total_frames)
         QTimer.singleShot(0, self._process_next_frame)
+
+    def _finalize_writer(self):
+        if self._writer is not None:
+            writer = self._writer
+            self._writer = None
+            writer.close()
 
     def _cleanup(self, delete_output=False):
         if self._writer is not None:

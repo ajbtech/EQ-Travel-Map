@@ -299,6 +299,18 @@ class ResultsView(QWidget):
         if not output_path:
             return
 
+        # Setting up the export imports imageio/ffmpeg, builds the generator, and
+        # realizes an offscreen view — any of which can fail (missing bundled
+        # dependency, ffmpeg that won't launch, etc.). A bare exception here would
+        # be swallowed by Qt's slot machinery and vanish into a (nonexistent in a
+        # windowed build) stderr, so surface it as the same "Video failed" dialog
+        # the worker uses.
+        try:
+            self._start_video_export(target_seconds, output_path)
+        except Exception as exc:  # noqa: BLE001 - report any setup failure to user
+            self._on_video_error(str(exc))
+
+    def _start_video_export(self, target_seconds, output_path):
         from ui.video_worker import VideoWorker
 
         generator = VideoGenerator(
