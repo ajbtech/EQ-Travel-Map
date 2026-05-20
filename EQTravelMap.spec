@@ -12,7 +12,7 @@ import os
 import sys
 from pathlib import Path
 
-from PyInstaller.utils.hooks import collect_data_files
+from PyInstaller.utils.hooks import collect_data_files, copy_metadata
 
 
 PROJECT_ROOT = Path(SPECPATH).resolve()
@@ -21,6 +21,10 @@ SRC_DIR = PROJECT_ROOT / "src"
 # imageio-ffmpeg ships the ffmpeg binary the video exporter shells out to;
 # it must be bundled or video generation fails on machines without ffmpeg.
 IMAGEIO_FFMPEG_DATAS = collect_data_files("imageio_ffmpeg")
+
+# imageio calls importlib.metadata.version("imageio") on import; without the
+# .dist-info folder in the bundle that raises PackageNotFoundError at runtime.
+IMAGEIO_METADATA = copy_metadata("imageio")
 
 # (source on disk, target directory inside the bundle)
 # ``samples/`` is intentionally not bundled here -- it ships as a separate
@@ -32,7 +36,7 @@ DATAS = [
     (str(SRC_DIR / "ui" / "theme"), "ui/theme"),
     (str(PROJECT_ROOT / "zone_graph.json"), "."),
     (str(PROJECT_ROOT / "zone_map.png"), "."),
-] + IMAGEIO_FFMPEG_DATAS
+] + IMAGEIO_FFMPEG_DATAS + IMAGEIO_METADATA
 
 # Bare ``import eq_parser`` etc. only resolve once ``src/`` is on sys.path.
 # The entry script handles that at runtime, but PyInstaller's static analysis
