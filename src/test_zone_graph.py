@@ -88,6 +88,14 @@ def test_zone_graph_aliases_log_name_without_apostrophe_for_sirens_grotto():
     assert graph["aliases"].get("Sirens Grotto") == "Siren's Grotto"
 
 
+def test_zone_graph_aliases_log_name_without_apostrophe_for_sleepers_tomb():
+    # EQ logs write "You have entered Sleepers Tomb." with no apostrophe,
+    # but the graph node uses the canonical "Sleeper's Tomb" spelling.
+    graph = load_zone_graph()
+
+    assert graph["aliases"].get("Sleepers Tomb") == "Sleeper's Tomb"
+
+
 def test_zone_graph_includes_boat_connections_from_map_dotted_lines():
     graph = load_zone_graph()
     edges = {frozenset((edge["from"], edge["to"])) for edge in graph["edges"]}
