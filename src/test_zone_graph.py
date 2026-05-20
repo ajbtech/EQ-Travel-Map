@@ -88,6 +88,15 @@ def test_zone_graph_aliases_full_solusek_ro_log_name_to_abbreviated_node():
     assert graph["aliases"].get("Temple of Solusek Ro") == "Temple of Sol. Ro"
 
 
+def test_zone_graph_aliases_long_form_felwithe_log_names_to_short_nodes():
+    # EQ logs write "Northern Felwithe" / "Southern Felwithe", but the graph
+    # nodes use the abbreviated "North Felwithe" / "South Felwithe" spelling.
+    graph = load_zone_graph()
+
+    assert graph["aliases"].get("Northern Felwithe") == "North Felwithe"
+    assert graph["aliases"].get("Southern Felwithe") == "South Felwithe"
+
+
 def test_zone_graph_aliases_log_name_without_apostrophe_for_sirens_grotto():
     # EQ logs write "You have entered Sirens Grotto." with no apostrophe,
     # but the graph node uses the canonical "Siren's Grotto" spelling.
