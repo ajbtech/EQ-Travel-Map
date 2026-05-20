@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import line_reader
 import log_parser
 
 
@@ -154,3 +155,63 @@ def test_parse_log_lines_empty_spell_list_when_no_casts():
 def test_build_empty_summary_has_empty_spell_list():
     summary = log_parser.build_empty_summary()
     assert summary.spell_list.get_raw_eq_list() == []
+
+
+def test_build_empty_summary_has_empty_timeline():
+    summary = log_parser.build_empty_summary()
+    assert summary.timeline == []
+
+
+def test_timeline_records_events_in_order():
+    # Four leading non-event lines so the add_starting_zones special case
+    # (which captures a zone from the first four lines before login filtering)
+    # doesn't reorder the sequence under test.
+    lines = [
+        "[Sat Sep 24 19:50:00 2022] You say, 'one'",
+        "[Sat Sep 24 19:50:10 2022] You say, 'two'",
+        "[Sat Sep 24 19:50:20 2022] You say, 'three'",
+        "[Sat Sep 24 19:50:30 2022] You say, 'four'",
+        "[Sat Sep 24 19:51:48 2022] Welcome to EverQuest!",
+        "[Sat Sep 24 19:51:55 2022] You say, 'hi'",
+        "[Sat Sep 24 19:52:00 2022] You have entered Grobb.",
+        "[Sat Sep 24 19:53:00 2022] You have slain a froglok!",
+        "[Sat Sep 24 19:54:00 2022] You have gained a level! Welcome to level 2!",
+        "[Sat Sep 24 19:55:00 2022] You have been slain by a froglok!",
+    ]
+    _, _, summary = log_parser.parse_log_lines(lines)
+    kinds = [event.kind for event in summary.timeline]
+    assert kinds == [
+        line_reader.EventType.LOGIN,
+        line_reader.EventType.ZONE,
+        line_reader.EventType.KILL,
+        line_reader.EventType.LEVEL_GAINED,
+        line_reader.EventType.DEATH,
+    ]
+
+
+def test_timeline_zone_entries_match_zone_list():
+    lines = [
+        "[Sat Sep 24 19:51:48 2022] You have entered Grobb.",
+        "[Sat Sep 24 19:52:00 2022] You have entered Innothule Swamp.",
+        "[Sat Sep 24 19:53:00 2022] You have entered Grobb.",
+    ]
+    _, zone_list, summary = log_parser.parse_log_lines(lines)
+    zone_values = [
+        event.value
+        for event in summary.timeline
+        if event.kind == line_reader.EventType.ZONE
+    ]
+    assert zone_values == zone_list.get_raw_eq_list()
+
+
+def test_timeline_excludes_player_damage_and_spell():
+    lines = [
+        "[Sat Sep 24 19:51:48 2022] You begin casting Spirit of Wolf.",
+        "[Sat Sep 24 19:52:00 2022] You slash a goblin for 10 points of damage.",
+        "[Sat Sep 24 19:53:00 2022] You have slain a goblin!",
+    ]
+    _, _, summary = log_parser.parse_log_lines(lines)
+    kinds = [event.kind for event in summary.timeline]
+    assert line_reader.EventType.SPELL_CAST not in kinds
+    assert line_reader.EventType.PLAYER_DAMAGE not in kinds
+    assert kinds == [line_reader.EventType.KILL]

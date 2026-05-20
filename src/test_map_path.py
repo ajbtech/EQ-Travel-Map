@@ -85,3 +85,30 @@ def test_get_known_zones_filters_unknown_zones():
     zones = map_path.get_known_zones(["Grobb", "Definitely Unknown Zone"])
 
     assert zones == ["Grobb"]
+
+
+def test_cumulative_event_counts_last_equals_total_events():
+    zones = ["Grobb", "Innothule Swamp", "Grobb", "Great Divide"]
+    counts = map_path.cumulative_event_counts(zones)
+
+    assert counts[-1] == len(map_path.build_map_events(zones))
+
+
+def test_cumulative_event_counts_is_nondecreasing():
+    zones = ["Grobb", "Great Divide", "Grobb", "Innothule Swamp"]
+    counts = map_path.cumulative_event_counts(zones)
+
+    assert all(b >= a for a, b in zip(counts, counts[1:]))
+
+
+def test_cumulative_event_counts_one_per_known_zone():
+    counts = map_path.cumulative_event_counts(
+        ["Grobb", "Definitely Unknown Zone", "Innothule Swamp"]
+    )
+
+    # Only the two known zones produce entries; the first is always 0.
+    assert counts == [0, 1]
+
+
+def test_cumulative_event_counts_empty_for_no_known_zones():
+    assert map_path.cumulative_event_counts(["Definitely Unknown Zone"]) == []

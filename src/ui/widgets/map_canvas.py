@@ -48,6 +48,12 @@ class MapCanvas(QLabel):
         self._source_pixmap = pixmap
         self._refresh_scaled()
 
+    def load_pixmap(self, pixmap):
+        if pixmap is None or pixmap.isNull():
+            return
+        self._source_pixmap = pixmap
+        self._refresh_scaled()
+
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self._refresh_scaled()

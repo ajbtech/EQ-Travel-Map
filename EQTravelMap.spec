@@ -10,9 +10,15 @@ GitHub Releases for download by non-CLI users.
 
 from pathlib import Path
 
+from PyInstaller.utils.hooks import collect_data_files
+
 
 PROJECT_ROOT = Path(SPECPATH).resolve()
 SRC_DIR = PROJECT_ROOT / "src"
+
+# imageio-ffmpeg ships the ffmpeg binary the video exporter shells out to;
+# it must be bundled or video generation fails on machines without ffmpeg.
+IMAGEIO_FFMPEG_DATAS = collect_data_files("imageio_ffmpeg")
 
 # (source on disk, target directory inside the bundle)
 # ``samples/`` is intentionally not bundled here -- it ships as a separate
@@ -24,7 +30,7 @@ DATAS = [
     (str(SRC_DIR / "ui" / "theme"), "ui/theme"),
     (str(PROJECT_ROOT / "zone_graph.json"), "."),
     (str(PROJECT_ROOT / "zone_map.png"), "."),
-]
+] + IMAGEIO_FFMPEG_DATAS
 
 # Bare ``import eq_parser`` etc. only resolve once ``src/`` is on sys.path.
 # The entry script handles that at runtime, but PyInstaller's static analysis
@@ -38,17 +44,22 @@ HIDDEN_IMPORTS = [
     "map_path",
     "money_sorter",
     "summary_formatter",
+    "video_generator",
     "zone_graph",
     "ui.app",
     "ui.asset_paths",
     "ui.main_window",
     "ui.parse_worker",
+    "ui.video_worker",
     "ui.views.input_view",
     "ui.views.progress_view",
     "ui.views.results_view",
     "ui.widgets.engraved_heading",
     "ui.widgets.map_canvas",
     "ui.widgets.parchment_panel",
+    "imageio",
+    "imageio_ffmpeg",
+    "numpy",
 ]
 
 # Qt modules the app does not use. The app only imports QtCore, QtGui, and
@@ -124,12 +135,14 @@ UNUSED_QT_TOOL_EXES = [
     "balsam", "balsamui",
 ]
 
-# matplotlib and numpy used to be runtime dependencies (matplotlib drove
-# the map renderer). The renderer was rewritten on top of Pillow, so list
-# them here as defensive PyInstaller excludes -- if a stray ``import
-# matplotlib`` ever sneaks back into the codebase, the bundle will fail
-# loudly at runtime instead of silently re-bundling ~25 MB of dead code.
-UNUSED_HEAVY_DEPS = ["matplotlib", "numpy"]
+# matplotlib used to be a runtime dependency (it drove the map renderer).
+# The renderer was rewritten on top of Pillow, so list it here as a
+# defensive PyInstaller exclude -- if a stray ``import matplotlib`` ever
+# sneaks back into the codebase, the bundle will fail loudly at runtime
+# instead of silently re-bundling ~25 MB of dead code. numpy is NOT excluded:
+# the video exporter (ui.video_worker) uses it to move pixels between Pillow,
+# Qt, and imageio.
+UNUSED_HEAVY_DEPS = ["matplotlib"]
 
 # Pillow image-format plugins. Pillow auto-registers every plugin it can
 # import, but the app only ever opens PNG (the bundled assets and the

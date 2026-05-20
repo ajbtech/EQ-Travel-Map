@@ -19,6 +19,12 @@ TIMESTAMP_FORMAT = "%a %b %d %H:%M:%S %Y"
 LOG_ENCODING = "utf-8"
 
 
+@dataclass(frozen=True)
+class TimelineEvent:
+    kind: line_reader.EventType
+    value: object = None
+
+
 @dataclass
 class ParserState:
     kill_list: EQList = field(default_factory=EQList)
@@ -41,6 +47,7 @@ class ParserState:
     most_recent_message: str = ""
     previous_line_is_help: bool = False
     previous_line_is_login: bool = False
+    timeline: list = field(default_factory=list)
 
 
 @dataclass
@@ -61,6 +68,7 @@ class ParseSummary:
     merch_cash: money_sorter.Cash
     max_damage: dict = field(default_factory=dict)
     spell_list: EQList = field(default_factory=EQList)
+    timeline: list = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -153,6 +161,7 @@ def build_empty_summary():
         merch_cash=money_sorter.Cash(),
         max_damage={},
         spell_list=EQList(),
+        timeline=[],
     )
 
 
@@ -166,6 +175,7 @@ def record_line_metadata(line, event, state):
 def record_zone_name(zone_name, state):
     state.zone_count += 1
     state.zone_list.add(zone_name)
+    state.timeline.append(TimelineEvent(line_reader.EventType.ZONE, zone_name))
 
 
 def add_starting_zones(events, state):
@@ -191,35 +201,46 @@ def update_previous_line_flags(event, state):
 
 def record_login(_line, _event, state):
     state.login_count += 1
+    state.timeline.append(TimelineEvent(line_reader.EventType.LOGIN))
 
 
 def record_death(_line, _event, state):
     state.death_count += 1
+    state.timeline.append(TimelineEvent(line_reader.EventType.DEATH))
 
 
 def record_kill(line, event, state):
     state.kill_count += 1
     state.kill_list.add(event.value)
+    state.timeline.append(TimelineEvent(line_reader.EventType.KILL, event.value))
 
 
 def record_level_gain(line, event, state):
     state.level_count += 1
     state.current_level = event.value
+    state.timeline.append(
+        TimelineEvent(line_reader.EventType.LEVEL_GAINED, event.value)
+    )
 
 
 def record_level_loss(line, event, state):
     state.level_lost_count += 1
     state.current_level = event.value
+    state.timeline.append(TimelineEvent(line_reader.EventType.LEVEL_LOST, event.value))
 
 
 def add_loot_cash(_line, event, state):
     state.loot_cash_count += 1
     state.loot_cash = state.loot_cash.add(event.value)
+    state.timeline.append(TimelineEvent(line_reader.EventType.LOOT_CASH, event.value))
 
 
 def add_merchant_cash(_line, event, state):
     state.merch_cash_count += 1
     state.merch_cash = state.merch_cash.add(event.value)
+    state.timeline.append(
+        TimelineEvent(line_reader.EventType.MERCHANT_CASH, event.value)
+    )
 
 
 def record_player_damage(_line, event, state):
@@ -304,6 +325,7 @@ def build_summary(state):
         merch_cash=state.merch_cash,
         max_damage=dict(state.max_damage),
         spell_list=state.spell_list,
+        timeline=list(state.timeline),
     )
 
 

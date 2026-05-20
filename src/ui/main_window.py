@@ -152,8 +152,12 @@ class MainWindow(QMainWindow):
         self.progress_view.reset_progress()
         self._stack.setCurrentWidget(self.progress_view)
 
-    def show_results(self, image_path, summary_sections):
-        self.results_view.set_results(image_path, summary_sections)
+    def show_results(
+        self, image_path, summary_sections, zone_list=None, parse_summary=None
+    ):
+        self.results_view.set_results(
+            image_path, summary_sections, zone_list, parse_summary
+        )
         self._stack.setCurrentWidget(self.results_view)
 
     # --- worker wiring ---
@@ -193,9 +197,11 @@ class MainWindow(QMainWindow):
     def _on_worker_progress(self, file_name, line_count):
         self.progress_view.set_progress(file_name, line_count)
 
-    @Slot(object, object)
-    def _on_worker_finished(self, image_path, summary_sections):
-        self.show_results(image_path, summary_sections)
+    @Slot(object, object, object, object)
+    def _on_worker_finished(
+        self, image_path, summary_sections, zone_list, parse_summary
+    ):
+        self.show_results(image_path, summary_sections, zone_list, parse_summary)
         self._save_last_results(self._active_character, image_path, summary_sections)
         self._clear_worker()
 

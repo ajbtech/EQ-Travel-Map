@@ -19,7 +19,7 @@ def _default_count(folder, character_name):
 class ParseWorker(QObject):
     progress = Signal(str, int)
     totals = Signal(int)
-    finished = Signal(object, object)
+    finished = Signal(object, object, object, object)
     error = Signal(str)
     canceled = Signal()
 
@@ -74,7 +74,7 @@ class ParseWorker(QObject):
         except Exception as exc:
             self.error.emit(str(exc))
             return
-        self.finished.emit(self.output_path, summary_sections)
+        self.finished.emit(self.output_path, summary_sections, zone_list, summary)
 
     def _on_progress(self, parse_progress):
         if self._cancel_requested:
