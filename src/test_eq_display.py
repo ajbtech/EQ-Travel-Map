@@ -99,3 +99,28 @@ def test_map_renderer_saves_map_at_expected_dimensions(tmp_path):
 
     with Image.open(output_path) as image:
         assert image.size == (eq_display.MAP_PIXEL_WIDTH, eq_display.MAP_PIXEL_HEIGHT)
+
+
+def test_draw_location_circle_paints_ring_pixel_with_expected_color():
+    renderer = eq_display.MapRenderer()
+    x, y = eq_display.MAP_PIXEL_WIDTH // 2, eq_display.MAP_PIXEL_HEIGHT // 2
+    percent = 0.0  # red
+
+    renderer.draw_location_circle((x, y), percent)
+    img = renderer.get_image()
+    r = eq_display.LOCATION_CIRCLE_RADIUS
+    top_pixel = img.getpixel((x, y - r))
+
+    expected = eq_display._to_rgba(eq_display.make_rainbow(percent))
+    assert top_pixel == expected
+
+
+def test_draw_location_circle_center_is_unfilled():
+    renderer = eq_display.MapRenderer()
+    x, y = eq_display.MAP_PIXEL_WIDTH // 2, eq_display.MAP_PIXEL_HEIGHT // 2
+
+    before = eq_display.MapRenderer().get_image().getpixel((x, y))
+    renderer.draw_location_circle((x, y), 0.0)
+    after = renderer.get_image().getpixel((x, y))
+
+    assert after == before
