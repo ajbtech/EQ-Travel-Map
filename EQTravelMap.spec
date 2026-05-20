@@ -365,3 +365,11 @@ coll = COLLECT(
     upx_exclude=[],
     name="EQTravelMap",
 )
+
+if sys.platform == "darwin":
+    app = BUNDLE(
+        coll,
+        name="EQTravelMap.app",
+        icon=_icon,
+        bundle_identifier="com.ajbtech.EQTravelMap",
+    )
