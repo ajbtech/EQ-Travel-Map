@@ -7,6 +7,7 @@
 
 ## Features
 - [ ] Add a view that allows a live run of the travel map
+- [x] Export the travel run as a video (MAKE VIDEO button)
 - [ ] Allow zoom and pan in the map
 - [ ] Allow dynamic app resizing
 

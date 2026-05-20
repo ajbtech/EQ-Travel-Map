@@ -1,6 +1,8 @@
 from pathlib import Path
 
+import log_parser
 import summary_formatter
+from eq_list import EQList
 from ui.views.results_view import ResultsView
 
 
@@ -49,3 +51,24 @@ def test_summary_frame_spans_map_and_buttons(qt_app):
 
     expected = view.map_frame.width() + view.button_frame.sizeHint().width()
     assert view.summary_stone_frame.width() == expected
+
+
+def test_make_video_button_disabled_without_timeline(qt_app):
+    view = ResultsView()
+    view.set_results(Path("/tmp/map.png"), _sections())
+    assert not view.make_video_button.isEnabled()
+
+
+def test_make_video_button_enabled_with_zone_list_and_summary(qt_app):
+    zone_list = EQList()
+    zone_list.add("Grobb")
+    summary = log_parser.build_empty_summary()
+    view = ResultsView()
+    view.set_results(Path("/tmp/map.png"), _sections(), zone_list, summary)
+    assert view.make_video_button.isEnabled()
+
+
+def test_suggested_video_filename_uses_character(qt_app):
+    view = ResultsView()
+    view.set_results(Path("/tmp/map.png"), _sections("Gorrek"))
+    assert view._suggested_video_filename() == "Gorrek_travel.mp4"

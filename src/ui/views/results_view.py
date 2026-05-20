@@ -5,12 +5,20 @@ from pathlib import Path
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
+    QApplication,
+    QButtonGroup,
+    QDialog,
+    QDialogButtonBox,
     QFileDialog,
     QFrame,
     QHBoxLayout,
     QLabel,
+    QMessageBox,
+    QProgressDialog,
     QPushButton,
+    QRadioButton,
     QSizePolicy,
+    QSpinBox,
     QVBoxLayout,
     QWidget,
 )
@@ -18,6 +26,7 @@ from PySide6.QtWidgets import (
 from ui.views.more_stats_view import MoreStatsDialog
 from ui.widgets.map_canvas import MapCanvas
 from ui.widgets.parchment_panel import ParchmentPanel
+from video_generator import VideoGenerator
 
 
 class ResultsView(QWidget):
@@ -53,6 +62,11 @@ class ResultsView(QWidget):
         self.setObjectName("resultsView")
         self._current_image_path = None
         self._current_sections = None
+        self._zone_list = None
+        self._parse_summary = None
+        self._video_worker = None
+        self._video_offscreen = None
+        self._video_dialog = None
 
         outer = QVBoxLayout(self)
         outer.setContentsMargins(0, 0, 0, 0)
@@ -103,6 +117,13 @@ class ResultsView(QWidget):
         self.more_stats_button.setFixedWidth(200)
         self.more_stats_button.clicked.connect(self._on_more_stats)
         button_column.addWidget(self.more_stats_button)
+
+        self.make_video_button = QPushButton("MAKE VIDEO")
+        self.make_video_button.setObjectName("bronzeButton")
+        self.make_video_button.setFixedWidth(200)
+        self.make_video_button.setEnabled(False)
+        self.make_video_button.clicked.connect(self._on_make_video)
+        button_column.addWidget(self.make_video_button)
 
         button_column.addStretch(1)
         upper_row.addWidget(self.button_frame)
@@ -188,21 +209,31 @@ class ResultsView(QWidget):
         label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
         return label
 
-    def set_results(self, image_path, summary_sections):
+    def set_results(
+        self, image_path, summary_sections, zone_list=None, parse_summary=None
+    ):
         self._current_image_path = Path(image_path)
         self._current_sections = summary_sections
+        self._zone_list = zone_list
+        self._parse_summary = parse_summary
         self.map_canvas.load_image(self._current_image_path)
         self._fit_map_frame_to_image()
-        self._kills_column.setText(
-            self._render_column_html(summary_sections.top_kills_lines)
+        self.set_columns(
+            summary_sections.top_kills_lines,
+            summary_sections.top_zones_lines,
+            summary_sections.stats_lines,
         )
-        self._zones_column.setText(
-            self._render_column_html(summary_sections.top_zones_lines)
+        # Restored sessions don't carry a timeline, so video export needs both
+        # the zone list and the parsed summary to be present.
+        self.make_video_button.setEnabled(
+            zone_list is not None and parse_summary is not None
         )
+
+    def set_columns(self, top_kills_lines, top_zones_lines, stats_lines):
+        self._kills_column.setText(self._render_column_html(top_kills_lines))
+        self._zones_column.setText(self._render_column_html(top_zones_lines))
         self._stats_column.setText(
-            self._render_column_html(
-                ["Major Statistics", *summary_sections.stats_lines],
-            )
+            self._render_column_html(["Major Statistics", *stats_lines])
         )
 
     @staticmethod
@@ -250,6 +281,107 @@ class ResultsView(QWidget):
             return
         shutil.copyfile(self._current_image_path, chosen)
 
+    def _on_make_video(self):
+        if self._zone_list is None or self._parse_summary is None:
+            return
+        if self._current_image_path is None or not self._current_image_path.exists():
+            return
+
+        dialog = _DurationDialog(self)
+        if dialog.exec() != QDialog.Accepted:
+            return
+        target_seconds = dialog.target_seconds()
+
+        suggested = str(Path.home() / self._suggested_video_filename())
+        output_path, _filter = QFileDialog.getSaveFileName(
+            self, "Save video as", suggested, "MP4 video (*.mp4);;All files (*)"
+        )
+        if not output_path:
+            return
+
+        from ui.video_worker import VideoWorker
+
+        generator = VideoGenerator(
+            self._character_name(),
+            self._zone_list,
+            self._parse_summary,
+            target_seconds=target_seconds,
+        )
+
+        offscreen = self._build_offscreen_view()
+
+        progress = QProgressDialog(
+            "Generating video…", "Cancel", 0, generator.total_frames(), self
+        )
+        progress.setWindowTitle("Make Video")
+        progress.setWindowModality(Qt.WindowModal)
+        progress.setAutoClose(False)
+        progress.setAutoReset(False)
+        progress.setMinimumDuration(0)
+
+        worker = VideoWorker(generator, offscreen, output_path)
+        self._video_worker = worker
+        self._video_offscreen = offscreen
+        self._video_dialog = progress
+
+        worker.progress.connect(lambda current, _total: progress.setValue(current))
+        worker.finished.connect(self._on_video_finished)
+        worker.error.connect(self._on_video_error)
+        worker.canceled.connect(self._on_video_canceled)
+        progress.canceled.connect(worker.cancel)
+
+        worker.start()
+
+    def _build_offscreen_view(self):
+        offscreen = ResultsView()
+        app = QApplication.instance()
+        if app is not None:
+            offscreen.setStyleSheet(app.styleSheet())
+        size = self.size()
+        # h.264 with yuv420p needs even dimensions.
+        size.setWidth(size.width() - size.width() % 2)
+        size.setHeight(size.height() - size.height() % 2)
+        offscreen.setAttribute(Qt.WA_DontShowOnScreen, True)
+        offscreen.setFixedSize(size)
+        offscreen.set_results(self._current_image_path, self._current_sections)
+        # Realize the layout offscreen so child widgets get real geometry
+        # (without ever appearing on screen) before QWidget.render is called.
+        offscreen.show()
+        return offscreen
+
+    def _on_video_finished(self, output_path):
+        self._close_video_dialog()
+        self._cleanup_video()
+        QMessageBox.information(self, "Video saved", f"Video saved to:\n{output_path}")
+
+    def _on_video_error(self, message):
+        self._close_video_dialog()
+        self._cleanup_video()
+        QMessageBox.warning(
+            self, "Video failed", f"Could not generate the video:\n{message}"
+        )
+
+    def _on_video_canceled(self):
+        self._close_video_dialog()
+        self._cleanup_video()
+
+    def _close_video_dialog(self):
+        if self._video_dialog is not None:
+            self._video_dialog.close()
+            self._video_dialog = None
+
+    def _cleanup_video(self):
+        if self._video_offscreen is not None:
+            self._video_offscreen.deleteLater()
+            self._video_offscreen = None
+        self._video_worker = None
+
+    def _suggested_video_filename(self):
+        character = self._character_name()
+        if character:
+            return f"{character}_travel.mp4"
+        return "travel.mp4"
+
     def _suggested_save_filename(self):
         original = self._current_image_path.name
         character = self._character_name()
@@ -265,3 +397,54 @@ class ResultsView(QWidget):
         if line.startswith(prefix):
             return line[len(prefix) :].strip()
         return ""
+
+
+class _DurationDialog(QDialog):
+    """Asks how long the exported video should be, in seconds."""
+
+    _PRESETS = [
+        ("30 seconds", 30),
+        ("1 minute", 60),
+        ("2 minutes", 120),
+        ("5 minutes", 300),
+    ]
+    _DEFAULT_INDEX = 2
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Video length")
+
+        layout = QVBoxLayout(self)
+        self._group = QButtonGroup(self)
+        for index, (label, seconds) in enumerate(self._PRESETS):
+            radio = QRadioButton(label)
+            radio.setProperty("seconds", seconds)
+            self._group.addButton(radio, index)
+            layout.addWidget(radio)
+            if index == self._DEFAULT_INDEX:
+                radio.setChecked(True)
+
+        custom_row = QHBoxLayout()
+        self._custom_radio = QRadioButton("Custom:")
+        self._group.addButton(self._custom_radio, len(self._PRESETS))
+        self._custom_spin = QSpinBox()
+        self._custom_spin.setRange(10, 3600)
+        self._custom_spin.setValue(120)
+        self._custom_spin.setSuffix(" s")
+        custom_row.addWidget(self._custom_radio)
+        custom_row.addWidget(self._custom_spin)
+        custom_row.addStretch(1)
+        layout.addLayout(custom_row)
+
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel, parent=self
+        )
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+    def target_seconds(self):
+        checked = self._group.checkedButton()
+        if checked is self._custom_radio:
+            return self._custom_spin.value()
+        return int(checked.property("seconds"))

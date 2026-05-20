@@ -43,13 +43,19 @@ def _to_rgba(color_0_1, alpha=255):
 
 
 class MapRenderer:
-    def __init__(self, map_image_path=MAP_IMAGE_PATH):
+    def __init__(self, map_image_path=MAP_IMAGE_PATH, base_image=None):
         self.image = Image.new(
             "RGBA", (MAP_PIXEL_WIDTH, MAP_PIXEL_HEIGHT), (0, 0, 0, 0)
         )
         self.draw = ImageDraw.Draw(self.image, "RGBA")
 
-        map_image = Image.open(map_image_path).convert("RGBA")
+        # ``base_image`` lets callers (e.g. the video generator) reuse an
+        # already-loaded map and skip re-reading the PNG from disk on every
+        # incremental re-render.
+        if base_image is not None:
+            map_image = base_image
+        else:
+            map_image = Image.open(map_image_path).convert("RGBA")
         if map_image.size != (MAP_PIXEL_WIDTH, MAP_PIXEL_HEIGHT):
             map_image = map_image.resize(
                 (MAP_PIXEL_WIDTH, MAP_PIXEL_HEIGHT), Image.LANCZOS
@@ -69,6 +75,9 @@ class MapRenderer:
             [(x - DOT_RADIUS, y - DOT_RADIUS), (x + DOT_RADIUS, y + DOT_RADIUS)],
             fill=_to_rgba(make_rainbow(percent)),
         )
+
+    def get_image(self):
+        return self.image.copy()
 
     def display_map(self):
         self.image.show()

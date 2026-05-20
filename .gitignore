@@ -36,6 +36,8 @@ dist/
 
 # App outputs
 /generated_zone_path.png
+# Exported travel videos (MAKE VIDEO output)
+*.mp4
 
 # Personal EverQuest log files (keep samples/ ones tracked)
 eqlog_*.txt

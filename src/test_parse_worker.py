@@ -72,9 +72,11 @@ def test_run_emits_finished_with_output_path_and_summary_sections(qt_app):
     worker.run()
 
     assert len(finished) == 1
-    output_path, summary_sections = finished[0]
+    output_path, summary_sections, zone_list, summary = finished[0]
     assert output_path == Path("/tmp/out.png")
     assert summary_sections == worker._test_summary_sections
+    assert zone_list.get_raw_eq_list() == ["Grobb"]
+    assert summary is not None
 
 
 def test_run_calls_parse_then_summary_then_draw_in_order(qt_app):

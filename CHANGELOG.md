@@ -6,6 +6,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- "MAKE VIDEO" button on the results window exports an MP4 that replays the
+  character's journey: travel lines draw onto the map and the summary stats
+  count up over a chosen duration (30 s / 1 min / 2 min / 5 min / custom).
+  Frames are captured from the results view itself, so the video matches the
+  on-screen style. Generation runs without freezing the UI and can be canceled.
+
 ## [1.0.0] - 2026-05-17
 
 First stable release. Rolls up the 0.1.1 → 0.1.14 patch series plus the

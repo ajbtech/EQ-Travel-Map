@@ -62,3 +62,24 @@ def build_map_events(zone_list):
 
 def get_known_zones(zone_list):
     return [zone for zone in zone_list if zone_graph.has_zone_center(zone)]
+
+
+def cumulative_event_counts(zone_list):
+    """Running count of draw events after each known zone is processed.
+
+    Mirrors ``build_map_events``'s emit condition (which is deterministic and
+    independent of jitter) so a prefix of the events maps to a prefix of the
+    known-zone sequence. ``counts[-1] == len(build_map_events(zone_list))``.
+    """
+    counts = []
+    event_count = 0
+    last_zone = ""
+    for zone in get_known_zones(zone_list):
+        if last_zone != "" and (
+            zone_graph.are_adjacent(last_zone, zone)
+            or not zone_graph.is_same_zone(last_zone, zone)
+        ):
+            event_count += 1
+        last_zone = zone
+        counts.append(event_count)
+    return counts
