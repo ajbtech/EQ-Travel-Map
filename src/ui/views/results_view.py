@@ -24,6 +24,7 @@ from PySide6.QtWidgets import (
 )
 
 from ui.views.more_stats_view import MoreStatsDialog
+from ui.widgets.engraved_heading import EngravedHeading
 from ui.widgets.map_canvas import MapCanvas
 from ui.widgets.parchment_panel import ParchmentPanel
 from video_generator import VideoGenerator
@@ -93,6 +94,13 @@ class ResultsView(QWidget):
         button_column = QVBoxLayout(self.button_frame)
         button_column.setContentsMargins(0, 0, 0, 0)
         button_column.setSpacing(8)
+
+        self.character_heading = EngravedHeading()
+        heading_font = self.character_heading.font()
+        heading_font.setPointSize(32)
+        self.character_heading.setFont(heading_font)
+        self.character_heading.setFixedWidth(200)
+        button_column.addWidget(self.character_heading)
 
         self.back_button = QPushButton("NEW INPUT")
         self.back_button.setObjectName("bronzeButton")
@@ -217,6 +225,7 @@ class ResultsView(QWidget):
         self._zone_list = zone_list
         self._parse_summary = parse_summary
         self.map_canvas.load_image(self._current_image_path)
+        self.character_heading.setText(self._character_name())
         self._fit_map_frame_to_image()
         self.set_columns(
             summary_sections.top_kills_lines,
@@ -392,7 +401,7 @@ class ResultsView(QWidget):
     def _character_name(self):
         if self._current_sections is None:
             return ""
-        line = self._current_sections.character_line
+        line = getattr(self._current_sections, "character_line", "")
         prefix = "Character: "
         if line.startswith(prefix):
             return line[len(prefix) :].strip()

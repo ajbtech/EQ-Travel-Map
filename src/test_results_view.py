@@ -53,6 +53,18 @@ def test_summary_frame_spans_map_and_buttons(qt_app):
     assert view.summary_stone_frame.width() == expected
 
 
+def test_character_heading_shows_name(qt_app):
+    view = ResultsView()
+    view.set_results(Path("/tmp/map.png"), _sections("Gorrek"))
+    assert view.character_heading.text() == "Gorrek"
+
+
+def test_character_heading_blank_without_character(qt_app):
+    view = ResultsView()
+    view.set_results(Path("/tmp/map.png"), _sections(""))
+    assert view.character_heading.text() == ""
+
+
 def test_make_video_button_disabled_without_timeline(qt_app):
     view = ResultsView()
     view.set_results(Path("/tmp/map.png"), _sections())
