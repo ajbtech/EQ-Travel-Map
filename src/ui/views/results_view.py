@@ -3,7 +3,7 @@ from html import escape
 from pathlib import Path
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QGuiApplication
+from PySide6.QtGui import QColor, QGuiApplication
 from PySide6.QtWidgets import (
     QApplication,
     QButtonGroup,
@@ -95,10 +95,14 @@ class ResultsView(QWidget):
         button_column.setContentsMargins(0, 0, 0, 0)
         button_column.setSpacing(8)
 
+        # Match the flat dark-brown Georgia title used on the input screen
+        # (QLabel#parchmentTitle in the QSS theme), kept large for the corner.
         self.character_heading = EngravedHeading()
         heading_font = self.character_heading.font()
         heading_font.setPointSize(32)
         self.character_heading.setFont(heading_font)
+        self.character_heading.set_color(QColor("#2a1c0e"))
+        self.character_heading.set_engraved(False)
         self.character_heading.setFixedWidth(200)
         button_column.addWidget(self.character_heading)
 

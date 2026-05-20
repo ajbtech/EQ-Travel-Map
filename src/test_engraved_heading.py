@@ -24,3 +24,10 @@ def test_short_name_keeps_base_point_size(qt_app):
     base = heading.font().pointSize()
     heading.setText("Bob")
     assert heading._effective_font().pointSize() == base
+
+
+def test_set_engraved_toggles_flag(qt_app):
+    heading = EngravedHeading()
+    assert heading._engraved is True
+    heading.set_engraved(False)
+    assert heading._engraved is False

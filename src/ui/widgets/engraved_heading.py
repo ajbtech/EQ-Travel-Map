@@ -22,12 +22,18 @@ class EngravedHeading(QWidget):
         self._fill = self.DEFAULT_FILL
         self._shadow = self.DEFAULT_SHADOW
         self._highlight = self.DEFAULT_HIGHLIGHT
+        self._engraved = True
         font = QFont("Georgia", 22)
         font.setBold(True)
         self.setFont(font)
 
     def set_color(self, fill):
         self._fill = QColor(fill)
+        self.update()
+
+    def set_engraved(self, enabled):
+        """Toggle the chiseled offset draws; when off the text renders flat."""
+        self._engraved = bool(enabled)
         self.update()
 
     def text(self):
@@ -74,11 +80,12 @@ class EngravedHeading(QWidget):
         rect = self.rect()
         align = Qt.AlignLeft | Qt.AlignVCenter
 
-        painter.setPen(self._highlight)
-        painter.drawText(rect.adjusted(1, 1, 1, 1), align, self._text)
+        if self._engraved:
+            painter.setPen(self._highlight)
+            painter.drawText(rect.adjusted(1, 1, 1, 1), align, self._text)
 
-        painter.setPen(self._shadow)
-        painter.drawText(rect.adjusted(-1, -1, -1, -1), align, self._text)
+            painter.setPen(self._shadow)
+            painter.drawText(rect.adjusted(-1, -1, -1, -1), align, self._text)
 
         painter.setPen(self._fill)
         painter.drawText(rect, align, self._text)

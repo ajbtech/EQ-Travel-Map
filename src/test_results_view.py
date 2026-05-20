@@ -65,6 +65,16 @@ def test_character_heading_blank_without_character(qt_app):
     assert view.character_heading.text() == ""
 
 
+def test_character_heading_matches_input_title_style(qt_app):
+    from PySide6.QtGui import QColor
+
+    view = ResultsView()
+    assert view.character_heading._fill == QColor("#2a1c0e")
+    assert view.character_heading._engraved is False
+    assert view.character_heading.font().family() == "Georgia"
+    assert view.character_heading.font().bold()
+
+
 def test_make_video_button_disabled_without_timeline(qt_app):
     view = ResultsView()
     view.set_results(Path("/tmp/map.png"), _sections())
