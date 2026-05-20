@@ -3,7 +3,7 @@ from html import escape
 from pathlib import Path
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QColor, QGuiApplication
+from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
     QApplication,
     QButtonGroup,
@@ -99,9 +99,12 @@ class ResultsView(QWidget):
         heading_font = self.character_heading.font()
         heading_font.setPointSize(32)
         self.character_heading.setFont(heading_font)
-        self.character_heading.set_color(QColor("black"))
         self.character_heading.setFixedWidth(200)
         button_column.addWidget(self.character_heading)
+
+        # Stretch between the heading (pinned top) and the buttons pushes the
+        # button stack down to the bottom of the column.
+        button_column.addStretch(1)
 
         self.back_button = QPushButton("NEW INPUT")
         self.back_button.setObjectName("bronzeButton")
@@ -134,7 +137,6 @@ class ResultsView(QWidget):
         self.make_video_button.clicked.connect(self._on_make_video)
         button_column.addWidget(self.make_video_button)
 
-        button_column.addStretch(1)
         upper_row.addWidget(self.button_frame)
         upper_row.addStretch(1)
 
