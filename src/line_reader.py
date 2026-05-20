@@ -32,6 +32,11 @@ ZONE_TEXT = "You have entered "
 # only run on candidate lines, not every line of a multi-GB log.
 PLAYER_DAMAGE_TEXT = " damage."
 SPELL_CAST_TEXT = "You begin casting "
+JBOOT_TEXT = "Your feet feel quick"
+ALCOHOL_TEXT = "Glug, glug, glug"
+INTOXICATED_TEXT = (
+    "You could not possibly consume more alcohol or become more intoxicated"
+)
 PLAYER_DAMAGE_PATTERN = re.compile(
     r"\bYou (?!have\b)(\w+) .+ for (\d+) points? of (non-melee )?damage\."
 )
@@ -51,6 +56,9 @@ class EventType(Enum):
     PLAYER_DAMAGE = "player_damage"
     SPELL_CAST = "spell_cast"
     ZONE = "zone"
+    JBOOT_CLICK = "jboot_click"
+    ALCOHOL_CONSUMED = "alcohol_consumed"
+    TOTALLY_INTOXICATED = "totally_intoxicated"
 
 
 @dataclass(frozen=True)
@@ -127,6 +135,18 @@ def is_line_spell_cast(line):
 
 def is_line_chat(line):
     return ", '" in line and CHAT_PATTERN.search(line) is not None
+
+
+def is_line_jboot_click(line):
+    return JBOOT_TEXT in line
+
+
+def is_line_alcohol_consumed(line):
+    return ALCOHOL_TEXT in line
+
+
+def is_line_totally_intoxicated(line):
+    return INTOXICATED_TEXT in line
 
 
 def _clean_up_article(name):
@@ -226,4 +246,10 @@ def classify_line(line):
         damage = get_player_damage(line)
         if damage is not None:
             return LineEvent(EventType.PLAYER_DAMAGE, damage)
+    if is_line_jboot_click(line):
+        return LineEvent(EventType.JBOOT_CLICK)
+    if is_line_alcohol_consumed(line):
+        return LineEvent(EventType.ALCOHOL_CONSUMED)
+    if is_line_totally_intoxicated(line):
+        return LineEvent(EventType.TOTALLY_INTOXICATED)
     return EMPTY_LINE_EVENT

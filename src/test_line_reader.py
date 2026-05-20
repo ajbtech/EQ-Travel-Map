@@ -552,3 +552,34 @@ def test_classify_merchant_cash_event_carries_cash_value():
 
     assert event.kind == line_reader.EventType.MERCHANT_CASH
     assert event.value == money_sorter.Cash(platinum=5, gold=1, silver=2, copper=3)
+
+
+def test_classify_line_extracts_jboot_click_event():
+    line = "[Sun Apr 20 13:15:27 2025] Your feet feel quick."
+    event = line_reader.classify_line(line)
+    assert event.kind == line_reader.EventType.JBOOT_CLICK
+
+
+def test_classify_line_skips_jboot_for_unrelated_line():
+    line = "[Sun Apr 20 13:15:27 2025] You say, 'my feet feel quick'"
+    assert line_reader.classify_line(line) == line_reader.EMPTY_LINE_EVENT
+
+
+def test_classify_line_extracts_alcohol_consumed_event():
+    line = "[Wed May 20 06:05:09 2026] Glug, glug, glug...  You take a swig of ale."
+    event = line_reader.classify_line(line)
+    assert event.kind == line_reader.EventType.ALCOHOL_CONSUMED
+
+
+def test_classify_line_extracts_totally_intoxicated_event():
+    line = (
+        "[Wed May 20 06:05:12 2026] You could not possibly consume more "
+        "alcohol or become more intoxicated!"
+    )
+    event = line_reader.classify_line(line)
+    assert event.kind == line_reader.EventType.TOTALLY_INTOXICATED
+
+
+def test_classify_line_returns_empty_for_unrelated_trivia_line():
+    line = "[Wed May 20 06:05:12 2026] You feel revitalized."
+    assert line_reader.classify_line(line) == line_reader.EMPTY_LINE_EVENT

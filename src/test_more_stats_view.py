@@ -12,6 +12,12 @@ def _sections():
         extended_zones_lines=["Top 25 visited zones:", "1. Grobb: 10"],
         extended_spells_lines=["Top 25 cast spells:", "1. Spirit of Wolf: 10"],
         max_damage_lines=["Max hit by damage type:", "Slash: 25"],
+        additional_trivia_lines=[
+            "Additional Trivia:",
+            "JBoot Clicks: 12",
+            "Alcohol consumed: 345",
+            "Totally intoxicated: 6",
+        ],
     )
 
 
@@ -40,6 +46,7 @@ def test_more_stats_dialog_renders_all_four_sections(qt_app):
     assert "Top 25 killed creatures" in all_text
     assert "Top 25 cast spells" in all_text
     assert "Max hit by damage type" in all_text
+    assert "Additional Trivia" in all_text
 
 
 def test_more_stats_dialog_on_more_stats_noop_without_sections(qt_app):

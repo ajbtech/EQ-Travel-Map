@@ -224,6 +224,26 @@ def test_build_summary_sections_includes_extended_spells_top_25():
     assert "2. Haste: 5" in sections.extended_spells_lines
 
 
+def test_build_summary_sections_includes_additional_trivia():
+    kill_list = EQList()
+    zone_list = EQList()
+    zone_list.add("Grobb")
+    zone_list.sort_lists()
+    summary = log_parser.build_empty_summary()
+    summary.jboot_click_count = 12
+    summary.alcohol_count = 345
+    summary.totally_intoxicated_count = 6
+
+    sections = summary_formatter.build_summary_sections(kill_list, zone_list, summary)
+
+    assert sections.additional_trivia_lines == [
+        "Additional Trivia:",
+        "JBoot Clicks: 12",
+        "Alcohol consumed: 345",
+        "Totally intoxicated: 6",
+    ]
+
+
 def test_build_summary_sections_omits_character_line_when_no_name():
     kill_list = EQList()
     zone_list = EQList()
