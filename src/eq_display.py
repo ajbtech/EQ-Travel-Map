@@ -24,8 +24,8 @@ MAP_IMAGE_PATH = _data_root() / "zone_map.png"
 
 LINE_WIDTH = 2
 DOT_RADIUS = 2
-LOCATION_CIRCLE_RADIUS = 20
-LOCATION_CIRCLE_WIDTH = 4
+LOCATION_CIRCLE_RADIUS = 30
+LOCATION_CIRCLE_WIDTH = 5
 MAP_PIXEL_WIDTH = 2700
 MAP_PIXEL_HEIGHT = 1550
 RAINBOW_COLOR_STOPS = [
@@ -81,6 +81,11 @@ class MapRenderer:
     def draw_location_circle(self, zone_loc, percent):
         x, y = zone_loc
         r = LOCATION_CIRCLE_RADIUS
+        self.draw.ellipse(
+            [(x - r, y - r), (x + r, y + r)],
+            outline=(0, 0, 0, 255),
+            width=LOCATION_CIRCLE_WIDTH + 2,
+        )
         self.draw.ellipse(
             [(x - r, y - r), (x + r, y + r)],
             outline=_to_rgba(make_rainbow(percent)),
