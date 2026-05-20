@@ -11,6 +11,7 @@ class SummarySections:
     extended_zones_lines: list = field(default_factory=list)
     extended_spells_lines: list = field(default_factory=list)
     max_damage_lines: list = field(default_factory=list)
+    additional_trivia_lines: list = field(default_factory=list)
 
 
 def build_summary_sections(kill_list, zone_list, summary, character_name=None):
@@ -41,6 +42,7 @@ def build_summary_sections(kill_list, zone_list, summary, character_name=None):
         "Top 25 cast spells", summary.spell_list, limit=25
     )
     max_damage_lines = build_max_damage_lines(summary.max_damage)
+    additional_trivia_lines = build_additional_trivia_lines(summary)
     return SummarySections(
         character_line=character_line,
         top_kills_lines=top_kills_lines,
@@ -50,6 +52,7 @@ def build_summary_sections(kill_list, zone_list, summary, character_name=None):
         extended_zones_lines=extended_zones_lines,
         extended_spells_lines=extended_spells_lines,
         max_damage_lines=max_damage_lines,
+        additional_trivia_lines=additional_trivia_lines,
     )
 
 
@@ -87,6 +90,15 @@ def build_max_damage_lines(max_damage):
     for damage_type, amount in known + extra:
         lines.append(f"{damage_type.capitalize()}: {format_number(amount)}")
     return lines
+
+
+def build_additional_trivia_lines(summary):
+    return [
+        "Additional Trivia:",
+        f"JBoot Clicks: {format_number(summary.jboot_click_count)}",
+        f"Alcohol consumed: {format_number(summary.alcohol_count)}",
+        f"Totally intoxicated: {format_number(summary.totally_intoxicated_count)}",
+    ]
 
 
 def format_number(value):

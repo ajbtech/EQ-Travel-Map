@@ -17,6 +17,9 @@ from eq_list import EQList
 TIMESTAMP_PATTERN = re.compile(r"^\[(?P<timestamp>.+?)\]")
 TIMESTAMP_FORMAT = "%a %b %d %H:%M:%S %Y"
 LOG_ENCODING = "utf-8"
+# A rogue ability can land a one-off ~32k backstab; cap it so the tracked
+# backstab max reflects normal hits rather than the spike.
+BACKSTAB_DAMAGE_CAP = 10000
 
 
 @dataclass(frozen=True)
@@ -48,6 +51,9 @@ class ParserState:
     previous_line_is_help: bool = False
     previous_line_is_login: bool = False
     timeline: list = field(default_factory=list)
+    jboot_click_count: int = 0
+    alcohol_count: int = 0
+    totally_intoxicated_count: int = 0
 
 
 @dataclass
@@ -69,6 +75,9 @@ class ParseSummary:
     max_damage: dict = field(default_factory=dict)
     spell_list: EQList = field(default_factory=EQList)
     timeline: list = field(default_factory=list)
+    jboot_click_count: int = 0
+    alcohol_count: int = 0
+    totally_intoxicated_count: int = 0
 
 
 @dataclass(frozen=True)
@@ -245,12 +254,26 @@ def add_merchant_cash(_line, event, state):
 
 def record_player_damage(_line, event, state):
     damage_type, amount = event.value
+    if damage_type == "backstab" and amount > BACKSTAB_DAMAGE_CAP:
+        return
     if amount > state.max_damage.get(damage_type, 0):
         state.max_damage[damage_type] = amount
 
 
 def record_spell_cast(_line, event, state):
     state.spell_list.add(event.value)
+
+
+def record_jboot_click(_line, _event, state):
+    state.jboot_click_count += 1
+
+
+def record_alcohol_consumed(_line, _event, state):
+    state.alcohol_count += 1
+
+
+def record_totally_intoxicated(_line, _event, state):
+    state.totally_intoxicated_count += 1
 
 
 EVENT_HANDLERS = {
@@ -263,6 +286,9 @@ EVENT_HANDLERS = {
     line_reader.EventType.MERCHANT_CASH: add_merchant_cash,
     line_reader.EventType.PLAYER_DAMAGE: record_player_damage,
     line_reader.EventType.SPELL_CAST: record_spell_cast,
+    line_reader.EventType.JBOOT_CLICK: record_jboot_click,
+    line_reader.EventType.ALCOHOL_CONSUMED: record_alcohol_consumed,
+    line_reader.EventType.TOTALLY_INTOXICATED: record_totally_intoxicated,
 }
 
 
@@ -326,6 +352,9 @@ def build_summary(state):
         max_damage=dict(state.max_damage),
         spell_list=state.spell_list,
         timeline=list(state.timeline),
+        jboot_click_count=state.jboot_click_count,
+        alcohol_count=state.alcohol_count,
+        totally_intoxicated_count=state.totally_intoxicated_count,
     )
 
 

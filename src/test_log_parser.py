@@ -108,6 +108,74 @@ def test_parse_log_lines_tracks_max_damage_per_type():
     assert "pierce" not in summary.max_damage
 
 
+def test_parse_log_lines_excludes_backstab_over_cap():
+    lines = [
+        "You backstab a zombie for 80 points of damage.",
+        "You backstab a goblin for 32000 points of damage.",
+    ]
+    _, _, summary = log_parser.parse_log_lines(lines)
+    assert summary.max_damage["backstab"] == 80
+
+
+def test_parse_log_lines_keeps_backstab_at_cap_boundary():
+    lines = [
+        "You backstab a zombie for 10000 points of damage.",
+        "You backstab a goblin for 10001 points of damage.",
+    ]
+    _, _, summary = log_parser.parse_log_lines(lines)
+    assert summary.max_damage["backstab"] == 10000
+
+
+def test_parse_log_lines_cap_does_not_affect_other_damage_types():
+    lines = [
+        "You slash a goblin for 32000 points of damage.",
+    ]
+    _, _, summary = log_parser.parse_log_lines(lines)
+    assert summary.max_damage["slash"] == 32000
+
+
+def test_parse_log_lines_counts_jboot_clicks():
+    lines = [
+        "[Sun Apr 20 13:15:27 2025] Your feet feel quick.",
+        "[Sun Apr 20 13:16:27 2025] Your feet feel quick.",
+        "[Sun Apr 20 13:17:27 2025] You have entered Grobb.",
+    ]
+    _, _, summary = log_parser.parse_log_lines(lines)
+    assert summary.jboot_click_count == 2
+
+
+def test_parse_log_lines_counts_alcohol_and_intoxication():
+    lines = [
+        "[Wed May 20 06:05:09 2026] Glug, glug, glug...  You take a swig of ale.",
+        "[Wed May 20 06:05:10 2026] Glug, glug, glug...  You take a swig of ale.",
+        (
+            "[Wed May 20 06:05:12 2026] You could not possibly consume more "
+            "alcohol or become more intoxicated!"
+        ),
+    ]
+    _, _, summary = log_parser.parse_log_lines(lines)
+    assert summary.alcohol_count == 2
+    assert summary.totally_intoxicated_count == 1
+
+
+def test_parse_log_lines_trivia_counts_zero_when_absent():
+    lines = [
+        "[Sat Sep 24 19:51:48 2022] Welcome to EverQuest!",
+        "[Sun Jan 08 15:01:29 2023] You have entered Lake Rathetear.",
+    ]
+    _, _, summary = log_parser.parse_log_lines(lines)
+    assert summary.jboot_click_count == 0
+    assert summary.alcohol_count == 0
+    assert summary.totally_intoxicated_count == 0
+
+
+def test_build_empty_summary_has_zero_trivia_counts():
+    summary = log_parser.build_empty_summary()
+    assert summary.jboot_click_count == 0
+    assert summary.alcohol_count == 0
+    assert summary.totally_intoxicated_count == 0
+
+
 def test_parse_log_lines_tracks_spell_damage():
     lines = [
         "You hit a goblin for 30 points of non-melee damage.",
