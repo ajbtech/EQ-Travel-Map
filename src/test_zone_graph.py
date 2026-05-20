@@ -88,6 +88,15 @@ def test_zone_graph_aliases_log_name_without_apostrophe_for_sirens_grotto():
     assert graph["aliases"].get("Sirens Grotto") == "Siren's Grotto"
 
 
+def test_zone_graph_aliases_plural_crystal_caverns_to_singular_node():
+    # EQ logs write "You have entered Crystal Caverns." (plural), but the
+    # graph node uses the singular "Crystal Cavern" spelling; the alias keeps
+    # the logged zone from being dropped as unknown.
+    graph = load_zone_graph()
+
+    assert graph["aliases"].get("Crystal Caverns") == "Crystal Cavern"
+
+
 def test_zone_graph_aliases_log_name_without_apostrophe_for_sleepers_tomb():
     # EQ logs write "You have entered Sleepers Tomb." with no apostrophe,
     # but the graph node uses the canonical "Sleeper's Tomb" spelling.
