@@ -80,6 +80,14 @@ def test_zone_graph_aliases_an_arena_pvp_area_to_the_arena():
     assert graph["aliases"].get("an Arena (PvP) area") == "The Arena"
 
 
+def test_zone_graph_aliases_qeynos_aqueduct_system_to_catacombs_node():
+    # EQ logs write "You have entered Qeynos Aqueduct System." but the graph
+    # node uses the canonical "Qeynos Catacombs" spelling.
+    graph = load_zone_graph()
+
+    assert graph["aliases"].get("Qeynos Aqueduct System") == "Qeynos Catacombs"
+
+
 def test_zone_graph_aliases_full_solusek_ro_log_name_to_abbreviated_node():
     # EQ logs write "You have entered Temple of Solusek Ro." in full, but the
     # graph node uses the abbreviated "Temple of Sol. Ro" spelling.
