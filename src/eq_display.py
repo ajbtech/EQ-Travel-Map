@@ -81,15 +81,24 @@ class MapRenderer:
     def draw_location_circle(self, zone_loc, percent):
         x, y = zone_loc
         r = LOCATION_CIRCLE_RADIUS
+        w = LOCATION_CIRCLE_WIDTH
+        o = 2
+        color = _to_rgba(make_rainbow(percent))
+        black = (0, 0, 0, 255)
         self.draw.ellipse(
-            [(x - r, y - r), (x + r, y + r)],
-            outline=(0, 0, 0, 255),
-            width=LOCATION_CIRCLE_WIDTH + 2,
+            [(x - r - o, y - r - o), (x + r + o, y + r + o)],
+            outline=black,
+            width=o,
         )
         self.draw.ellipse(
             [(x - r, y - r), (x + r, y + r)],
-            outline=_to_rgba(make_rainbow(percent)),
-            width=LOCATION_CIRCLE_WIDTH,
+            outline=color,
+            width=w,
+        )
+        self.draw.ellipse(
+            [(x - r + w, y - r + w), (x + r - w, y + r - w)],
+            outline=black,
+            width=o,
         )
 
     def get_image(self):
