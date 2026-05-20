@@ -8,6 +8,8 @@ The resulting ``dist/EQTravelMap/`` folder is what gets zipped and attached to
 GitHub Releases for download by non-CLI users.
 """
 
+import os
+import sys
 from pathlib import Path
 
 
@@ -322,6 +324,19 @@ a.datas = [d for d in a.datas if _keep(d)]
 
 pyz = PYZ(a.pure)
 
+if sys.platform == "win32":
+    _icon = str(PROJECT_ROOT / "assets" / "icon.ico")
+    _codesign_identity = None
+    _entitlements_file = None
+elif sys.platform == "darwin":
+    _icon = str(PROJECT_ROOT / "assets" / "icon.icns")
+    _codesign_identity = os.environ.get("CODESIGN_IDENTITY", "-")
+    _entitlements_file = None
+else:
+    _icon = str(PROJECT_ROOT / "assets" / "icon.png")
+    _codesign_identity = None
+    _entitlements_file = None
+
 exe = EXE(
     pyz,
     a.scripts,
@@ -336,9 +351,9 @@ exe = EXE(
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
-    codesign_identity=None,
-    entitlements_file=None,
-    icon=str(PROJECT_ROOT / "assets" / "icon.ico"),
+    codesign_identity=_codesign_identity,
+    entitlements_file=_entitlements_file,
+    icon=_icon,
 )
 
 coll = COLLECT(
