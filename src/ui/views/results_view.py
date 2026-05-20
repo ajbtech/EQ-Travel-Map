@@ -3,7 +3,7 @@ from html import escape
 from pathlib import Path
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QGuiApplication
+from PySide6.QtGui import QColor, QGuiApplication
 from PySide6.QtWidgets import (
     QApplication,
     QButtonGroup,
@@ -99,6 +99,7 @@ class ResultsView(QWidget):
         heading_font = self.character_heading.font()
         heading_font.setPointSize(32)
         self.character_heading.setFont(heading_font)
+        self.character_heading.set_color(QColor("black"))
         self.character_heading.setFixedWidth(200)
         button_column.addWidget(self.character_heading)
 
