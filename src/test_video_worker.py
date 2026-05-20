@@ -108,3 +108,50 @@ def test_worker_cancel_removes_partial_output(qt_app, tmp_path):
 
     assert result.get("cancel") is True
     assert not output.exists()
+
+
+def test_worker_finalize_failure_reports_error(qt_app, tmp_path, monkeypatch):
+    import ui.video_worker as vw
+    from ui.views.results_view import ResultsView
+
+    lines = ["[ts] You have slain a mob!"]
+    kill_list, zone_list, summary = log_parser.parse_log_lines(lines)
+    sections = summary_formatter.build_summary_sections(
+        kill_list, zone_list, summary, "Gorrek"
+    )
+
+    offscreen = ResultsView()
+    offscreen.setAttribute(Qt.WA_DontShowOnScreen, True)
+    offscreen.setFixedSize(320, 240)
+    offscreen.set_results(_SAMPLE_MAP, sections)
+    offscreen.show()
+
+    gen = video_generator.VideoGenerator(
+        "Gorrek", zone_list, summary, target_seconds=1, fps=2
+    )
+    output = tmp_path / "out.mp4"
+    output.write_bytes(b"partial")  # pretend ffmpeg began writing the file
+
+    class _FakeWriter:
+        def append_data(self, frame):
+            pass
+
+        def close(self):
+            raise RuntimeError("ffmpeg finalize failed")
+
+    monkeypatch.setattr(vw.imageio, "get_writer", lambda *a, **k: _FakeWriter())
+
+    worker = VideoWorker(gen, offscreen, output, fps=2)
+
+    result = {}
+    loop = QEventLoop()
+    worker.finished.connect(lambda p: (result.__setitem__("ok", p), loop.quit()))
+    worker.error.connect(lambda m: (result.__setitem__("err", m), loop.quit()))
+    worker.start()
+    loop.exec()
+
+    # A close() failure means the file was never finalized: report error, not
+    # a false success, and remove the partial output.
+    assert "ok" not in result
+    assert "ffmpeg finalize failed" in result.get("err", "")
+    assert not output.exists()
