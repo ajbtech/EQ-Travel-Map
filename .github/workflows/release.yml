@@ -46,7 +46,7 @@ jobs:
         run: |
           Get-FileHash -Algorithm SHA256 $env:BUNDLE_ZIP, $env:SAMPLES_ZIP |
             ForEach-Object { "{0}  {1}" -f $_.Hash.ToLower(), (Split-Path -Leaf $_.Path) } |
-            Out-File -Encoding ascii -FilePath SHA256SUMS.txt
+            Out-File -Encoding ascii -FilePath SHA256SUMS-windows.txt
 
       - name: Create GitHub Release and upload assets
         uses: softprops/action-gh-release@v2
@@ -54,7 +54,116 @@ jobs:
           files: |
             ${{ env.BUNDLE_ZIP }}
             ${{ env.SAMPLES_ZIP }}
-            SHA256SUMS.txt
+            SHA256SUMS-windows.txt
           generate_release_notes: true
+          draft: false
+          prerelease: false
+
+  build-macos:
+    name: Build macOS bundle and attach to release
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-release.txt
+
+      - name: Create icon.icns from icon.png
+        run: |
+          mkdir -p icon.iconset
+          sips -z 16   16   assets/icon.png --out icon.iconset/icon_16x16.png
+          sips -z 32   32   assets/icon.png --out icon.iconset/icon_16x16@2x.png
+          sips -z 32   32   assets/icon.png --out icon.iconset/icon_32x32.png
+          sips -z 64   64   assets/icon.png --out icon.iconset/icon_32x32@2x.png
+          sips -z 128  128  assets/icon.png --out icon.iconset/icon_128x128.png
+          sips -z 256  256  assets/icon.png --out icon.iconset/icon_128x128@2x.png
+          sips -z 256  256  assets/icon.png --out icon.iconset/icon_256x256.png
+          sips -z 512  512  assets/icon.png --out icon.iconset/icon_256x256@2x.png
+          sips -z 512  512  assets/icon.png --out icon.iconset/icon_512x512.png
+          iconutil -c icns icon.iconset -o assets/icon.icns
+
+      - name: Build PyInstaller bundle
+        run: pyinstaller --noconfirm --clean EQTravelMap.spec
+
+      - name: Zip .app bundle
+        run: |
+          TAG="${{ github.ref_name }}"
+          BUNDLE_ZIP="EQTravelMap-${TAG}-macos.zip"
+          cd dist
+          zip -r "../${BUNDLE_ZIP}" EQTravelMap.app
+          cd ..
+          echo "BUNDLE_ZIP=${BUNDLE_ZIP}" >> "$GITHUB_ENV"
+
+      - name: Generate SHA256 checksums
+        run: |
+          shasum -a 256 "$BUNDLE_ZIP" > SHA256SUMS-macos.txt
+
+      - name: Upload assets to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ env.BUNDLE_ZIP }}
+            SHA256SUMS-macos.txt
+          draft: false
+          prerelease: false
+
+  build-linux:
+    name: Build Linux bundle and attach to release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install Linux Qt runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libegl1 libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 \
+            libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 \
+            libxcb-shape0 libxcb-sync1 libxcb-xfixes0 libxcb-xinerama0 \
+            libxcb-xkb1 libxkbcommon0 libdbus-1-3
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-release.txt
+
+      - name: Build PyInstaller bundle
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: pyinstaller --noconfirm --clean EQTravelMap.spec
+
+      - name: Create tar.gz archive
+        run: |
+          TAG="${{ github.ref_name }}"
+          BUNDLE_TAR="EQTravelMap-${TAG}-linux.tar.gz"
+          tar -czf "${BUNDLE_TAR}" -C dist EQTravelMap
+          echo "BUNDLE_TAR=${BUNDLE_TAR}" >> "$GITHUB_ENV"
+
+      - name: Generate SHA256 checksums
+        run: |
+          sha256sum "$BUNDLE_TAR" > SHA256SUMS-linux.txt
+
+      - name: Upload assets to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ env.BUNDLE_TAR }}
+            SHA256SUMS-linux.txt
           draft: false
           prerelease: false

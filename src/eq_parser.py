@@ -6,6 +6,7 @@ and prints a text summary to stdout.
 """
 
 import argparse
+import sys
 from pathlib import Path
 
 import eq_display
@@ -15,12 +16,27 @@ import summary_formatter
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-_CANDIDATE_LOG_FOLDERS = (
-    Path.home() / "EverQuest" / "Logs",
-    Path("C:/EverQuest/Logs"),
-    Path("C:/Program Files/Sony/EverQuest/Logs"),
-    Path("C:/Program Files (x86)/Sony/EverQuest/Logs"),
-)
+
+def _platform_log_candidates():
+    common = [Path.home() / "EverQuest" / "Logs"]
+    if sys.platform == "win32":
+        return common + [
+            Path("C:/EverQuest/Logs"),
+            Path("C:/Program Files/Sony/EverQuest/Logs"),
+            Path("C:/Program Files (x86)/Sony/EverQuest/Logs"),
+        ]
+    if sys.platform == "darwin":
+        return common + [
+            Path.home() / "Library" / "Application Support" / "EverQuest" / "Logs",
+            Path("/Applications/EverQuest/Logs"),
+        ]
+    return common + [
+        Path.home() / ".everquest" / "logs",
+        Path("/opt/everquest/logs"),
+    ]
+
+
+_CANDIDATE_LOG_FOLDERS = tuple(_platform_log_candidates())
 
 
 def _detect_default_log_folder():
