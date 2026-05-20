@@ -72,3 +72,42 @@ def test_suggested_video_filename_uses_character(qt_app):
     view = ResultsView()
     view.set_results(Path("/tmp/map.png"), _sections("Gorrek"))
     assert view._suggested_video_filename() == "Gorrek_travel.mp4"
+
+
+def test_make_video_setup_failure_surfaces_error_dialog(qt_app, monkeypatch):
+    from ui.views import results_view as rv
+
+    sample_image = Path(__file__).resolve().parents[1] / "docs" / "sample_map.png"
+    zone_list = EQList()
+    zone_list.add("Grobb")
+    summary = log_parser.build_empty_summary()
+    view = ResultsView()
+    view.set_results(sample_image, _sections("Gorrek"), zone_list, summary)
+
+    # Skip the two interactive dialogs.
+    monkeypatch.setattr(rv._DurationDialog, "exec", lambda self: rv.QDialog.Accepted)
+    monkeypatch.setattr(rv._DurationDialog, "target_seconds", lambda self: 30)
+    monkeypatch.setattr(
+        rv.QFileDialog,
+        "getSaveFileName",
+        staticmethod(lambda *a, **k: ("/tmp/o.mp4", "")),
+    )
+
+    # Force the export setup to blow up the way a missing dependency would.
+    def _boom(self, *_a, **_k):
+        raise RuntimeError("ffmpeg unavailable")
+
+    monkeypatch.setattr(rv.ResultsView, "_start_video_export", _boom)
+
+    captured = {}
+    monkeypatch.setattr(
+        rv.QMessageBox,
+        "warning",
+        staticmethod(lambda *a, **k: captured.setdefault("args", a)),
+    )
+
+    view._on_make_video()
+
+    # The failure must reach the user instead of vanishing silently.
+    assert "args" in captured
+    assert "ffmpeg unavailable" in captured["args"][-1]
