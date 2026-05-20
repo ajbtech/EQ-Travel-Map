@@ -198,7 +198,8 @@ UNUSED_PIL_C_EXTENSION_STEMS = [
 # than via a binary/data filter because they are pure-Python packages.
 UNUSED_STDLIB_MODULES = [
     "asyncio",
-    "email",
+    # "email" is needed by imageio → importlib.metadata (package METADATA files
+    # are RFC 822 / email-header format); removing it breaks video export.
     # "html" is imported by src/ui/views/results_view.py for html.escape
     # when building the Qt summary widget -- do NOT add it back.
     "http",
