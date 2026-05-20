@@ -6,9 +6,10 @@ from eq_list import EQList
 from ui.views.results_view import ResultsView
 
 
-def _sections(character="Gorrek"):
+def _sections(character="Gorrek", level_line="Level: 1"):
     return summary_formatter.SummarySections(
         character_line=f"Character: {character}" if character else "",
+        level_line=level_line,
         top_kills_lines=["Top 5 killed creatures:"],
         top_zones_lines=["Top 5 visited zones:"],
         stats_lines=["Total logs: 0"],
@@ -80,6 +81,20 @@ def test_character_heading_is_centered(qt_app):
 
     view = ResultsView()
     assert view.character_heading._alignment & Qt.AlignHCenter
+
+
+def test_level_heading_shows_level(qt_app):
+    view = ResultsView()
+    view.set_results(Path("/tmp/map.png"), _sections("Gorrek", "Level: 42"))
+    assert view.level_heading.text() == "Level: 42"
+
+
+def test_level_heading_smaller_than_name(qt_app):
+    view = ResultsView()
+    assert (
+        view.level_heading.font().pointSize()
+        < view.character_heading.font().pointSize()
+    )
 
 
 def test_make_video_button_disabled_without_timeline(qt_app):

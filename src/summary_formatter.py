@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 @dataclass
 class SummarySections:
     character_line: str = ""
+    level_line: str = ""
     top_kills_lines: list = field(default_factory=list)
     top_zones_lines: list = field(default_factory=list)
     stats_lines: list = field(default_factory=list)
@@ -17,6 +18,7 @@ def build_summary_sections(kill_list, zone_list, summary, character_name=None):
     character_line = (
         f"Character: {character_name}" if character_name is not None else ""
     )
+    level_line = f"Level: {format_number(summary.current_level)}"
     top_kills_lines = build_top_count_lines("Top 5 killed creatures", kill_list)
     top_zones_lines = build_top_count_lines("Top 5 visited zones", zone_list)
     stats_lines = [
@@ -27,7 +29,6 @@ def build_summary_sections(kill_list, zone_list, summary, character_name=None):
         f"Zone Count: {format_number(summary.zone_count)}",
         f"Kill Count: {format_number(summary.kill_count)}",
         f"Levels Lost: {format_number(summary.level_lost_count)}",
-        f"Current Level: {format_number(summary.current_level)}",
         f"Looted coin: {format_cash(summary.loot_cash)}",
         f"Coin from Merchants: {format_cash(summary.merch_cash)}",
     ]
@@ -43,6 +44,7 @@ def build_summary_sections(kill_list, zone_list, summary, character_name=None):
     max_damage_lines = build_max_damage_lines(summary.max_damage)
     return SummarySections(
         character_line=character_line,
+        level_line=level_line,
         top_kills_lines=top_kills_lines,
         top_zones_lines=top_zones_lines,
         stats_lines=stats_lines,
@@ -57,7 +59,11 @@ def build_summary_lines(kill_list, zone_list, summary, character_name=None):
     sections = build_summary_sections(kill_list, zone_list, summary, character_name)
     lines = []
     if sections.character_line:
-        lines += [sections.character_line, ""]
+        lines.append(sections.character_line)
+    if sections.level_line:
+        lines.append(sections.level_line)
+    if lines:
+        lines.append("")
     lines += sections.top_kills_lines
     lines += [""]
     lines += sections.top_zones_lines

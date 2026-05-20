@@ -28,6 +28,7 @@ class VideoFrame:
     top_kills_lines: list
     top_zones_lines: list
     stats_lines: list
+    level_line: str
     frame_index: int
     total_frames: int
 
@@ -131,10 +132,10 @@ class VideoGenerator:
                     zone_count,
                     kill_count,
                     level_lost_count,
-                    current_level,
                     loot_cash,
                     merch_cash,
                 ),
+                level_line=f"Level: {summary_formatter.format_number(current_level)}",
                 frame_index=frame_index,
                 total_frames=total,
             )
@@ -168,7 +169,6 @@ class VideoGenerator:
         zone_count,
         kill_count,
         level_lost_count,
-        current_level,
         loot_cash,
         merch_cash,
     ):
@@ -181,7 +181,6 @@ class VideoGenerator:
             f"Zone Count: {fmt(zone_count)}",
             f"Kill Count: {fmt(kill_count)}",
             f"Levels Lost: {fmt(level_lost_count)}",
-            f"Current Level: {fmt(current_level)}",
             f"Looted coin: {summary_formatter.format_cash(loot_cash.normalize())}",
             f"Coin from Merchants: "
             f"{summary_formatter.format_cash(merch_cash.normalize())}",

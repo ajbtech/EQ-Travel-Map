@@ -107,6 +107,16 @@ class ResultsView(QWidget):
         self.character_heading.setFixedWidth(200)
         button_column.addWidget(self.character_heading)
 
+        self.level_heading = EngravedHeading()
+        level_font = self.level_heading.font()
+        level_font.setPointSize(16)
+        self.level_heading.setFont(level_font)
+        self.level_heading.set_color(QColor("#2a1c0e"))
+        self.level_heading.set_engraved(False)
+        self.level_heading.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+        self.level_heading.setFixedWidth(200)
+        button_column.addWidget(self.level_heading)
+
         # Stretch between the heading (pinned top) and the buttons pushes the
         # button stack down to the bottom of the column.
         button_column.addStretch(1)
@@ -234,6 +244,7 @@ class ResultsView(QWidget):
         self._parse_summary = parse_summary
         self.map_canvas.load_image(self._current_image_path)
         self.character_heading.setText(self._character_name())
+        self.level_heading.setText(self._level_text())
         self._fit_map_frame_to_image()
         self.set_columns(
             summary_sections.top_kills_lines,
@@ -267,6 +278,9 @@ class ResultsView(QWidget):
         parts = []
         if self._current_sections.character_line:
             parts.append(self._current_sections.character_line)
+            level_line = getattr(self._current_sections, "level_line", "")
+            if level_line:
+                parts.append(level_line)
             parts.append("")
         parts.extend(self._current_sections.top_kills_lines)
         parts.append("")
@@ -414,6 +428,11 @@ class ResultsView(QWidget):
         if line.startswith(prefix):
             return line[len(prefix) :].strip()
         return ""
+
+    def _level_text(self):
+        if self._current_sections is None:
+            return ""
+        return getattr(self._current_sections, "level_line", "")
 
 
 class _DurationDialog(QDialog):
