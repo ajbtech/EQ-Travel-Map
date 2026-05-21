@@ -97,5 +97,29 @@ def test_final_frame_map_matches_full_reverse_render():
     reference = eq_display.MapRenderer()
     for event in reversed(gen._all_map_events):
         event.draw(reference)
+    last_zone = "Grobb"
+    if gen._all_map_events:
+        loc = eq_display.get_zone_center(last_zone)
+        reference.draw_location_circle(loc, gen._all_map_events[-1].percent)
 
     assert frames[-1].map_image.tobytes() == reference.get_image().tobytes()
+
+
+def test_video_frame_map_has_circle_at_last_zone_center():
+    lines = [
+        "[ts] You have entered Grobb.",
+        "[ts] You have entered Innothule Swamp.",
+    ]
+    zone_list, summary = _summary_and_zones(lines)
+    gen = video_generator.VideoGenerator(
+        "Gorrek", zone_list, summary, target_seconds=1, fps=2
+    )
+    frames = list(gen.frames())
+    final_map = frames[-1].map_image
+
+    x, y = eq_display.get_zone_center("Innothule Swamp")
+    r = eq_display.LOCATION_CIRCLE_RADIUS
+    top_pixel = final_map.getpixel((int(x), int(y) - r))
+    percent = gen._all_map_events[-1].percent
+    expected = eq_display._to_rgba(eq_display.make_rainbow(percent))
+    assert top_pixel == expected

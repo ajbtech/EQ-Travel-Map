@@ -82,6 +82,7 @@ class VideoGenerator:
         known_revealed = 0
         drawn_event_count = 0
         current_map_image = self._base_image
+        last_known_zone = None
 
         consumed = 0
         for frame_index in range(total):
@@ -97,6 +98,7 @@ class VideoGenerator:
                     zone_counter[event.value] += 1
                     if zone_graph.has_zone_center(event.value):
                         known_revealed += 1
+                        last_known_zone = event.value
                 elif kind == line_reader.EventType.KILL:
                     kill_count += 1
                     kill_counter[event.value] += 1
@@ -118,7 +120,7 @@ class VideoGenerator:
                 self._cumulative[known_revealed - 1] if known_revealed else 0
             )
             if target_events > drawn_event_count:
-                current_map_image = self._render_map(target_events)
+                current_map_image = self._render_map(target_events, last_known_zone)
                 drawn_event_count = target_events
 
             yield VideoFrame(
@@ -147,10 +149,14 @@ class VideoGenerator:
             return event_count
         return int(round((frame_index + 1) * event_count / total))
 
-    def _render_map(self, event_count):
+    def _render_map(self, event_count, last_known_zone=None):
         renderer = eq_display.MapRenderer(base_image=self._base_image)
-        for event in reversed(self._all_map_events[:event_count]):
+        events = self._all_map_events[:event_count]
+        for event in reversed(events):
             event.draw(renderer)
+        if last_known_zone is not None and events:
+            loc = eq_display.get_zone_center(last_known_zone)
+            renderer.draw_location_circle(loc, events[-1].percent)
         return renderer.get_image()
 
     @staticmethod
