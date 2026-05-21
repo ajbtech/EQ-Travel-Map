@@ -24,7 +24,9 @@ Reads your EverQuest log files chronologically and draws every valid
 zone-to-zone trip on a map of the world. The colour of each line shows when
 in your character's history that trip happened (older trips are drawn on top
 so early adventures stay visible). Alongside the map, you get a copyable text
-summary of kills, deaths, level-ups, looted coin, and merchant earnings.
+summary of kills, deaths, level-ups, looted coin, and merchant earnings. You
+can also export an MP4 video that replays your whole journey, drawing the
+trips in order while the running stats tick up beside the map.
 
 The map shown above was generated from the bundled sample log
 (`samples/sample_eqlog_Gorrek_P1999Green.txt`), a real Project 1999 character
@@ -40,10 +42,11 @@ The results window has three things side-by-side under the rendered map:
   deaths, zones visited, kills, levels lost, current level, looted coin,
   and coin earned from merchants.
 
-Four buttons sit to the right of the map: **NEW INPUT** to parse another
+Five buttons sit to the right of the map: **NEW INPUT** to parse another
 character, **COPY TEXT** to put the summary on your clipboard, **SAVE MAP**
-to export the rendered PNG anywhere on disk, and **MORE STATS** to open the
-extra-stats window described below.
+to export the rendered PNG anywhere on disk, **MORE STATS** to open the
+extra-stats window described below, and **MAKE VIDEO** to export an animated
+replay of your journey (see below).
 
 ### Extra stats (MORE STATS button)
 
@@ -56,6 +59,24 @@ doesn't fit on the main summary:
 - **Max hit by damage type** — your biggest single hit broken down by
   `slash`, `pierce`, `backstab`, `bash`, `spell`, `crit`, and any other
   damage types that turned up in the logs.
+
+### Travel-replay video (MAKE VIDEO button)
+
+Click **MAKE VIDEO** on the results window to export an MP4 that replays your
+character's history from the beginning. The map starts empty and reveals each
+trip in chronological order, with a marker on your current zone, while the
+top-kills, top-zones, and major-statistics columns count up alongside it.
+
+When you click the button you're asked how long the finished video should be.
+Pick one of the presets — **30 seconds**, **1 minute**, **2 minutes** (the
+default), or **5 minutes** — or enter a custom length (10–3600 seconds). The
+whole journey is always shown; a shorter duration just packs more events into
+each frame. Then choose where to save the `.mp4` file. A progress dialog runs
+the export and can be cancelled at any time.
+
+Video export needs the freshly parsed timeline, so it's available right after
+a **Generate** run. (The pre-built bundles ship the ffmpeg encoder needed to
+write the MP4; running from source pulls it in via `imageio[ffmpeg]`.)
 
 ---
 
