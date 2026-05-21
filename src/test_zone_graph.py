@@ -71,13 +71,13 @@ def test_zone_graph_includes_plane_of_sky_connection_to_east_freeport():
     assert frozenset(("Plane of Sky", "East Freeport")) in edges
 
 
-def test_zone_graph_aliases_an_arena_pvp_area_to_the_arena():
-    # EQ logs write "You have entered an Arena (PvP) area." verbatim; the
-    # alias resolves that literal phrase to the canonical "The Arena" node
-    # without relying on article stripping.
+def test_zone_graph_does_not_alias_pvp_area_to_the_arena():
+    # "You have entered an Arena (PvP) area." fires inside ordinary zones when
+    # stepping into a small PvP sub-area; it is not the Arena zone (which logs
+    # "The Arena" verbatim), so it must not be aliased to that node.
     graph = load_zone_graph()
 
-    assert graph["aliases"].get("an Arena (PvP) area") == "The Arena"
+    assert "an Arena (PvP) area" not in graph["aliases"]
 
 
 def test_zone_graph_aliases_qeynos_aqueduct_system_to_catacombs_node():
