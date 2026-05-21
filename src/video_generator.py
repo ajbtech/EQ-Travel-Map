@@ -10,6 +10,8 @@ here so it stays unit-testable.
 from collections import Counter
 from dataclasses import dataclass
 
+from PIL import Image
+
 import eq_display
 import line_reader
 import map_path
@@ -31,6 +33,8 @@ class VideoFrame:
     level_line: str
     frame_index: int
     total_frames: int
+    map_updated: bool
+    content_version: int
 
 
 class VideoGenerator:
@@ -66,6 +70,14 @@ class VideoGenerator:
         return self._total_frames
 
     def frames(self):
+        # Reset incremental render state so frames() is safe to call multiple times.
+        self._lines_overlay = Image.new(
+            "RGBA",
+            (eq_display.MAP_PIXEL_WIDTH, eq_display.MAP_PIXEL_HEIGHT),
+            (0, 0, 0, 0),
+        )
+        self._rendered_event_count = 0
+
         event_count = len(self._timeline)
         total = self._total_frames
 
@@ -84,6 +96,8 @@ class VideoGenerator:
         drawn_event_count = 0
         current_map_image = self._base_image
         last_known_zone = None
+        prev_consumed = 0
+        content_version = 0
 
         consumed = 0
         for frame_index in range(total):
@@ -120,12 +134,20 @@ class VideoGenerator:
             target_events = (
                 self._cumulative[known_revealed - 1] if known_revealed else 0
             )
+            map_was_updated = False
             if target_events > drawn_event_count:
                 current_map_image = self._render_map(target_events, last_known_zone)
                 drawn_event_count = target_events
+                map_was_updated = True
+
+            if consumed != prev_consumed:
+                content_version += 1
+                prev_consumed = consumed
 
             yield VideoFrame(
                 map_image=current_map_image,
+                map_updated=map_was_updated,
+                content_version=content_version,
                 top_kills_lines=self._top_lines("Top 5 killed creatures", kill_counter),
                 top_zones_lines=self._top_lines("Top 5 visited zones", zone_counter),
                 stats_lines=self._stats_lines(
@@ -151,14 +173,35 @@ class VideoGenerator:
         return int(round((frame_index + 1) * event_count / total))
 
     def _render_map(self, event_count, last_known_zone=None):
-        renderer = eq_display.MapRenderer(base_image=self._base_image)
-        events = self._all_map_events[:event_count]
-        for event in reversed(events):
-            event.draw(renderer)
-        if last_known_zone is not None and events:
+        new_events = self._all_map_events[self._rendered_event_count : event_count]
+        if new_events:
+            # Draw new events onto a fresh transparent layer.  Reversing within
+            # the batch keeps the same "oldest on top" z-order as a full redraw:
+            # the earliest of the new events is drawn last and sits on top of the
+            # later ones.
+            new_layer = Image.new(
+                "RGBA",
+                (eq_display.MAP_PIXEL_WIDTH, eq_display.MAP_PIXEL_HEIGHT),
+                (0, 0, 0, 0),
+            )
+            overlay_renderer = eq_display.MapRenderer.for_overlay(new_layer)
+            for event in reversed(new_events):
+                event.draw(overlay_renderer)
+            # Paste the existing lines on top so all previously drawn events
+            # remain above the new ones, preserving the overall z-order.
+            new_layer.alpha_composite(self._lines_overlay)
+            self._lines_overlay = new_layer
+            self._rendered_event_count = event_count
+
+        result = self._base_image.copy()
+        result.alpha_composite(self._lines_overlay)
+        if last_known_zone is not None and event_count > 0:
             loc = eq_display.get_zone_center(last_known_zone)
-            renderer.draw_location_circle(loc, events[-1].percent)
-        return renderer.get_image()
+            circle_renderer = eq_display.MapRenderer.for_overlay(result)
+            circle_renderer.draw_location_circle(
+                loc, self._all_map_events[event_count - 1].percent
+            )
+        return result
 
     @staticmethod
     def _top_lines(title, counter):

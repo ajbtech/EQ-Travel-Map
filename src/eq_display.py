@@ -101,6 +101,14 @@ class MapRenderer:
             width=o,
         )
 
+    @classmethod
+    def for_overlay(cls, image):
+        """Return a renderer that draws onto *image* without pasting a base map."""
+        obj = cls.__new__(cls)
+        obj.image = image
+        obj.draw = ImageDraw.Draw(image, "RGBA")
+        return obj
+
     def get_image(self):
         return self.image.copy()
 
