@@ -124,3 +124,26 @@ def test_draw_location_circle_center_is_unfilled():
     after = renderer.get_image().getpixel((x, y))
 
     assert after == before
+
+
+def test_for_overlay_draws_on_provided_image_without_base_map():
+    from PIL import Image
+
+    w, h = eq_display.MAP_PIXEL_WIDTH, eq_display.MAP_PIXEL_HEIGHT
+    canvas = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    renderer = eq_display.MapRenderer.for_overlay(canvas)
+    x, y = w // 2, h // 2
+    renderer.draw_dot((x, y), 0.0)
+
+    assert canvas.getpixel((x, y)) == eq_display._to_rgba(eq_display.make_rainbow(0.0))
+
+
+def test_for_overlay_does_not_paste_base_map():
+    from PIL import Image
+
+    w, h = eq_display.MAP_PIXEL_WIDTH, eq_display.MAP_PIXEL_HEIGHT
+    canvas = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    eq_display.MapRenderer.for_overlay(canvas)
+
+    # All pixels should still be transparent — no map was pasted.
+    assert canvas.getpixel((0, 0)) == (0, 0, 0, 0)

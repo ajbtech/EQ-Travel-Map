@@ -123,3 +123,65 @@ def test_video_frame_map_has_circle_at_last_zone_center():
     percent = gen._all_map_events[-1].percent
     expected = eq_display._to_rgba(eq_display.make_rainbow(percent))
     assert top_pixel == expected
+
+
+def test_map_updated_is_false_for_kill_only_frames():
+    lines = ["[ts] You have slain a frog!"] * 10
+    zone_list, summary = _summary_and_zones(lines)
+    gen = video_generator.VideoGenerator(
+        "Gorrek", zone_list, summary, target_seconds=1, fps=5
+    )
+    frames = list(gen.frames())
+    # No zone transitions means no map updates.
+    assert all(not f.map_updated for f in frames)
+
+
+def test_map_updated_is_true_when_zone_transition_occurs():
+    lines = [
+        "[ts] You have entered Grobb.",
+        "[ts] You have entered Innothule Swamp.",
+    ]
+    zone_list, summary = _summary_and_zones(lines)
+    gen = video_generator.VideoGenerator(
+        "Gorrek", zone_list, summary, target_seconds=1, fps=2
+    )
+    frames = list(gen.frames())
+    # Zone transitions must mark at least one frame as map_updated.
+    assert any(f.map_updated for f in frames)
+
+
+def test_content_version_is_non_decreasing():
+    lines = [f"[ts] You have slain mob{i}!" for i in range(5)]
+    zone_list, summary = _summary_and_zones(lines)
+    gen = video_generator.VideoGenerator(
+        "Gorrek", zone_list, summary, target_seconds=1, fps=5
+    )
+    versions = [f.content_version for f in gen.frames()]
+    assert versions == sorted(versions)
+
+
+def test_content_version_stable_when_no_new_events():
+    lines = ["[ts] You have slain a mob!"]
+    zone_list, summary = _summary_and_zones(lines)
+    # More frames than events means some frames will have identical content.
+    gen = video_generator.VideoGenerator(
+        "Gorrek", zone_list, summary, target_seconds=10, fps=24
+    )
+    versions = [f.content_version for f in gen.frames()]
+    unique_versions = len(set(versions))
+    # Only one event → at most two distinct versions (before and after the event).
+    assert unique_versions <= 2
+
+
+def test_frames_is_safe_to_call_twice():
+    lines = [
+        "[ts] You have entered Grobb.",
+        "[ts] You have entered Innothule Swamp.",
+    ]
+    zone_list, summary = _summary_and_zones(lines)
+    gen = video_generator.VideoGenerator(
+        "Gorrek", zone_list, summary, target_seconds=1, fps=2
+    )
+    frames_a = list(gen.frames())
+    frames_b = list(gen.frames())
+    assert frames_a[-1].map_image.tobytes() == frames_b[-1].map_image.tobytes()

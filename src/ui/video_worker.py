@@ -49,6 +49,9 @@ class VideoWorker(QObject):
         self._writer = None
         self._frame_iter = None
         self._cancel_requested = False
+        self._last_content_version = -1
+        self._last_numpy_frame = None
+        self._pixmap_loaded = False
 
     def start(self):
         try:
@@ -100,15 +103,20 @@ class VideoWorker(QObject):
             return
 
         try:
-            self._view.map_canvas.load_pixmap(pil_to_qpixmap(frame.map_image))
-            self._view.set_columns(
-                frame.top_kills_lines, frame.top_zones_lines, frame.stats_lines
-            )
-            self._view.level_heading.setText(frame.level_line)
-            image = QImage(self._view.size(), QImage.Format_RGB888)
-            image.fill(Qt.black)
-            self._view.render(image)
-            self._writer.append_data(qimage_to_numpy(image))
+            if frame.content_version != self._last_content_version:
+                if frame.map_updated or not self._pixmap_loaded:
+                    self._view.map_canvas.load_pixmap(pil_to_qpixmap(frame.map_image))
+                    self._pixmap_loaded = True
+                self._view.set_columns(
+                    frame.top_kills_lines, frame.top_zones_lines, frame.stats_lines
+                )
+                self._view.level_heading.setText(frame.level_line)
+                image = QImage(self._view.size(), QImage.Format_RGB888)
+                image.fill(Qt.black)
+                self._view.render(image)
+                self._last_numpy_frame = qimage_to_numpy(image)
+                self._last_content_version = frame.content_version
+            self._writer.append_data(self._last_numpy_frame)
         except Exception as exc:
             self._cleanup(delete_output=True)
             self.error.emit(str(exc))
