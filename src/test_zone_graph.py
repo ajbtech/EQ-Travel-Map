@@ -88,6 +88,14 @@ def test_zone_graph_aliases_qeynos_aqueduct_system_to_catacombs_node():
     assert graph["aliases"].get("Qeynos Aqueduct System") == "Qeynos Catacombs"
 
 
+def test_zone_graph_aliases_high_keep_to_highpass_keep_node():
+    # EQ logs write "You have entered High Keep." but the graph node uses the
+    # "Highpass Keep" spelling.
+    graph = load_zone_graph()
+
+    assert graph["aliases"].get("High Keep") == "Highpass Keep"
+
+
 def test_zone_graph_aliases_full_solusek_ro_log_name_to_abbreviated_node():
     # EQ logs write "You have entered Temple of Solusek Ro." in full, but the
     # graph node uses the abbreviated "Temple of Sol. Ro" spelling.
