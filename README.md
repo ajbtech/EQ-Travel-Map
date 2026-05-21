@@ -12,7 +12,7 @@ Instructions:
 Generate a visual travel map and play summary from your EverQuest character's
 log files. Drop in your logs, pick your character, click Generate.
 
-<video src="Gorrek_travel_short.mp4" autoplay loop muted playsinline width="100%"></video>
+<video src="https://github.com/user-attachments/assets/a664569d-346e-4016-91d5-13562d3b83e6" autoplay loop muted playsinline width="100%"></video>
 
 [![tests](https://github.com/ajbtech/EQ-Travel-Map/actions/workflows/test.yml/badge.svg)](https://github.com/ajbtech/EQ-Travel-Map/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
