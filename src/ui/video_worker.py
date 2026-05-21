@@ -104,6 +104,7 @@ class VideoWorker(QObject):
             self._view.set_columns(
                 frame.top_kills_lines, frame.top_zones_lines, frame.stats_lines
             )
+            self._view.level_heading.setText(frame.level_line)
             image = QImage(self._view.size(), QImage.Format_RGB888)
             image.fill(Qt.black)
             self._view.render(image)
