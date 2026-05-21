@@ -128,16 +128,21 @@ class MainWindow(QMainWindow):
             return
         width, height = size
         # Cap to the active screen's available area minus a reserve for the
-        # window frame and title bar. When either dimension would overflow,
-        # shrink both proportionally so the view keeps its designed aspect
-        # ratio (e.g. results view at 1240x760 stays ~1.63:1 instead of
-        # turning wider-than-designed when only the height is clipped).
+        # window frame and title bar.
         available = self._available_geometry(self)
         max_width = max(1, available.width() - _WINDOW_FRAME_RESERVE_W)
         max_height = max(1, available.height() - _WINDOW_FRAME_RESERVE_H)
-        scale = min(1.0, max_width / width, max_height / height)
-        width = max(1, int(width * scale))
-        height = max(1, int(height * scale))
+        # Views whose content does not scale uniformly (the results view has a
+        # fixed-height summary band and fixed-width button column) know how to
+        # fit themselves into the available area without leaving blank space.
+        # Other views just shrink proportionally to keep their aspect ratio.
+        clamp = getattr(active, "clamp_to_available", None)
+        if clamp is not None:
+            width, height = clamp(max_width, max_height)
+        else:
+            scale = min(1.0, max_width / width, max_height / height)
+            width = max(1, int(width * scale))
+            height = max(1, int(height * scale))
         self.setFixedSize(width, height)
         if not self.isVisible():
             return

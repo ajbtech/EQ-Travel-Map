@@ -364,10 +364,12 @@ def test_window_caps_to_available_screen_when_preferred_too_large(qt_app):
     assert h <= small_screen.height() - 80
 
 
-def test_window_preserves_aspect_ratio_when_capping(qt_app):
-    # Screen that only clips the height. Preferred 1240x760 has aspect
-    # 1.6316; the capped window should keep that ratio (within 1px of
-    # int rounding) rather than only shrinking the height.
+def test_window_has_no_right_gap_when_height_is_capped(qt_app):
+    # Screen that only clips the height. The map shrinks to fit, but the
+    # fixed-height summary band and fixed-width button column do not scale,
+    # so the window width must follow the map's new width exactly instead of
+    # keeping the uncapped window's aspect ratio (which left blank space on
+    # the right).
     short_screen = QRect(0, 0, 4000, 700)
     window = _make_window(qt_app, available_geometry=lambda _w: short_screen)
     window.show()
@@ -375,12 +377,14 @@ def test_window_preserves_aspect_ratio_when_capping(qt_app):
     window.show_results(Path("/tmp/out.png"), _sections())
 
     w, h = window.size().toTuple()
-    pref_w, pref_h = window.results_view.preferred_window_size
-    pref_aspect = pref_w / pref_h
-    actual_aspect = w / h
-    assert abs(actual_aspect - pref_aspect) < 0.01
-    # And the height must respect the cap.
+    # The height must respect the cap.
     assert h <= short_screen.height() - 80
+    # The window width is exactly what the layout-aware fit computes for that
+    # height, so there is no leftover space on the right.
+    expected = window.results_view.clamp_to_available(
+        short_screen.width() - 20, short_screen.height() - 80
+    )
+    assert (w, h) == expected
 
 
 def test_window_uses_preferred_size_when_screen_has_room(qt_app):

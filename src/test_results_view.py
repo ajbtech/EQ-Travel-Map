@@ -54,6 +54,51 @@ def test_summary_frame_spans_map_and_buttons(qt_app):
     assert view.summary_stone_frame.width() == expected
 
 
+def test_clamp_returns_preferred_when_bounds_are_generous(qt_app):
+    sample_image = Path(__file__).resolve().parents[1] / "docs" / "sample_map.png"
+    view = ResultsView()
+    view.set_results(sample_image, _sections())
+    assert view.clamp_to_available(4000, 3000) == view.preferred_window_size
+
+
+def test_clamp_leaves_no_right_gap_when_height_is_capped(qt_app):
+    # A wide-but-short screen clips only the height. The map shrinks to fit,
+    # but the fixed-width button column and the fixed-height summary band do
+    # not scale, so the window width must follow the map's new width exactly
+    # (no leftover space on the right).
+    sample_image = Path(__file__).resolve().parents[1] / "docs" / "sample_map.png"
+    view = ResultsView()
+    view.set_results(sample_image, _sections())
+
+    width, height = view.clamp_to_available(4000, 620)
+
+    aspect = view.map_canvas.source_aspect_ratio()
+    border = ResultsView._MAP_FRAME_BORDER
+    map_inner_h = height - ResultsView._SUMMARY_TOTAL_HEIGHT - 2 * border
+    expected_map_w = int(round(map_inner_h * aspect)) + 2 * border
+    expected_w = expected_map_w + ResultsView._BUTTON_FRAME_WIDTH
+
+    assert height <= 620
+    assert width == expected_w
+
+
+def test_clamp_respects_both_bounds_when_width_is_the_tighter_limit(qt_app):
+    sample_image = Path(__file__).resolve().parents[1] / "docs" / "sample_map.png"
+    view = ResultsView()
+    view.set_results(sample_image, _sections())
+
+    width, height = view.clamp_to_available(700, 3000)
+
+    assert width <= 700
+    assert height <= ResultsView._PREFERRED_HEIGHT
+
+    aspect = view.map_canvas.source_aspect_ratio()
+    border = ResultsView._MAP_FRAME_BORDER
+    map_inner_h = height - ResultsView._SUMMARY_TOTAL_HEIGHT - 2 * border
+    expected_map_w = int(round(map_inner_h * aspect)) + 2 * border
+    assert width == expected_map_w + ResultsView._BUTTON_FRAME_WIDTH
+
+
 def test_character_heading_shows_name(qt_app):
     view = ResultsView()
     view.set_results(Path("/tmp/map.png"), _sections("Gorrek"))

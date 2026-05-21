@@ -52,11 +52,38 @@ class ResultsView(QWidget):
 
     @property
     def preferred_window_size(self):
+        return self._size_for_height(self._PREFERRED_HEIGHT)
+
+    def _size_for_height(self, height):
+        # The map fills the height left after the fixed summary band and the
+        # map frame's stone bevel; its width then follows the map's aspect
+        # ratio. The button column and summary band are fixed pixel sizes and
+        # do not scale with the window.
         aspect = self.map_canvas.source_aspect_ratio() or self._FALLBACK_MAP_ASPECT
         border = self._MAP_FRAME_BORDER
-        inner_h = self._PREFERRED_HEIGHT - self._SUMMARY_TOTAL_HEIGHT - 2 * border
+        inner_h = height - self._SUMMARY_TOTAL_HEIGHT - 2 * border
         map_w = int(round(inner_h * aspect)) + 2 * border
-        return (map_w + self._BUTTON_FRAME_WIDTH, self._PREFERRED_HEIGHT)
+        return (map_w + self._BUTTON_FRAME_WIDTH, height)
+
+    def clamp_to_available(self, max_width, max_height):
+        # Fit the window inside the available area using the real layout model
+        # so the content always fills the window with no blank strip on the
+        # right. Scaling width and height by a single factor would not work
+        # here: only the map scales, while the summary band and button column
+        # stay fixed, so a height-clipped window would otherwise end up wider
+        # than its content.
+        aspect = self.map_canvas.source_aspect_ratio() or self._FALLBACK_MAP_ASPECT
+        border = self._MAP_FRAME_BORDER
+        height = min(self._PREFERRED_HEIGHT, max_height)
+        width, height = self._size_for_height(height)
+        if width > max_width:
+            # Too wide for the screen: shrink the map (and thus the height)
+            # until the width fits, then recompute the height from that width.
+            map_inner_w = max_width - 2 * border - self._BUTTON_FRAME_WIDTH
+            map_inner_h = max(0, int(map_inner_w / aspect))
+            height = map_inner_h + self._SUMMARY_TOTAL_HEIGHT + 2 * border
+            width, height = self._size_for_height(height)
+        return (max(1, width), max(1, height))
 
     def __init__(self, parent=None):
         super().__init__(parent)
