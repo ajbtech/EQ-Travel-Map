@@ -25,7 +25,7 @@ def test_bundled_sample_log_parses_to_expected_totals():
     assert summary.line_count == 18112
     assert summary.login_count == 668
     assert summary.death_count == 39
-    assert summary.zone_count == 1086
+    assert summary.zone_count == 1085
     assert summary.kill_count == 5123
     assert summary.level_lost_count == 4
     assert summary.current_level == 51

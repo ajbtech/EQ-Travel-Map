@@ -8,6 +8,7 @@
     "Everfrost": "Everfrost Peaks",
     "Guk": "Upper Guk",
     "Howling Stones": "Charasis (H. Stones)",
+    "High Keep": "Highpass Keep",
     "Infected Paw": "Splitpaw Lair",
     "Kael Drakkel": "Kael Drakkal",
     "Kithicor Woods": "Kithicor Forest",
@@ -48,8 +49,7 @@
     "The Warsliks Woods": "Warsliks Woods",
     "The Western Wastes": "Western Wastes",
     "Warrens": "The Warrens",
-    "Western Plains of Karana": "West Karana",
-    "an Arena (PvP) area": "The Arena"
+    "Western Plains of Karana": "West Karana"
   },
   "description": "Zone adjacency graph transcribed from the local Project 1999 zone_map.png. Edges represent non-directional visible map connections between zones.",
   "edges": [

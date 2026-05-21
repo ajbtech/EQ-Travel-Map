@@ -291,11 +291,20 @@ def test_get_zone_3():
     assert line_reader.get_zone(line) == "The Feerrott"
 
 
-def test_get_zone_preserves_leading_article():
-    # "an Arena (PvP) area" is its own log phrase; collapsing the article
-    # would conflate it with the proper-noun zone "The Arena".
+def test_pvp_area_message_is_not_a_zone():
+    # "You have entered an Arena (PvP) area." fires when stepping into a small
+    # PvP sub-area inside an ordinary zone; it is not a zone change and must
+    # not be recorded as one.
     line = "[Sat Mar 09 15:24:26 2024] You have entered an Arena (PvP) area."
-    assert line_reader.get_zone(line) == "an Arena (PvP) area"
+    assert line_reader.is_line_zone(line) is False
+    assert line_reader.classify_line(line) == line_reader.EMPTY_LINE_EVENT
+
+
+def test_the_arena_zone_is_recognized():
+    # The real Arena zone logs "The Arena" verbatim.
+    line = "[Wed May 20 20:11:17 2026] You have entered The Arena."
+    assert line_reader.is_line_zone(line) is True
+    assert line_reader.get_zone(line) == "The Arena"
 
 
 def test_is_line_help_positive():

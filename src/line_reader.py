@@ -28,6 +28,11 @@ LEVEL_GAINED_TEXT = "You have gained a level! Welcome to level "
 LEVEL_LOST_TEXT = "You LOST a level! You are now level "
 LOGIN_TEXT = "Welcome to EverQuest!"
 ZONE_TEXT = "You have entered "
+# "You have entered an Arena (PvP) area." fires when stepping into a small
+# PvP sub-area inside an ordinary zone, not when changing zones. The real
+# Arena zone logs "You have entered The Arena.", so this phrase must never be
+# treated as a zone event.
+PVP_AREA_TEXT = "an Arena (PvP) area"
 # Cheap substring prefilters so the player-damage / spell-cast regexes
 # only run on candidate lines, not every line of a multi-GB log.
 PLAYER_DAMAGE_TEXT = " damage."
@@ -118,7 +123,7 @@ def is_line_merch_cash(line):
 
 
 def is_line_zone(line):
-    return ZONE_TEXT in line
+    return ZONE_TEXT in line and PVP_AREA_TEXT not in line
 
 
 def is_line_help(line):
@@ -181,7 +186,7 @@ def get_name(line):
 def get_zone(line):
     # Zone names are matched literally against zone_graph.json (with aliases
     # for log-specific phrasings), so leading articles must be preserved -
-    # "an Arena (PvP) area" is its own zone phrase, not "The Arena".
+    # "The Arena" is a proper-noun zone and must keep its article.
     return _get_text_between(line, ZONE_TEXT, ".")
 
 
