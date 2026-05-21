@@ -99,6 +99,46 @@ write the MP4; running from source pulls it in via `imageio[ffmpeg]`.)
 > warn you the first time. Right-click → **Open** to proceed; after that it
 > opens normally.
 
+> **Windows note:** The `.exe` is not code-signed (a signing certificate is
+> an ongoing cost this free hobby project doesn't carry), so Windows will
+> warn you the first time you run it:
+>
+> - **SmartScreen** may show a blue *"Windows protected your PC — unknown
+>   publisher"* box. Click **More info → Run anyway**. This warning appears
+>   for any unsigned app and fades as a release accumulates downloads.
+> - **Defender / antivirus** may occasionally flag the bundle. This is a
+>   well-known *false positive* for apps packaged with
+>   [PyInstaller](https://pyinstaller.org/) — the launcher stub that unpacks
+>   the bundled Python runtime matches generic packer heuristics. The build
+>   deliberately avoids the worst triggers (no UPX compression, `--onedir`
+>   rather than a self-extracting single file) to keep flags rare.
+>
+> This tool only ever reads your local EverQuest log files and writes a PNG
+> to disk — it makes no network connections and installs nothing. You don't
+> have to take that on faith: every release ships a `SHA256SUMS-windows.txt`
+> file, the full source is on GitHub, and the bundle is built in public by
+> [GitHub Actions](.github/workflows/release.yml) from pinned dependencies.
+> See **Verify your download** below.
+
+### Verify your download (optional)
+
+Every release attaches a `SHA256SUMS-<os>.txt` file. To confirm your
+download wasn't tampered with, check its hash against that file:
+
+**Windows (PowerShell)**
+```powershell
+Get-FileHash -Algorithm SHA256 EQTravelMap-vX.Y.Z-windows.zip
+# compare the printed hash against the matching line in SHA256SUMS-windows.txt
+```
+
+**macOS / Linux**
+```bash
+shasum -a 256 -c SHA256SUMS-macos.txt    # or SHA256SUMS-linux.txt
+```
+
+If the hashes match, the archive is byte-for-byte the one the release
+workflow built.
+
 ### Use it with your own EverQuest logs
 
 1. In-game, type **`/log on`** once. EverQuest will start writing per-character
