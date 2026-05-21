@@ -46,11 +46,11 @@ line-length = 88
 select = ["E", "F", "W", "I"]
 
 [tool.pytest.ini_options]
-testpaths = ["src"]
+testpaths = ["tests"]
 
 [tool.coverage.run]
 source = ["src"]
-omit = ["src/test_*", "src/conftest.py"]
+omit = ["tests/*"]
 
 [tool.coverage.report]
 # Minimum overall line coverage. Enforced in CI via the `coverage` job

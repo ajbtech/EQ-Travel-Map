@@ -21,11 +21,12 @@ The desktop app has two windows:
 - `src/map_path.py` — converts zone visits into drawable map segments (graph-skip, jitter)
 - `src/money_sorter.py` — parses and normalises cash values
 - `src/summary_formatter.py` — builds the text summary used by both the CLI and desktop app
-- `src/zone_graph.py` — loads `zone_graph.json` and checks zone adjacency
+- `src/zone_graph.py` — loads `data/zone_graph.json` and checks zone adjacency
 - `src/desktop_app.py` and `src/ui/` — PySide6 desktop GUI (entry shim, app, main window, views, widgets)
 - `src/ui/theme/eq_theme.qss` — Qt stylesheet that drives the desktop app's visual style
-- `zone_graph.json` — zone nodes, aliases, and valid connections
-- `zone_map.png` — base map image used by the renderer
+- `tests/` — pytest suite (`test_*.py`) and shared `conftest.py`
+- `data/zone_graph.json` — zone nodes, aliases, and valid connections
+- `data/zone_map.png` — base map image used by the renderer
 
 ## Running the app
 
@@ -40,14 +41,14 @@ Log files must be in the project root and match `*eqlog_<CharacterName>_*.txt`.
 ## Running tests
 
 ```powershell
-python -m pytest -q src
+python -m pytest -q tests
 ```
 
 ## Development practice
 
-**Use test-driven development for all new behavior.** Write a failing test first, then implement until it passes. Tests live in `src/test_*.py` alongside the module they cover.
+**Use test-driven development for all new behavior.** Write a failing test first, then implement until it passes. Tests live in `tests/test_*.py`, one file per module under test.
 
-**Before committing, always run `ruff check src` and `black src` and fix any issues first.**
+**Before committing, always run `ruff check src tests` and `black src tests` and fix any issues first.**
 
 ## TODO tracking
 
@@ -55,5 +56,5 @@ Open work items live in `TODO.md`, grouped under Bugs / Features / Polish / Defe
 
 ## Adding a new zone
 
-1. Add the zone to `zone_graph.json` under `nodes` with a `center: [x, y]` pixel coordinate, plus its connections under `edges`.
-2. Add an alias entry in `zone_graph.json` if the log name differs from the map name.
+1. Add the zone to `data/zone_graph.json` under `nodes` with a `center: [x, y]` pixel coordinate, plus its connections under `edges`.
+2. Add an alias entry in `data/zone_graph.json` if the log name differs from the map name.

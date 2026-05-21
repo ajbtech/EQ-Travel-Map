@@ -16,8 +16,8 @@ from zone_graph import get_zone_center, has_zone_center  # noqa: F401
 
 def _data_root():
     if hasattr(sys, "_MEIPASS"):
-        return Path(sys._MEIPASS)
-    return Path(__file__).resolve().parents[1]
+        return Path(sys._MEIPASS) / "data"
+    return Path(__file__).resolve().parents[1] / "data"
 
 
 MAP_IMAGE_PATH = _data_root() / "zone_map.png"

@@ -25,8 +25,8 @@ from PySide6.QtWidgets import (
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-ZONE_GRAPH_PATH = PROJECT_ROOT / "zone_graph.json"
-MAP_IMAGE_PATH = PROJECT_ROOT / "zone_map.png"
+ZONE_GRAPH_PATH = PROJECT_ROOT / "data" / "zone_graph.json"
+MAP_IMAGE_PATH = PROJECT_ROOT / "data" / "zone_map.png"
 MAP_W, MAP_H = 2700, 1550
 
 

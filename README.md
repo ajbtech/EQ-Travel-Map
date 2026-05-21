@@ -285,7 +285,7 @@ attribution list and notes.
 
 EverQuest and the world map artwork are property of Daybreak Game Company.
 This is an unofficial fan project with no affiliation to Daybreak or the
-Project 1999 team. The bundled `zone_map.png` is the
+Project 1999 team. The bundled `data/zone_map.png` is the
 [Project 1999 Unofficial Zone Connection Map](https://wiki.project1999.com/Zone_Connection_World),
 originally created by Yurz Truly of the Project 1999 server and later
 expanded by Matthew Gordon Roulston (a.k.a Within Amnesia). Full per-file

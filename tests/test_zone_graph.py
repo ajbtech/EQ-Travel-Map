@@ -3,7 +3,7 @@ from pathlib import Path
 
 import eq_display
 
-ZONE_GRAPH_PATH = Path(__file__).resolve().parents[1] / "zone_graph.json"
+ZONE_GRAPH_PATH = Path(__file__).resolve().parents[1] / "data" / "zone_graph.json"
 
 
 def load_zone_graph():
