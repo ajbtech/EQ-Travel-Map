@@ -34,8 +34,8 @@ DATAS = [
     (str(PROJECT_ROOT / "assets"), "assets"),
     (str(PROJECT_ROOT / "LICENSES"), "LICENSES"),
     (str(SRC_DIR / "ui" / "theme"), "ui/theme"),
-    (str(PROJECT_ROOT / "zone_graph.json"), "."),
-    (str(PROJECT_ROOT / "zone_map.png"), "."),
+    (str(PROJECT_ROOT / "data" / "zone_graph.json"), "data"),
+    (str(PROJECT_ROOT / "data" / "zone_map.png"), "data"),
 ] + IMAGEIO_FFMPEG_DATAS + IMAGEIO_METADATA
 
 # Bare ``import eq_parser`` etc. only resolve once ``src/`` is on sys.path.
