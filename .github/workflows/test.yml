@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: pytest (${{ matrix.os }} / py${{ matrix.python-version }})
