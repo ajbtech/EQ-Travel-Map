@@ -130,6 +130,14 @@ def test_zone_graph_aliases_plural_crystal_caverns_to_singular_node():
     assert graph["aliases"].get("Crystal Caverns") == "Crystal Cavern"
 
 
+def test_zone_graph_aliases_short_dalnir_to_crypt_node():
+    # EQ logs write "You have entered Dalnir." (short form), but the graph node
+    # uses the full "Crypt of Dalnir" spelling.
+    graph = load_zone_graph()
+
+    assert graph["aliases"].get("Dalnir") == "Crypt of Dalnir"
+
+
 def test_zone_graph_aliases_log_name_without_apostrophe_for_sleepers_tomb():
     # EQ logs write "You have entered Sleepers Tomb." with no apostrophe,
     # but the graph node uses the canonical "Sleeper's Tomb" spelling.
