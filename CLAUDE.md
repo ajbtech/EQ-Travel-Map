@@ -50,6 +50,10 @@ python -m pytest -q tests
 
 **Before committing, always run `ruff check src tests` and `black src tests` and fix any issues first.**
 
+**Prefer a single return statement per function.** Use a single exit point rather than multiple `return`s where practical.
+
+**Keep individual lines simple.** Avoid dense one-liners; extract conditions into named variables (e.g. `is_quoted_chat = ...`) instead of packing multiple checks into one expression.
+
 ## TODO tracking
 
 Open work items live in `TODO.md`, grouped under Bugs / Features / Polish / Deferred. When you finish a task, check `TODO.md` for related items and tick them off. When the user defers something mid-conversation ("not now", "later", "next time"), append it to the relevant section rather than relying on memory.
