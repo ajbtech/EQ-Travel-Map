@@ -372,6 +372,44 @@ def test_is_line_chat_tells_you():
     assert line_reader.is_line_chat(line) is True
 
 
+def test_is_line_chat_outgoing_tell_arrow():
+    # Outgoing tells log as "You -> Target: text" (no comma-quote).
+    line = "[Wed Jan 28 21:31:44 2026] MyChar -> TheirChar: hey there"
+    assert line_reader.is_line_chat(line) is True
+
+
+def test_is_line_chat_incoming_tell_arrow():
+    # Incoming tells log as "Sender -> You: text" (no comma-quote).
+    line = "[Wed Jan 28 21:31:44 2026] TheirChar -> MyChar: hello"
+    assert line_reader.is_line_chat(line) is True
+
+
+def test_classify_line_ignores_event_text_quoted_in_tell_arrow():
+    # A player can paste log-looking text into a tell; the whole line is
+    # chat, so the embedded "gained a level" phrase must not be counted.
+    line = (
+        "[Wed Jan 28 21:31:44 2026] MyChar -> TheirChar: and then "
+        "Thu Jun 17 18:33:44 2021 You have gained a level! Welcome to level 59!"
+    )
+    assert line_reader.is_line_chat(line) is True
+    assert line_reader.classify_line(line) == line_reader.EMPTY_LINE_EVENT
+
+
+def test_classify_line_ignores_event_text_quoted_in_say():
+    # Same protection for the comma-quote chat forms (say/shout/ooc/guild).
+    line = (
+        "[Wed Jan 28 21:31:44 2026] TheirChar says, 'gz! You have slain "
+        "a froglok tad! and You have entered Grobb.'"
+    )
+    assert line_reader.classify_line(line) == line_reader.EMPTY_LINE_EVENT
+
+
+def test_is_line_chat_negative_arrow_in_non_chat_line():
+    # A bare " -> " mid-line (not the timestamped tell form) is not chat.
+    line = "[Sun Jan 08 15:01:29 2023] You have entered Lake Rathetear -> done."
+    assert line_reader.is_line_chat(line) is False
+
+
 def test_is_line_chat_negative_zone():
     line = "[Sun Jan 08 15:01:29 2023] You have entered Lake Rathetear."
     assert line_reader.is_line_chat(line) is False
