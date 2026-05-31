@@ -11,6 +11,57 @@ def load_zone_graph():
         return json.load(f)
 
 
+# EQEmu's modern zone long_names differ from the project's canonical map labels
+# (mostly a leading "The ", plus Neriak's hyphenated districts and "The City of
+# Guk" for Upper Guk). These defensive aliases keep a log that emits the EQEmu
+# spelling from being dropped as an unknown zone. Confirmed against the EQEmu
+# zone table in common/eq_constants.h.
+DEFENSIVE_EQEMU_ALIASES = {
+    "The Greater Faydark": "Greater Faydark",
+    "The Lesser Faydark": "Lesser Faydark",
+    "The Lavastorm Mountains": "Lavastorm Mountains",
+    "The Rathe Mountains": "Rathe Mountains",
+    "The Innothule Swamp": "Innothule Swamp",
+    "The Misty Thicket": "Misty Thicket",
+    "The Steamfont Mountains": "Steamfont Mountains",
+    "The Ocean of Tears": "Ocean of Tears",
+    "The Qeynos Hills": "Qeynos Hills",
+    "The Surefall Glade": "Surefall Glade",
+    "The Estate of Unrest": "Estate of Unrest",
+    "The Dreadlands": "Dreadlands",
+    "The Skyfire Mountains": "Skyfire Mountains",
+    "The Iceclad Ocean": "Iceclad Ocean",
+    "The Great Divide": "Great Divide",
+    "The Plane of Sky": "Plane of Sky",
+    "The Plane of Fear": "Plane of Fear",
+    "The Plane of Hate": "Plane of Hate",
+    "The Western Plains of Karana": "West Karana",
+    "The Northern Plains of Karana": "North Karana",
+    "The Southern Plains of Karana": "South Karana",
+    "The Qeynos Aqueduct System": "Qeynos Catacombs",
+    "The Ruins of Old Guk": "Lower Guk",
+    "The Permafrost Caverns": "Permafrost Keep",
+    "The Temple of Solusek Ro": "Temple of Sol. Ro",
+    "The Stonebrunt Mountains": "Stonebrunt Mtns.",
+    "The City of Thurgadin": "Thurgadin",
+    "The Crystal Caverns": "Crystal Cavern",
+    "The Plane of Air": "Plane of Sky",
+    "The City of Guk": "Upper Guk",
+    "Neriak - Foreign Quarter": "Neriak Foreign Quarter",
+    "Neriak - Commons": "Neriak Commons",
+    "Neriak - Third Gate": "Neriak Third Gate",
+    "Neriak - 3rd Gate": "Neriak Third Gate",
+}
+
+
+def test_defensive_eqemu_aliases_resolve_to_existing_nodes_with_centers():
+    graph = load_zone_graph()
+    for log_name, expected_node in DEFENSIVE_EQEMU_ALIASES.items():
+        assert graph["aliases"].get(log_name) == expected_node, log_name
+        assert expected_node in graph["nodes"], expected_node
+        assert eq_display.has_zone_center(log_name), log_name
+
+
 def test_zone_graph_edges_reference_existing_nodes():
     graph = load_zone_graph()
     node_names = set(graph["nodes"])
