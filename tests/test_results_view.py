@@ -8,6 +8,7 @@ from ui.views.results_view import ResultsView
 
 def _sections(character="Gorrek", level_line="Level: 1"):
     return summary_formatter.SummarySections(
+        character_name=character,
         character_line=f"Character: {character}" if character else "",
         level_line=level_line,
         top_kills_lines=["Top 5 killed creatures:"],

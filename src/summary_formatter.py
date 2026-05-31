@@ -3,6 +3,10 @@ from dataclasses import dataclass, field
 
 @dataclass
 class SummarySections:
+    # Structured name kept alongside the formatted ``character_line`` so the
+    # results view can read the name directly instead of stripping the
+    # "Character: " prefix back off the display string.
+    character_name: str = ""
     character_line: str = ""
     level_line: str = ""
     top_kills_lines: list = field(default_factory=list)
@@ -45,6 +49,7 @@ def build_summary_sections(kill_list, zone_list, summary, character_name=None):
     max_damage_lines = build_max_damage_lines(summary.max_damage)
     additional_trivia_lines = build_additional_trivia_lines(summary)
     return SummarySections(
+        character_name=character_name or "",
         character_line=character_line,
         level_line=level_line,
         top_kills_lines=top_kills_lines,
