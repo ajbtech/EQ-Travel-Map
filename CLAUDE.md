@@ -54,6 +54,12 @@ python -m pytest -q tests
 
 **Keep individual lines simple.** Avoid dense one-liners; extract conditions into named variables (e.g. `is_quoted_chat = ...`) instead of packing multiple checks into one expression.
 
+## Architecture constraints
+
+**Stream log files; never load them fully into memory.** Logs can be multiple gigabytes. Read line by line (see `log_parser.process_log_file`) and keep only aggregated state — never build a list of all lines or read a whole file into a string.
+
+**Keep the parsing layers separate.** `line_reader` owns all pattern matching: each `classify_line` call turns one raw line into a single `LineEvent`. `log_parser` stays event-driven, consuming `LineEvent`s to update state, and must not contain regexes or raw-line string matching. Add new line patterns in `line_reader`, not `log_parser`.
+
 ## TODO tracking
 
 Open work items live in `TODO.md`, grouped under Bugs / Features / Polish / Deferred. When you finish a task, check `TODO.md` for related items and tick them off. When the user defers something mid-conversation ("not now", "later", "next time"), append it to the relevant section rather than relying on memory.
