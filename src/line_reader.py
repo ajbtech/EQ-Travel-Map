@@ -21,6 +21,11 @@ MOB_COIN_CAP = 200
 # followed by an optional target phrase, then the comma + opening quote that
 # always precedes spoken text in EQ logs.
 CHAT_PATTERN = re.compile(r" (?:says?|shouts?|auctions?|tells?|told)\b[^']*?,\s*'")
+# Direct tells also log in the arrow form "Sender -> Receiver: text" with no
+# comma-quote, so CHAT_PATTERN misses them. Anchored just after the timestamp
+# so the whole line (including any log-looking text a player pastes into the
+# tell) is treated as chat and never counted as a real event.
+TELL_ARROW_PATTERN = re.compile(r"^\[[^\]]*\] \S+ -> \S+:")
 DEATH_TEXT = "You have been slain by "
 HELP_TEXT = "If you need help, click on the EQ Menu "
 KILL_TEXT = "You have slain "
@@ -139,7 +144,9 @@ def is_line_spell_cast(line):
 
 
 def is_line_chat(line):
-    return ", '" in line and CHAT_PATTERN.search(line) is not None
+    if ", '" in line and CHAT_PATTERN.search(line) is not None:
+        return True
+    return " -> " in line and TELL_ARROW_PATTERN.search(line) is not None
 
 
 def is_line_jboot_click(line):
