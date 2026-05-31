@@ -34,7 +34,7 @@ class ProgressView(QWidget):
         body.setContentsMargins(28, 4, 28, 20)
         body.setSpacing(12)
 
-        title = QLabel("EverQuest Travel Map")
+        title = QLabel("Gorrek's EverQuest Travel Map")
         title.setObjectName("parchmentTitle")
         title.setAlignment(Qt.AlignHCenter)
         body.addWidget(title)
