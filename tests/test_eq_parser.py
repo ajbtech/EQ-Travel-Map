@@ -19,25 +19,14 @@ def test_find_log_files_returns_character_archives_in_chronological_order(tmp_pa
     assert log_files == [earlier_log, later_log]
 
 
-def test_open_files_and_get_lines_combines_files_in_order(tmp_path):
-    first_log = tmp_path / "first.txt"
-    second_log = tmp_path / "second.txt"
-    first_log.write_text("line 1\nline 2\n")
-    second_log.write_text("line 3\n")
-
-    lines = log_parser.open_files_and_get_lines([first_log, second_log])
-
-    assert lines == ["line 1\n", "line 2\n", "line 3\n"]
-
-
-def test_open_file_and_get_lines_handles_unexpected_bytes(tmp_path):
+def test_parse_log_files_handles_unexpected_bytes(tmp_path):
     log_file = tmp_path / "ARCHIVEeqlog_Gorrek_P1999Green.txt"
     log_file.write_bytes(b"[Sat Sep 24 19:51:48 2022] odd byte: \x90\n")
 
-    lines = log_parser.open_file_and_get_lines(log_file)
+    _, _, summary = log_parser.parse_log_files([log_file])
 
-    assert len(lines) == 1
-    assert "odd byte" in lines[0]
+    assert summary.line_count == 1
+    assert "odd byte" in summary.most_recent_message
 
 
 def test_parse_character_logs_combines_matching_files(tmp_path):

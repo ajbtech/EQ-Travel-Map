@@ -5,18 +5,19 @@ Per-zone pixel coordinates live in ``zone_graph.json`` and are looked up
 via ``zone_graph.get_zone_center``.
 """
 
-import sys
 from pathlib import Path
 from random import random
 
 from PIL import Image, ImageDraw
 
+import resource_paths
 from zone_graph import get_zone_center, has_zone_center  # noqa: F401
 
 
 def _data_root():
-    if hasattr(sys, "_MEIPASS"):
-        return Path(sys._MEIPASS) / "data"
+    bundle = resource_paths.bundled_root()
+    if bundle is not None:
+        return bundle / "data"
     return Path(__file__).resolve().parents[1] / "data"
 
 

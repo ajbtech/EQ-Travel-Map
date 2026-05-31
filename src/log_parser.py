@@ -5,8 +5,9 @@ which is finalized into an immutable ``ParseSummary`` plus kill / zone tallies.
 Files are read lazily so multi-gigabyte archives stay out of memory.
 """
 
+import itertools
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from datetime import datetime
 from pathlib import Path
 
@@ -112,19 +113,6 @@ def _count_lines_in_file(file_path):
     return line_count
 
 
-def open_file_and_get_lines(file_path):
-    with open(file_path, encoding=LOG_ENCODING, errors="replace") as f:
-        lines = f.readlines()
-    return lines
-
-
-def open_files_and_get_lines(file_paths):
-    lines = []
-    for file_path in file_paths:
-        lines.extend(open_file_and_get_lines(file_path))
-    return lines
-
-
 def find_log_files(log_folder, character_name):
     log_folder = Path(log_folder)
     log_files = log_folder.glob(f"*eqlog_{character_name}_*.txt")
@@ -153,25 +141,7 @@ def get_line_timestamp(line):
 
 
 def build_empty_summary():
-    return ParseSummary(
-        first_login_message="",
-        most_recent_message="",
-        line_count=0,
-        login_count=0,
-        death_count=0,
-        zone_count=0,
-        kill_count=0,
-        level_count=0,
-        level_lost_count=0,
-        current_level=1,
-        loot_cash_count=0,
-        merch_cash_count=0,
-        loot_cash=money_sorter.Cash(),
-        merch_cash=money_sorter.Cash(),
-        max_damage={},
-        spell_list=EQList(),
-        timeline=[],
-    )
+    return build_summary(ParserState())
 
 
 def record_line_metadata(line, event, state):
@@ -333,45 +303,44 @@ def sort_result_lists(state):
     state.spell_list.sort_lists()
 
 
+# Every ParseSummary field is also a ParserState field, so the summary is a
+# projection of the finalized state. Listing the names once here keeps adding a
+# tracked metric to a single edit (add the field to both dataclasses) instead of
+# also threading it through a hand-written copy.
+_SUMMARY_FIELD_NAMES = tuple(f.name for f in fields(ParseSummary))
+
+
 def build_summary(state):
-    return ParseSummary(
-        first_login_message=state.first_login_message,
-        most_recent_message=state.most_recent_message,
-        line_count=state.line_count,
-        login_count=state.login_count,
-        death_count=state.death_count,
-        zone_count=state.zone_count,
-        kill_count=state.kill_count,
-        level_count=state.level_count,
-        level_lost_count=state.level_lost_count,
-        current_level=state.current_level,
-        loot_cash_count=state.loot_cash_count,
-        merch_cash_count=state.merch_cash_count,
-        loot_cash=state.loot_cash,
-        merch_cash=state.merch_cash,
-        max_damage=dict(state.max_damage),
-        spell_list=state.spell_list,
-        timeline=list(state.timeline),
-        jboot_click_count=state.jboot_click_count,
-        alcohol_count=state.alcohol_count,
-        totally_intoxicated_count=state.totally_intoxicated_count,
-    )
+    values = {name: getattr(state, name) for name in _SUMMARY_FIELD_NAMES}
+    # Defensive copies so later parsing (or reuse of the state) can't mutate the
+    # returned summary's collections.
+    values["max_damage"] = dict(values["max_damage"])
+    values["timeline"] = list(values["timeline"])
+    return ParseSummary(**values)
+
+
+def _ingest_lines(lines, state, after_line=None):
+    # The first few lines get the starting-zone special case (a zone logged
+    # right at login, before login/help filtering can suppress it); the rest
+    # stream straight through. ``lines`` may be a list or a file iterator, so a
+    # single iterator drives both halves and never re-reads a line.
+    line_iter = iter(lines)
+    first_lines = list(itertools.islice(line_iter, 4))
+    first_events = [line_reader.classify_line(line) for line in first_lines]
+    add_starting_zones(first_events, state)
+    for line, event in zip(first_lines, first_events):
+        process_line_event(line, event, state)
+        if after_line is not None:
+            after_line()
+    for line in line_iter:
+        process_log_line(line, state)
+        if after_line is not None:
+            after_line()
 
 
 def parse_log_lines(lines):
     state = ParserState()
-
-    if not lines:
-        return state.kill_list, state.zone_list, build_empty_summary()
-
-    first_lines = lines[:4]
-    first_events = [line_reader.classify_line(ln) for ln in first_lines]
-    add_starting_zones(first_events, state)
-    for line, event in zip(first_lines, first_events):
-        process_line_event(line, event, state)
-    for line in lines[4:]:
-        process_log_line(line, state)
-
+    _ingest_lines(lines, state)
     _finalize_state(state)
     return state.kill_list, state.zone_list, build_summary(state)
 
@@ -382,29 +351,14 @@ def _finalize_state(state):
 
 
 def process_log_file(log_file, state, progress_callback=None):
-    first_lines = []
-    first_events = []
     notify_progress(progress_callback, log_file, state)
-
     with open(log_file, encoding=LOG_ENCODING, errors="replace") as f:
-        for _ in range(4):
-            line = f.readline()
-            if line == "":
-                break
-            first_lines.append(line)
-            first_events.append(line_reader.classify_line(line))
 
-        add_starting_zones(first_events, state)
-        for line, event in zip(first_lines, first_events):
-            process_line_event(line, event, state)
+        def after_line():
             if should_notify_line_progress(state.line_count):
                 notify_progress(progress_callback, log_file, state)
 
-        for line in f:
-            process_log_line(line, state)
-            if should_notify_line_progress(state.line_count):
-                notify_progress(progress_callback, log_file, state)
-
+        _ingest_lines(f, state, after_line)
     notify_progress(progress_callback, log_file, state)
 
 

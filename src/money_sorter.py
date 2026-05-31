@@ -43,7 +43,3 @@ def parse_cash(line):
         silver=values.get("silver", 0),
         copper=values.get("copper", 0),
     )
-
-
-def get_coin_value(coin_type, line):
-    return getattr(parse_cash(line), coin_type)
