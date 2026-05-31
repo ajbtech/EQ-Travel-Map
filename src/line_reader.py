@@ -144,9 +144,9 @@ def is_line_spell_cast(line):
 
 
 def is_line_chat(line):
-    if ", '" in line and CHAT_PATTERN.search(line) is not None:
-        return True
-    return " -> " in line and TELL_ARROW_PATTERN.search(line) is not None
+    is_quoted_chat = ", '" in line and CHAT_PATTERN.search(line) is not None
+    is_arrow_tell = " -> " in line and TELL_ARROW_PATTERN.search(line) is not None
+    return is_quoted_chat or is_arrow_tell
 
 
 def is_line_jboot_click(line):
