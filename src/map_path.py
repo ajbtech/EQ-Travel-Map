@@ -24,6 +24,22 @@ class MapDot:
         renderer.draw_dot(self.loc, percent=self.percent)
 
 
+def _emits_event(last_zone, zone):
+    """Whether moving from *last_zone* to *zone* produces a draw event.
+
+    Single source of truth shared with ``cumulative_event_counts`` so the two
+    can't drift: a prefix of the events always maps to a prefix of the
+    known-zone sequence. A move emits when the zones are graph-adjacent (a line)
+    or are genuinely different but non-adjacent (a jump dot); revisiting the
+    same zone emits nothing.
+    """
+    if last_zone == "":
+        return False
+    return zone_graph.are_adjacent(last_zone, zone) or not zone_graph.is_same_zone(
+        last_zone, zone
+    )
+
+
 def build_map_events(zone_list):
     known_zone_list = get_known_zones(zone_list)
     if len(known_zone_list) == 0:
@@ -45,15 +61,14 @@ def build_map_events(zone_list):
             zone_visit_counts[zone],
             zone_total_counts[zone],
         )
-        if last_zone != "":
+        if _emits_event(last_zone, zone):
             if zone_graph.are_adjacent(last_zone, zone):
                 draw_events.append(MapLine(last_loc, loc, percent))
-                percent += percent_inc
-            elif not zone_graph.is_same_zone(last_zone, zone):
+            else:
                 # Ports, deaths, and logging gaps can jump across the graph;
                 # mark the destination without drawing an impossible line.
                 draw_events.append(MapDot(loc, percent))
-                percent += percent_inc
+            percent += percent_inc
         last_zone = zone
         last_loc = loc
 
@@ -75,10 +90,7 @@ def cumulative_event_counts(zone_list):
     event_count = 0
     last_zone = ""
     for zone in get_known_zones(zone_list):
-        if last_zone != "" and (
-            zone_graph.are_adjacent(last_zone, zone)
-            or not zone_graph.is_same_zone(last_zone, zone)
-        ):
+        if _emits_event(last_zone, zone):
             event_count += 1
         last_zone = zone
         counts.append(event_count)

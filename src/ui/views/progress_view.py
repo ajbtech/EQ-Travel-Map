@@ -7,12 +7,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+import summary_formatter
 from ui.widgets.parchment_panel import build_stone_framed_parchment
 from ui.widgets.segmented_progress_bar import SegmentedProgressBar
-
-
-def _format_count(value):
-    return f"{value:,}"
 
 
 class ProgressView(QWidget):
@@ -37,7 +34,7 @@ class ProgressView(QWidget):
         body.setContentsMargins(28, 4, 28, 20)
         body.setSpacing(12)
 
-        title = QLabel("EverQuest Travel Map")
+        title = QLabel("Gorrek's EverQuest Travel Map")
         title.setObjectName("parchmentTitle")
         title.setAlignment(Qt.AlignHCenter)
         body.addWidget(title)
@@ -89,6 +86,8 @@ class ProgressView(QWidget):
 
     def set_progress(self, file_name, line_count):
         self.file_label.setText(f"Current file: {file_name}")
-        self.lines_label.setText(f"Lines parsed: {_format_count(line_count)}")
+        self.lines_label.setText(
+            f"Lines parsed: {summary_formatter.format_number(line_count)}"
+        )
         if self.progress_bar.maximum() > 0:
             self.progress_bar.setValue(line_count)

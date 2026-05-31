@@ -1,11 +1,10 @@
-import sys
 from pathlib import Path
+
+import resource_paths
 
 
 def _project_root():
-    if hasattr(sys, "_MEIPASS"):
-        return Path(sys._MEIPASS)
-    return Path(__file__).resolve().parents[2]
+    return resource_paths.bundled_root() or Path(__file__).resolve().parents[2]
 
 
 def project_asset(name):
@@ -13,8 +12,9 @@ def project_asset(name):
 
 
 def theme_dir():
-    if hasattr(sys, "_MEIPASS"):
-        return Path(sys._MEIPASS) / "ui" / "theme"
+    bundle = resource_paths.bundled_root()
+    if bundle is not None:
+        return bundle / "ui" / "theme"
     return Path(__file__).resolve().parent / "theme"
 
 

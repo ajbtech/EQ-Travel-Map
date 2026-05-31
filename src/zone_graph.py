@@ -1,12 +1,14 @@
 import json
-import sys
 from functools import lru_cache
 from pathlib import Path
 
+import resource_paths
+
 
 def _data_root():
-    if hasattr(sys, "_MEIPASS"):
-        return Path(sys._MEIPASS) / "data"
+    bundle = resource_paths.bundled_root()
+    if bundle is not None:
+        return bundle / "data"
     return Path(__file__).resolve().parents[1] / "data"
 
 
@@ -24,9 +26,10 @@ def get_canonical_zone_name(zone_name):
     return graph["aliases"].get(zone_name, zone_name)
 
 
+@lru_cache(maxsize=1)
 def get_adjacent_zone_pairs():
     graph = load_zone_graph()
-    return {frozenset((edge["from"], edge["to"])) for edge in graph["edges"]}
+    return frozenset(frozenset((edge["from"], edge["to"])) for edge in graph["edges"])
 
 
 def _canonicalize_pair(a, b):
@@ -45,6 +48,7 @@ def is_same_zone(source_zone, target_zone):
     return source_zone == target_zone
 
 
+@lru_cache(maxsize=1)
 def get_zone_centers():
     graph = load_zone_graph()
     centers = {

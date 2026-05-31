@@ -1,9 +1,21 @@
+from PySide6.QtWidgets import QLabel
+
 from ui.views.progress_view import ProgressView
 
 
 def test_progress_view_initializes_without_error(qt_app):
     view = ProgressView()
     assert view is not None
+
+
+def test_progress_title_is_prefixed_with_gorreks(qt_app):
+    view = ProgressView()
+    titles = [
+        label.text()
+        for label in view.findChildren(QLabel)
+        if label.objectName() == "parchmentTitle"
+    ]
+    assert titles == ["Gorrek's EverQuest Travel Map"]
 
 
 def test_set_character_updates_label(qt_app):

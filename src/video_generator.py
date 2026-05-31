@@ -37,6 +37,86 @@ class VideoFrame:
     content_version: int
 
 
+def _apply_zone(totals, event):
+    totals.zone_count += 1
+    totals.zone_counter[event.value] += 1
+    if zone_graph.has_zone_center(event.value):
+        totals.known_revealed += 1
+        totals.last_known_zone = event.value
+
+
+def _apply_kill(totals, event):
+    totals.kill_count += 1
+    totals.kill_counter[event.value] += 1
+
+
+def _apply_death(totals, _event):
+    totals.death_count += 1
+
+
+def _apply_login(totals, _event):
+    totals.login_count += 1
+
+
+def _apply_level_gained(totals, event):
+    totals.current_level = event.value
+
+
+def _apply_level_lost(totals, event):
+    totals.level_lost_count += 1
+    totals.current_level = event.value
+
+
+def _apply_loot_cash(totals, event):
+    totals.loot_cash = totals.loot_cash.add(event.value)
+
+
+def _apply_merchant_cash(totals, event):
+    totals.merch_cash = totals.merch_cash.add(event.value)
+
+
+# Table-driven dispatch (mirrors log_parser.EVENT_HANDLERS) so adding a tracked
+# event is one entry rather than another branch in the frame loop.
+_TOTALS_HANDLERS = {
+    line_reader.EventType.ZONE: _apply_zone,
+    line_reader.EventType.KILL: _apply_kill,
+    line_reader.EventType.DEATH: _apply_death,
+    line_reader.EventType.LOGIN: _apply_login,
+    line_reader.EventType.LEVEL_GAINED: _apply_level_gained,
+    line_reader.EventType.LEVEL_LOST: _apply_level_lost,
+    line_reader.EventType.LOOT_CASH: _apply_loot_cash,
+    line_reader.EventType.MERCHANT_CASH: _apply_merchant_cash,
+}
+
+
+class _RunningTotals:
+    """Replayable tally of the metrics shown as the video progresses.
+
+    ``apply`` consumes one timeline event; ``known_revealed`` /
+    ``last_known_zone`` track which map segments should be drawn so the frame
+    loop can stay focused on pacing and rendering.
+    """
+
+    def __init__(self):
+        self.login_count = 0
+        self.death_count = 0
+        self.kill_count = 0
+        self.zone_count = 0
+        self.level_lost_count = 0
+        self.current_level = 1
+        self.loot_cash = money_sorter.Cash()
+        self.merch_cash = money_sorter.Cash()
+        self.kill_counter = Counter()
+        self.zone_counter = Counter()
+        self.known_revealed = 0
+        self.last_known_zone = None
+
+    def apply(self, event):
+        handler = _TOTALS_HANDLERS.get(event.kind)
+        if handler is not None:
+            handler(self, event)
+
+
 class VideoGenerator:
     def __init__(
         self,
@@ -81,21 +161,9 @@ class VideoGenerator:
         event_count = len(self._timeline)
         total = self._total_frames
 
-        login_count = 0
-        death_count = 0
-        kill_count = 0
-        zone_count = 0
-        level_lost_count = 0
-        current_level = 1
-        loot_cash = money_sorter.Cash()
-        merch_cash = money_sorter.Cash()
-        kill_counter = Counter()
-        zone_counter = Counter()
-
-        known_revealed = 0
+        totals = _RunningTotals()
         drawn_event_count = 0
         current_map_image = self._base_image
-        last_known_zone = None
         prev_consumed = 0
         content_version = 0
 
@@ -105,38 +173,19 @@ class VideoGenerator:
                 frame_index, event_count, total
             )
             while consumed < target_consumed:
-                event = self._timeline[consumed]
+                totals.apply(self._timeline[consumed])
                 consumed += 1
-                kind = event.kind
-                if kind == line_reader.EventType.ZONE:
-                    zone_count += 1
-                    zone_counter[event.value] += 1
-                    if zone_graph.has_zone_center(event.value):
-                        known_revealed += 1
-                        last_known_zone = event.value
-                elif kind == line_reader.EventType.KILL:
-                    kill_count += 1
-                    kill_counter[event.value] += 1
-                elif kind == line_reader.EventType.DEATH:
-                    death_count += 1
-                elif kind == line_reader.EventType.LOGIN:
-                    login_count += 1
-                elif kind == line_reader.EventType.LEVEL_GAINED:
-                    current_level = event.value
-                elif kind == line_reader.EventType.LEVEL_LOST:
-                    level_lost_count += 1
-                    current_level = event.value
-                elif kind == line_reader.EventType.LOOT_CASH:
-                    loot_cash = loot_cash.add(event.value)
-                elif kind == line_reader.EventType.MERCHANT_CASH:
-                    merch_cash = merch_cash.add(event.value)
 
             target_events = (
-                self._cumulative[known_revealed - 1] if known_revealed else 0
+                self._cumulative[totals.known_revealed - 1]
+                if totals.known_revealed
+                else 0
             )
             map_was_updated = False
             if target_events > drawn_event_count:
-                current_map_image = self._render_map(target_events, last_known_zone)
+                current_map_image = self._render_map(
+                    target_events, totals.last_known_zone
+                )
                 drawn_event_count = target_events
                 map_was_updated = True
 
@@ -148,18 +197,16 @@ class VideoGenerator:
                 map_image=current_map_image,
                 map_updated=map_was_updated,
                 content_version=content_version,
-                top_kills_lines=self._top_lines("Top 5 killed creatures", kill_counter),
-                top_zones_lines=self._top_lines("Top 5 visited zones", zone_counter),
-                stats_lines=self._stats_lines(
-                    login_count,
-                    death_count,
-                    zone_count,
-                    kill_count,
-                    level_lost_count,
-                    loot_cash,
-                    merch_cash,
+                top_kills_lines=self._top_lines(
+                    "Top 5 killed creatures", totals.kill_counter
                 ),
-                level_line=f"Level: {summary_formatter.format_number(current_level)}",
+                top_zones_lines=self._top_lines(
+                    "Top 5 visited zones", totals.zone_counter
+                ),
+                stats_lines=self._stats_lines(totals),
+                level_line=(
+                    f"Level: {summary_formatter.format_number(totals.current_level)}"
+                ),
                 frame_index=frame_index,
                 total_frames=total,
             )
@@ -211,26 +258,17 @@ class VideoGenerator:
             lines.append(f"{rank}. {name}: {summary_formatter.format_number(count)}")
         return lines
 
-    def _stats_lines(
-        self,
-        login_count,
-        death_count,
-        zone_count,
-        kill_count,
-        level_lost_count,
-        loot_cash,
-        merch_cash,
-    ):
+    def _stats_lines(self, totals):
         fmt = summary_formatter.format_number
+        cash = summary_formatter.format_cash
         return [
             f"First log: {self._first_login_message.rstrip()}",
             f"Total logs: {fmt(self._line_count)}",
-            f"Logins: {fmt(login_count)}",
-            f"Deaths: {fmt(death_count)}",
-            f"Zone Count: {fmt(zone_count)}",
-            f"Kill Count: {fmt(kill_count)}",
-            f"Levels Lost: {fmt(level_lost_count)}",
-            f"Looted coin: {summary_formatter.format_cash(loot_cash.normalize())}",
-            f"Coin from Merchants: "
-            f"{summary_formatter.format_cash(merch_cash.normalize())}",
+            f"Logins: {fmt(totals.login_count)}",
+            f"Deaths: {fmt(totals.death_count)}",
+            f"Zone Count: {fmt(totals.zone_count)}",
+            f"Kill Count: {fmt(totals.kill_count)}",
+            f"Levels Lost: {fmt(totals.level_lost_count)}",
+            f"Looted coin: {cash(totals.loot_cash.normalize())}",
+            f"Coin from Merchants: {cash(totals.merch_cash.normalize())}",
         ]

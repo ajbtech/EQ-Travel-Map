@@ -7,7 +7,7 @@ Instructions:
 - **Linux:** Download `EQTravelMap-vX.Y.Z-linux.tar.gz`, extract it, and run `./EQTravelMap/EQTravelMap`
 
 
-# EverQuest Travel Map
+# Gorrek's EverQuest Travel Map
 
 Generate a visual travel map and play summary from your EverQuest character's
 log files. Drop in your logs, pick your character, click Generate.

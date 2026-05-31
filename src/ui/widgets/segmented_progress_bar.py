@@ -1,3 +1,5 @@
+import math
+
 from PySide6.QtCore import QRectF, QSize, Qt
 from PySide6.QtGui import QColor, QLinearGradient, QPainter, QPainterPath
 from PySide6.QtWidgets import QSizePolicy, QWidget
@@ -256,8 +258,6 @@ class SegmentedProgressBar(QWidget):
         )
 
         # Spokes
-        import math
-
         spoke_inner = r * 0.45
         spoke_outer = r * 0.88
         spoke_count = 8

@@ -6,9 +6,7 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor, QGuiApplication
 from PySide6.QtWidgets import (
     QApplication,
-    QButtonGroup,
     QDialog,
-    QDialogButtonBox,
     QFileDialog,
     QFrame,
     QHBoxLayout,
@@ -16,13 +14,14 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QProgressDialog,
     QPushButton,
-    QRadioButton,
     QSizePolicy,
-    QSpinBox,
     QVBoxLayout,
     QWidget,
 )
 
+# Re-exported under the historical private name so callers (and tests) can keep
+# patching ``results_view._DurationDialog``.
+from ui.views.duration_dialog import DurationDialog as _DurationDialog
 from ui.views.more_stats_view import MoreStatsDialog
 from ui.widgets.engraved_heading import EngravedHeading
 from ui.widgets.map_canvas import MapCanvas
@@ -129,36 +128,21 @@ class ResultsView(QWidget):
         # button stack down to the bottom of the column.
         button_column.addStretch(1)
 
-        self.back_button = QPushButton("NEW INPUT")
-        self.back_button.setObjectName("bronzeButton")
-        self.back_button.setFixedWidth(200)
-        self.back_button.clicked.connect(self.back_requested.emit)
-        button_column.addWidget(self.back_button)
-
-        self.copy_text_button = QPushButton("COPY TEXT")
-        self.copy_text_button.setObjectName("bronzeButton")
-        self.copy_text_button.setFixedWidth(200)
-        self.copy_text_button.clicked.connect(self._on_copy_text)
-        button_column.addWidget(self.copy_text_button)
-
-        self.save_image_button = QPushButton("SAVE MAP")
-        self.save_image_button.setObjectName("bronzeButton")
-        self.save_image_button.setFixedWidth(200)
-        self.save_image_button.clicked.connect(self._on_save_image)
-        button_column.addWidget(self.save_image_button)
-
-        self.more_stats_button = QPushButton("MORE STATS")
-        self.more_stats_button.setObjectName("bronzeButton")
-        self.more_stats_button.setFixedWidth(200)
-        self.more_stats_button.clicked.connect(self._on_more_stats)
-        button_column.addWidget(self.more_stats_button)
-
-        self.make_video_button = QPushButton("MAKE VIDEO")
-        self.make_video_button.setObjectName("bronzeButton")
-        self.make_video_button.setFixedWidth(200)
-        self.make_video_button.setEnabled(False)
-        self.make_video_button.clicked.connect(self._on_make_video)
-        button_column.addWidget(self.make_video_button)
+        self.back_button = self._add_bronze_button(
+            button_column, "NEW INPUT", self.back_requested.emit
+        )
+        self.copy_text_button = self._add_bronze_button(
+            button_column, "COPY TEXT", self._on_copy_text
+        )
+        self.save_image_button = self._add_bronze_button(
+            button_column, "SAVE MAP", self._on_save_image
+        )
+        self.more_stats_button = self._add_bronze_button(
+            button_column, "MORE STATS", self._on_more_stats
+        )
+        self.make_video_button = self._add_bronze_button(
+            button_column, "MAKE VIDEO", self._on_make_video, enabled=False
+        )
 
         upper_row.addWidget(self.button_frame)
         upper_row.addStretch(1)
@@ -234,6 +218,16 @@ class ResultsView(QWidget):
             or self.summary_stone_frame.maximumWidth() != summary_w
         ):
             self.summary_stone_frame.setFixedWidth(summary_w)
+
+    @staticmethod
+    def _add_bronze_button(layout, text, slot, *, enabled=True):
+        button = QPushButton(text)
+        button.setObjectName("bronzeButton")
+        button.setFixedWidth(200)
+        button.setEnabled(enabled)
+        button.clicked.connect(slot)
+        layout.addWidget(button)
+        return button
 
     def _make_column(self):
         label = QLabel("")
@@ -443,64 +437,9 @@ class ResultsView(QWidget):
     def _character_name(self):
         if self._current_sections is None:
             return ""
-        line = getattr(self._current_sections, "character_line", "")
-        prefix = "Character: "
-        if line.startswith(prefix):
-            return line[len(prefix) :].strip()
-        return ""
+        return getattr(self._current_sections, "character_name", "")
 
     def _level_text(self):
         if self._current_sections is None:
             return ""
         return getattr(self._current_sections, "level_line", "")
-
-
-class _DurationDialog(QDialog):
-    """Asks how long the exported video should be, in seconds."""
-
-    _PRESETS = [
-        ("30 seconds", 30),
-        ("1 minute", 60),
-        ("2 minutes", 120),
-        ("5 minutes", 300),
-    ]
-    _DEFAULT_INDEX = 2
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle("Video length")
-
-        layout = QVBoxLayout(self)
-        self._group = QButtonGroup(self)
-        for index, (label, seconds) in enumerate(self._PRESETS):
-            radio = QRadioButton(label)
-            radio.setProperty("seconds", seconds)
-            self._group.addButton(radio, index)
-            layout.addWidget(radio)
-            if index == self._DEFAULT_INDEX:
-                radio.setChecked(True)
-
-        custom_row = QHBoxLayout()
-        self._custom_radio = QRadioButton("Custom:")
-        self._group.addButton(self._custom_radio, len(self._PRESETS))
-        self._custom_spin = QSpinBox()
-        self._custom_spin.setRange(10, 3600)
-        self._custom_spin.setValue(120)
-        self._custom_spin.setSuffix(" s")
-        custom_row.addWidget(self._custom_radio)
-        custom_row.addWidget(self._custom_spin)
-        custom_row.addStretch(1)
-        layout.addLayout(custom_row)
-
-        buttons = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel, parent=self
-        )
-        buttons.accepted.connect(self.accept)
-        buttons.rejected.connect(self.reject)
-        layout.addWidget(buttons)
-
-    def target_seconds(self):
-        checked = self._group.checkedButton()
-        if checked is self._custom_radio:
-            return self._custom_spin.value()
-        return int(checked.property("seconds"))
