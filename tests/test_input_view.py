@@ -1,3 +1,5 @@
+from PySide6.QtWidgets import QLabel
+
 from ui.views.input_view import InputView
 
 
@@ -7,6 +9,16 @@ def _make_view(tmp_path, character="Gorrek"):
         default_output_path=tmp_path / "out.png",
         default_character_name=character,
     )
+
+
+def test_input_title_is_prefixed_with_gorreks(qt_app, tmp_path):
+    view = _make_view(tmp_path)
+    titles = [
+        label.text()
+        for label in view.findChildren(QLabel)
+        if label.objectName() == "parchmentTitle"
+    ]
+    assert titles == ["Gorrek's EverQuest Travel Map"]
 
 
 def test_generate_blocked_when_no_log_files_match(qt_app, tmp_path):

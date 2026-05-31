@@ -44,7 +44,7 @@ class InputView(QWidget):
         body.setContentsMargins(16, 4, 16, 16)
         body.setSpacing(10)
 
-        title = QLabel("EverQuest Travel Map")
+        title = QLabel("Gorrek's EverQuest Travel Map")
         title.setObjectName("parchmentTitle")
         title.setAlignment(Qt.AlignHCenter)
         body.addWidget(title)
