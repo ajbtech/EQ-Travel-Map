@@ -6,6 +6,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+- Replaced the random per-visit "jitter" with deterministic colour rings.
+  Each zone is now drawn as a filled circle whose colour runs from the
+  earliest visit's rainbow colour at the centre to the latest at the edge, so
+  a zone visited throughout a character's life reads red→violet from the
+  inside out. Travel lines attach to the matching-colour ring on each zone.
+  The map is now fully deterministic (no RNG), so the same log always renders
+  identically.
+
 ### Added
 - "MAKE VIDEO" button on the results window exports an MP4 that replays the
   character's journey: travel lines draw onto the map and the summary stats

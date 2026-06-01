@@ -34,48 +34,30 @@ def test_log_name_aliases_are_available():
     assert eq_display.get_zone_center("The Wakening Lands") == (1031, 1361)
 
 
-def test_shifted_zone_center_uses_smaller_jitter_radius(monkeypatch):
-    monkeypatch.setattr(eq_display, "random", lambda: 1)
-
-    shifted_center = eq_display.get_shifted_zone_center("Grobb")
-
-    assert shifted_center == (1538.75, 864.75)
+def test_max_ring_radius_matches_legacy_jitter_radius():
+    assert eq_display.MAX_RING_RADIUS == 18.75
 
 
-def test_shifted_zone_center_starts_at_exact_center(monkeypatch):
-    monkeypatch.setattr(eq_display, "random", lambda: 1)
+def test_draw_disc_fills_center_with_expected_color():
+    renderer = eq_display.MapRenderer()
+    x, y = eq_display.MAP_PIXEL_WIDTH // 2, eq_display.MAP_PIXEL_HEIGHT // 2
 
-    shifted_center = eq_display.get_shifted_zone_center("Grobb", visit_number=1)
+    renderer.draw_disc((x, y), 10, 0.0)
 
-    assert shifted_center == (1520, 846)
-
-
-def test_shifted_zone_center_reaches_max_jitter_at_twenty_five_visits(monkeypatch):
-    monkeypatch.setattr(eq_display, "random", lambda: 1)
-
-    shifted_center = eq_display.get_shifted_zone_center("Grobb", visit_number=25)
-
-    assert shifted_center == (1538.75, 864.75)
+    expected = eq_display._to_rgba(eq_display.make_rainbow(0.0))
+    assert renderer.get_image().getpixel((x, y)) == expected
 
 
-def test_shifted_zone_center_scales_to_total_visits_when_more_than_twenty_five(
-    monkeypatch,
-):
-    monkeypatch.setattr(eq_display, "random", lambda: 1)
+def test_draw_disc_fills_out_to_its_radius():
+    renderer = eq_display.MapRenderer()
+    x, y = eq_display.MAP_PIXEL_WIDTH // 2, eq_display.MAP_PIXEL_HEIGHT // 2
+    radius = 10
 
-    midway_center = eq_display.get_shifted_zone_center(
-        "Grobb",
-        visit_number=50,
-        total_visits=100,
-    )
-    final_center = eq_display.get_shifted_zone_center(
-        "Grobb",
-        visit_number=100,
-        total_visits=100,
-    )
+    renderer.draw_disc((x, y), radius, 0.5)
 
-    assert midway_center == pytest.approx((1529.280303, 855.280303))
-    assert final_center == (1538.75, 864.75)
+    expected = eq_display._to_rgba(eq_display.make_rainbow(0.5))
+    edge_pixel = renderer.get_image().getpixel((x, y - radius + 1))
+    assert edge_pixel == expected
 
 
 def test_make_rainbow_starts_at_red():

@@ -18,7 +18,7 @@ The desktop app has two windows:
 - `src/log_parser.py` — streams log files and builds a parsed summary
 - `src/line_reader.py` — classifies individual log lines into events
 - `src/eq_display.py` — zone center coordinates and map drawing logic
-- `src/map_path.py` — converts zone visits into drawable map segments (graph-skip, jitter)
+- `src/map_path.py` — converts zone visits into drawable map events (graph-skip, per-visit colour rings)
 - `src/money_sorter.py` — parses and normalises cash values
 - `src/summary_formatter.py` — builds the text summary used by both the CLI and desktop app
 - `src/zone_graph.py` — loads `data/zone_graph.json` and checks zone adjacency

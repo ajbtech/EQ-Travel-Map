@@ -135,6 +135,9 @@ def test_draw_zone_path_can_save_map(monkeypatch, tmp_path):
         def draw_line(self, zone_loc_1, zone_loc_2, percent):
             pass
 
+        def draw_disc(self, center, radius, percent):
+            pass
+
         def mark_zone_x(self, zone_loc):
             pass
 
@@ -161,6 +164,9 @@ def test_draw_zone_path_does_not_mark_zone_centers(monkeypatch, tmp_path):
             pass
 
         def draw_line(self, zone_loc_1, zone_loc_2, percent):
+            pass
+
+        def draw_disc(self, center, radius, percent):
             pass
 
         def mark_zone_x(self, zone_loc):
@@ -190,7 +196,7 @@ def test_draw_zone_path_draws_adjacent_graph_transition(monkeypatch, tmp_path):
         def draw_line(self, zone_loc_1, zone_loc_2, percent):
             drawn_lines.append((zone_loc_1, zone_loc_2))
 
-        def draw_dot(self, zone_loc, percent):
+        def draw_disc(self, center, radius, percent):
             pass
 
         def mark_zone_x(self, zone_loc):
@@ -214,14 +220,17 @@ def test_draw_zone_path_draws_adjacent_graph_transition(monkeypatch, tmp_path):
 
 
 def test_draw_zone_path_draws_newer_segments_first(monkeypatch, tmp_path):
-    drawn_lines = []
+    line_percents = []
 
     class FakeMapRenderer:
         def __init__(self, *args, **kwargs):
             pass
 
         def draw_line(self, zone_loc_1, zone_loc_2, percent):
-            drawn_lines.append((zone_loc_1, zone_loc_2))
+            line_percents.append(percent)
+
+        def draw_disc(self, center, radius, percent):
+            pass
 
         def save_map(self, output_path):
             pass
@@ -235,25 +244,19 @@ def test_draw_zone_path_draws_newer_segments_first(monkeypatch, tmp_path):
     zone_list.add("Southern Desert of Ro")
 
     monkeypatch.setattr(eq_parser.eq_display, "MapRenderer", FakeMapRenderer)
-    monkeypatch.setattr(
-        eq_parser.eq_display,
-        "get_shifted_zone_center",
-        lambda zone, visit_number, total_visits: [zone],
-    )
 
     eq_parser.draw_zone_path(zone_list, output_path=tmp_path / "zone_path.png")
 
-    assert drawn_lines == [
-        (["Innothule Swamp"], ["Southern Desert of Ro"]),
-        (["Grobb"], ["Innothule Swamp"]),
-    ]
+    # Newest segment (highest chronological percent) is drawn first so older
+    # routes remain on top.
+    assert line_percents == [1.0, 0.5]
 
 
-def test_draw_zone_path_jitters_zones_in_chronological_visit_order(
+def test_draw_zone_path_draws_a_disc_for_every_known_visit(
     monkeypatch,
     tmp_path,
 ):
-    visits = []
+    drawn_discs = []
 
     class FakeMapRenderer:
         def __init__(self, *args, **kwargs):
@@ -262,15 +265,14 @@ def test_draw_zone_path_jitters_zones_in_chronological_visit_order(
         def draw_line(self, zone_loc_1, zone_loc_2, percent):
             pass
 
+        def draw_disc(self, center, radius, percent):
+            drawn_discs.append((center, percent))
+
         def save_map(self, output_path):
             pass
 
         def display_map(self):
             raise AssertionError("display_map should not be called when saving")
-
-    def fake_get_shifted_zone_center(zone, visit_number, total_visits):
-        visits.append((zone, visit_number, total_visits))
-        return [zone, visit_number]
 
     zone_list = EQList()
     zone_list.add("Grobb")
@@ -278,19 +280,11 @@ def test_draw_zone_path_jitters_zones_in_chronological_visit_order(
     zone_list.add("Grobb")
 
     monkeypatch.setattr(eq_parser.eq_display, "MapRenderer", FakeMapRenderer)
-    monkeypatch.setattr(
-        eq_parser.eq_display,
-        "get_shifted_zone_center",
-        fake_get_shifted_zone_center,
-    )
 
     eq_parser.draw_zone_path(zone_list, output_path=tmp_path / "zone_path.png")
 
-    assert visits == [
-        ("Grobb", 1, 2),
-        ("Innothule Swamp", 1, 1),
-        ("Grobb", 2, 2),
-    ]
+    # One disc per visit, drawn newest-first so the earliest ring lands on top.
+    assert [percent for _, percent in drawn_discs] == [1.0, 0.5, 0.0]
 
 
 def test_draw_zone_path_skips_non_adjacent_graph_transition(monkeypatch, tmp_path):
@@ -303,7 +297,7 @@ def test_draw_zone_path_skips_non_adjacent_graph_transition(monkeypatch, tmp_pat
         def draw_line(self, zone_loc_1, zone_loc_2, percent):
             drawn_lines.append((zone_loc_1, zone_loc_2))
 
-        def draw_dot(self, zone_loc, percent):
+        def draw_disc(self, center, radius, percent):
             pass
 
         def mark_zone_x(self, zone_loc):
@@ -331,7 +325,7 @@ def test_draw_zone_path_marks_skipped_transition_destination(
     tmp_path,
     capsys,
 ):
-    drawn_dots = []
+    drawn_discs = []
 
     class FakeMapRenderer:
         def __init__(self, *args, **kwargs):
@@ -340,8 +334,8 @@ def test_draw_zone_path_marks_skipped_transition_destination(
         def draw_line(self, zone_loc_1, zone_loc_2, percent):
             raise AssertionError("skipped graph transitions should not draw lines")
 
-        def draw_dot(self, zone_loc, percent):
-            drawn_dots.append((zone_loc, percent))
+        def draw_disc(self, center, radius, percent):
+            drawn_discs.append(center)
 
         def save_map(self, output_path):
             pass
@@ -354,15 +348,15 @@ def test_draw_zone_path_marks_skipped_transition_destination(
     zone_list.add("Great Divide")
 
     monkeypatch.setattr(eq_parser.eq_display, "MapRenderer", FakeMapRenderer)
-    monkeypatch.setattr(
-        eq_parser.eq_display,
-        "get_shifted_zone_center",
-        lambda zone, visit_number, total_visits: [zone, visit_number],
-    )
 
     eq_parser.draw_zone_path(zone_list, output_path=tmp_path / "zone_path.png")
 
-    assert drawn_dots == [(["Great Divide", 1], 0)]
+    # No connecting line, but the destination still gets its own colour ring.
+    expected_centers = {
+        eq_parser.eq_display.get_zone_center("Grobb"),
+        eq_parser.eq_display.get_zone_center("Great Divide"),
+    }
+    assert set(drawn_discs) == expected_centers
     assert "Graph skip" not in capsys.readouterr().out
 
 

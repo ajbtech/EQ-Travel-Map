@@ -6,7 +6,6 @@ via ``zone_graph.get_zone_center``.
 """
 
 from pathlib import Path
-from random import random
 
 from PIL import Image, ImageDraw
 
@@ -79,6 +78,13 @@ class MapRenderer:
             fill=_to_rgba(make_rainbow(percent)),
         )
 
+    def draw_disc(self, center, radius, percent):
+        x, y = center
+        self.draw.ellipse(
+            [(x - radius, y - radius), (x + radius, y + radius)],
+            fill=_to_rgba(make_rainbow(percent)),
+        )
+
     def draw_location_circle(self, zone_loc, percent):
         x, y = zone_loc
         r = LOCATION_CIRCLE_RADIUS
@@ -120,25 +126,10 @@ class MapRenderer:
         self.image.save(output_path, format="PNG")
 
 
-MAX_JITTER_SIZE = 37.5
-MIN_VISITS_TO_MAX_JITTER = 25
-
-
-def get_jitter_scale(visit_number, total_visits=MIN_VISITS_TO_MAX_JITTER):
-    if visit_number <= 1:
-        return 0
-    visits_to_max_jitter = max(total_visits, MIN_VISITS_TO_MAX_JITTER)
-    return min((visit_number - 1) / (visits_to_max_jitter - 1), 1)
-
-
-def get_shifted_zone_center(
-    key,
-    visit_number=MIN_VISITS_TO_MAX_JITTER,
-    total_visits=MIN_VISITS_TO_MAX_JITTER,
-):
-    r_size = MAX_JITTER_SIZE * get_jitter_scale(visit_number, total_visits)
-    x, y = get_zone_center(key)
-    return (x + (random() - 0.5) * r_size, y + (random() - 0.5) * r_size)
+# Outer radius of every zone's per-visit colour ring, in map pixels. Matches
+# the old maximum jitter radius (``MAX_JITTER_SIZE / 2``) so the visual spread
+# of a busy zone is unchanged, while the placement is now deterministic.
+MAX_RING_RADIUS = 18.75
 
 
 def make_rainbow(percent):
