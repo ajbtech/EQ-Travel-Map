@@ -44,18 +44,22 @@ def test_build_map_events_skips_line_for_non_adjacent_transition(monkeypatch):
     assert events[1].center == (0.0, 200.0)
 
 
-def test_build_map_events_stacks_repeat_visits_into_concentric_rings(monkeypatch):
+def test_build_map_events_outer_radius_is_area_proportional_to_busiest_zone(
+    monkeypatch,
+):
     _patch_geometry(monkeypatch)
 
-    events = map_path.build_map_events(["Grobb", "Innothule Swamp", "Grobb"])
+    # Grobb visited 4x is the busiest (full radius); Innothule visited once has
+    # a quarter of the visits, so a quarter of the area => half the radius.
+    events = map_path.build_map_events(
+        ["Grobb", "Grobb", "Grobb", "Grobb", "Innothule Swamp"]
+    )
 
-    radii = [(event.center, event.radius) for event in events]
-    # Grobb is visited twice: an inner ring first, the full-radius ring last.
-    assert radii == [
-        ((0.0, 0.0), 6.0),
-        ((100.0, 0.0), 12.0),
-        ((0.0, 0.0), 12.0),
-    ]
+    grobb_radii = [event.radius for event in events if event.center == (0.0, 0.0)]
+    innothule_radii = [event.radius for event in events if event.center == (100.0, 0.0)]
+    # Grobb's four visits stack as evenly spaced concentric rings out to 12.
+    assert grobb_radii == [3.0, 6.0, 9.0, 12.0]
+    assert innothule_radii == [6.0]
 
 
 def test_build_map_events_colours_visits_chronologically(monkeypatch):
@@ -70,12 +74,15 @@ def test_build_map_events_colours_visits_chronologically(monkeypatch):
 def test_build_map_events_attaches_line_to_matching_ring_radius(monkeypatch):
     _patch_geometry(monkeypatch)
 
-    events = map_path.build_map_events(["Grobb", "Innothule Swamp", "Grobb"])
+    # Both zones visited twice => equally busy => both full radius 12, with an
+    # inner ring at 6. The third move (back to Grobb) leaves Innothule's inner
+    # ring (radius 6) and arrives at Grobb's outer ring (radius 12).
+    events = map_path.build_map_events(
+        ["Grobb", "Innothule Swamp", "Grobb", "Innothule Swamp"]
+    )
 
-    # The return trip leaves Innothule's full ring and arrives at Grobb's
-    # outer (second-visit) ring, both at radius 12 along the shared axis.
     return_trip = events[2]
-    assert return_trip.line_start == (88.0, 0.0)
+    assert return_trip.line_start == (94.0, 0.0)
     assert return_trip.line_end == (12.0, 0.0)
 
 

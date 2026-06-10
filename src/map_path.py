@@ -14,9 +14,12 @@ class ZoneVisit:
     into concentric discs: the first visit is the small inner disc and the last
     visit is the full-radius outer disc, so the ring colour runs from the
     earliest visit's rainbow colour at the centre to the latest at the edge.
-    ``line_start``/``line_end`` carry the connecting line from the previous
-    visit when (and only when) the two zones are graph-adjacent; the line
-    attaches to each circle at the matching visit's ring radius.
+    The zone's outer radius scales with how often it was visited — its disc
+    *area* is proportional to its visit count relative to the busiest zone, so
+    the most-visited zone fills ``MAX_RING_RADIUS`` and the rest shrink from
+    there. ``line_start``/``line_end`` carry the connecting line from the
+    previous visit when (and only when) the two zones are graph-adjacent; the
+    line attaches to each circle at the matching visit's ring radius.
     """
 
     center: tuple[float, float]
@@ -38,6 +41,7 @@ def build_map_events(zone_list):
         return []
 
     zone_total_counts = Counter(known_zone_list)
+    max_total = max(zone_total_counts.values())
     zone_visit_counts = {}
     draw_events = []
     last_zone = ""
@@ -47,7 +51,9 @@ def build_map_events(zone_list):
     for visit_index, zone in enumerate(known_zone_list):
         percent = _visit_percent(visit_index, visit_count)
         zone_visit_counts[zone] = zone_visit_counts.get(zone, 0) + 1
-        radius = _visit_radius(zone_visit_counts[zone], zone_total_counts[zone])
+        radius = _visit_radius(
+            zone_visit_counts[zone], zone_total_counts[zone], max_total
+        )
         center = eq_display.get_zone_center(zone)
 
         line_start, line_end = _connecting_line(
@@ -69,9 +75,20 @@ def _visit_percent(visit_index, visit_count):
     return visit_index / (visit_count - 1)
 
 
-def _visit_radius(visit_number, total_visits):
-    """Ring radius for a zone's ``visit_number`` of ``total_visits`` visits."""
-    return eq_display.MAX_RING_RADIUS * visit_number / total_visits
+def _zone_outer_radius(total_visits, max_total):
+    """Full radius of a zone, with disc *area* proportional to its visit share.
+
+    The busiest zone (``total_visits == max_total``) fills ``MAX_RING_RADIUS``;
+    a zone visited a quarter as often covers a quarter of the area, i.e. half
+    the radius.
+    """
+    return eq_display.MAX_RING_RADIUS * math.sqrt(total_visits / max_total)
+
+
+def _visit_radius(visit_number, total_visits, max_total):
+    """Radius of a single ring within a zone's area-scaled outer circle."""
+    outer_radius = _zone_outer_radius(total_visits, max_total)
+    return outer_radius * visit_number / total_visits
 
 
 def _connecting_line(last_zone, zone, last_center, last_radius, center, radius):
