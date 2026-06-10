@@ -8,7 +8,7 @@ import zone_graph
 
 @dataclass(frozen=True)
 class ZoneVisit:
-    """One visit to a known zone, drawn as a colour ring (plus an optional line).
+    """One visit to a known zone, drawn as a colour ring over a link trapezoid.
 
     Each visit paints a filled disc centred on the zone. A zone's visits stack
     into concentric discs: the first visit is the small inner disc and the last
@@ -17,31 +17,33 @@ class ZoneVisit:
     The zone's outer radius scales with how often it was visited — its disc
     *area* is proportional to its visit count relative to the busiest zone, so
     the most-visited zone fills ``MAX_RING_RADIUS`` and the rest shrink from
-    there. ``line_start``/``line_end`` carry the connecting line from the
-    previous visit when (and only when) the two zones are graph-adjacent. The
-    line attaches to each circle at that visit's ring radius and is offset
-    perpendicular to the route, so repeated trips between the same two zones fan
-    out into a ribbon rather than stacking on one line.
+    there.
+
+    When the move from the previous zone is graph-adjacent, ``trapezoid`` holds
+    the four corners of a band that connects the two circles: it meets each
+    circle at this visit's ring radius (so its colour lines up with the matching
+    ring) and spans the full width there. Drawn beneath the discs, successive
+    trips between the same zones nest outward as the rings grow and fill the gap
+    with chronological colour stripes.
     """
 
     center: tuple[float, float]
     radius: float
     percent: float
-    line_start: tuple[float, float] | None = None
-    line_end: tuple[float, float] | None = None
+    trapezoid: tuple[tuple[float, float], ...] | None = None
 
     def draw_disc(self, renderer):
         renderer.draw_disc(self.center, self.radius, percent=self.percent)
 
-    def draw_line(self, renderer):
-        if self.line_start is not None:
-            renderer.draw_line(self.line_start, self.line_end, percent=self.percent)
+    def draw_trapezoid(self, renderer):
+        if self.trapezoid is not None:
+            renderer.draw_trapezoid(self.trapezoid, percent=self.percent)
 
     def draw(self, renderer):
-        # Disc first, then the line on top, so the connecting ribbon is never
-        # hidden behind the zone's filled circle.
+        # Trapezoid first, then the disc on top, so the linking band sits beneath
+        # the zone's filled circle.
+        self.draw_trapezoid(renderer)
         self.draw_disc(renderer)
-        self.draw_line(renderer)
 
 
 def build_map_events(zone_list):
@@ -52,12 +54,10 @@ def build_map_events(zone_list):
 
     zone_total_counts = Counter(known_zone_list)
     max_total = max(zone_total_counts.values())
-    corridor_keys = _corridor_keys(known_zone_list)
-    corridor_totals = Counter(key for key in corridor_keys if key is not None)
 
     zone_visit_counts = {}
-    corridor_seen = Counter()
     draw_events = []
+    last_zone = ""
     last_center = None
     last_radius = 0.0
 
@@ -68,45 +68,17 @@ def build_map_events(zone_list):
         radius = _visit_radius(zone_visit_counts[zone], zone_total, max_total)
         center = eq_display.get_zone_center(zone)
 
-        corridor_key = corridor_keys[visit_index]
-        if corridor_key is None:
-            line_start, line_end = (None, None)
+        if last_zone != "" and zone_graph.are_adjacent(last_zone, zone):
+            trapezoid = _transition_trapezoid(last_center, last_radius, center, radius)
         else:
-            corridor_seen[corridor_key] += 1
-            trip_index = corridor_seen[corridor_key] - 1
-            line_start, line_end = _fanned_line(
-                last_center,
-                last_radius,
-                center,
-                radius,
-                trip_index,
-                corridor_totals[corridor_key],
-            )
-        draw_events.append(ZoneVisit(center, radius, percent, line_start, line_end))
+            trapezoid = None
+        draw_events.append(ZoneVisit(center, radius, percent, trapezoid))
 
+        last_zone = zone
         last_center = center
         last_radius = radius
 
     return draw_events
-
-
-def _corridor_keys(known_zone_list):
-    """Per-visit corridor key (the unordered zone pair) for each drawn move.
-
-    Entry *i* is the route this visit's connecting line belongs to, or ``None``
-    when the move emits no line (the first visit, a same-zone revisit, or a
-    non-adjacent jump). Used to count and index the trips on each route so
-    repeated trips can fan out into a ribbon.
-    """
-    keys = []
-    last_zone = ""
-    for zone in known_zone_list:
-        if last_zone != "" and zone_graph.are_adjacent(last_zone, zone):
-            keys.append(frozenset((last_zone, zone)))
-        else:
-            keys.append(None)
-        last_zone = zone
-    return keys
 
 
 def _visit_percent(visit_index, visit_count):
@@ -136,52 +108,38 @@ def _visit_radius(visit_number, total_visits, max_total):
     return outer_radius * visit_number / total_visits
 
 
-def _fanned_line(last_center, last_radius, center, radius, trip_index, trip_total):
-    """Endpoints of one trip's connecting line, or ``(None, None)`` if degenerate.
+def _transition_trapezoid(last_center, last_radius, center, radius):
+    """Four corners of the band linking two zones, or ``None`` if degenerate.
 
-    Each trip leaves the previous zone's ring (at that visit's radius) and meets
-    this zone's ring, along the line between the two centres. Successive trips on
-    the same route are shifted perpendicular to it by :func:`_ribbon_offset`, so
-    repeated trips fan out into a ribbon that widens with the route's traffic
-    instead of stacking on a single line.
+    The band meets the previous zone's circle across a chord of half-width
+    ``last_radius`` and this zone's circle across a chord of half-width
+    ``radius`` — both this visit's ring radius — laid perpendicular to the route
+    between the centres. Because each end uses the matching ring radius, later
+    trips (larger rings) produce wider bands that nest over earlier ones, and
+    the widest reaches the full circle diameter.
     """
-    no_line = (None, None)
-    delta_x = center[0] - last_center[0]
-    delta_y = center[1] - last_center[1]
-    distance = math.hypot(delta_x, delta_y)
-    if distance == 0:
-        return no_line
-
-    unit_x = delta_x / distance
-    unit_y = delta_y / distance
-    # Clamp ring radii so the two endpoints can never cross past each other on
-    # very close zones.
-    reach = distance * 0.45
-    start_reach = min(last_radius, reach)
-    end_reach = min(radius, reach)
-
-    # A perpendicular fixed to the route (independent of travel direction) keeps
-    # both directions of travel on the same ribbon.
     perp_x, perp_y = _route_perpendicular(last_center, center)
-    offset = _ribbon_offset(trip_index, trip_total)
+    if (perp_x, perp_y) == (0.0, 0.0):
+        return None
 
-    start = (
-        last_center[0] + unit_x * start_reach + perp_x * offset,
-        last_center[1] + unit_y * start_reach + perp_y * offset,
+    start_top = (
+        last_center[0] + perp_x * last_radius,
+        last_center[1] + perp_y * last_radius,
     )
-    end = (
-        center[0] - unit_x * end_reach + perp_x * offset,
-        center[1] - unit_y * end_reach + perp_y * offset,
+    start_bottom = (
+        last_center[0] - perp_x * last_radius,
+        last_center[1] - perp_y * last_radius,
     )
-    return (start, end)
+    end_top = (center[0] + perp_x * radius, center[1] + perp_y * radius)
+    end_bottom = (center[0] - perp_x * radius, center[1] - perp_y * radius)
+    return (start_top, end_top, end_bottom, start_bottom)
 
 
 def _route_perpendicular(center_a, center_b):
     """Unit vector perpendicular to a route, fixed regardless of travel direction.
 
     The two endpoints are ordered canonically before taking the perpendicular so
-    that A->B and B->A trips share one ribbon rather than splaying to opposite
-    sides.
+    that A->B and B->A trips build the same band rather than mirrored ones.
     """
     low, high = sorted((center_a, center_b))
     delta_x = high[0] - low[0]
@@ -190,23 +148,6 @@ def _route_perpendicular(center_a, center_b):
     if distance == 0:
         return (0.0, 0.0)
     return (-delta_y / distance, delta_x / distance)
-
-
-def _ribbon_offset(trip_index, trip_total):
-    """Perpendicular shift for one trip so a route's trips spread into a ribbon.
-
-    Trips are centred on the route and spaced ``RIBBON_STEP`` apart, but the
-    whole ribbon is capped at ``MAX_RIBBON_HALF_WIDTH`` either side; busier
-    routes pack more trips into that capped width.
-    """
-    if trip_total <= 1:
-        return 0.0
-    step = eq_display.RIBBON_STEP
-    full_width = (trip_total - 1) * step
-    max_width = 2 * eq_display.MAX_RIBBON_HALF_WIDTH
-    if full_width > max_width:
-        step = max_width / (trip_total - 1)
-    return (trip_index - (trip_total - 1) / 2) * step
 
 
 def get_known_zones(zone_list):

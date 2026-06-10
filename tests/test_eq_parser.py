@@ -187,14 +187,14 @@ def test_draw_zone_path_does_not_mark_zone_centers(monkeypatch, tmp_path):
 
 
 def test_draw_zone_path_draws_adjacent_graph_transition(monkeypatch, tmp_path):
-    drawn_lines = []
+    drawn_trapezoids = []
 
     class FakeMapRenderer:
         def __init__(self, *args, **kwargs):
             pass
 
-        def draw_line(self, zone_loc_1, zone_loc_2, percent):
-            drawn_lines.append((zone_loc_1, zone_loc_2))
+        def draw_trapezoid(self, points, percent):
+            drawn_trapezoids.append(points)
 
         def draw_disc(self, center, radius, percent):
             pass
@@ -216,18 +216,18 @@ def test_draw_zone_path_draws_adjacent_graph_transition(monkeypatch, tmp_path):
 
     eq_parser.draw_zone_path(zone_list, output_path=tmp_path / "zone_path.png")
 
-    assert len(drawn_lines) == 1
+    assert len(drawn_trapezoids) == 1
 
 
 def test_draw_zone_path_draws_newer_segments_first(monkeypatch, tmp_path):
-    line_percents = []
+    trapezoid_percents = []
 
     class FakeMapRenderer:
         def __init__(self, *args, **kwargs):
             pass
 
-        def draw_line(self, zone_loc_1, zone_loc_2, percent):
-            line_percents.append(percent)
+        def draw_trapezoid(self, points, percent):
+            trapezoid_percents.append(percent)
 
         def draw_disc(self, center, radius, percent):
             pass
@@ -249,7 +249,7 @@ def test_draw_zone_path_draws_newer_segments_first(monkeypatch, tmp_path):
 
     # Newest segment (highest chronological percent) is drawn first so older
     # routes remain on top.
-    assert line_percents == [1.0, 0.5]
+    assert trapezoid_percents == [1.0, 0.5]
 
 
 def test_draw_zone_path_draws_a_disc_for_every_known_visit(
@@ -262,7 +262,7 @@ def test_draw_zone_path_draws_a_disc_for_every_known_visit(
         def __init__(self, *args, **kwargs):
             pass
 
-        def draw_line(self, zone_loc_1, zone_loc_2, percent):
+        def draw_trapezoid(self, points, percent):
             pass
 
         def draw_disc(self, center, radius, percent):
@@ -288,14 +288,14 @@ def test_draw_zone_path_draws_a_disc_for_every_known_visit(
 
 
 def test_draw_zone_path_skips_non_adjacent_graph_transition(monkeypatch, tmp_path):
-    drawn_lines = []
+    drawn_trapezoids = []
 
     class FakeMapRenderer:
         def __init__(self, *args, **kwargs):
             pass
 
-        def draw_line(self, zone_loc_1, zone_loc_2, percent):
-            drawn_lines.append((zone_loc_1, zone_loc_2))
+        def draw_trapezoid(self, points, percent):
+            drawn_trapezoids.append(points)
 
         def draw_disc(self, center, radius, percent):
             pass
@@ -317,7 +317,7 @@ def test_draw_zone_path_skips_non_adjacent_graph_transition(monkeypatch, tmp_pat
 
     eq_parser.draw_zone_path(zone_list, output_path=tmp_path / "zone_path.png")
 
-    assert drawn_lines == []
+    assert drawn_trapezoids == []
 
 
 def test_draw_zone_path_marks_skipped_transition_destination(
@@ -331,8 +331,8 @@ def test_draw_zone_path_marks_skipped_transition_destination(
         def __init__(self, *args, **kwargs):
             pass
 
-        def draw_line(self, zone_loc_1, zone_loc_2, percent):
-            raise AssertionError("skipped graph transitions should not draw lines")
+        def draw_trapezoid(self, points, percent):
+            raise AssertionError("skipped graph transitions should not draw a band")
 
         def draw_disc(self, center, radius, percent):
             drawn_discs.append(center)

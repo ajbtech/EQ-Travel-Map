@@ -151,11 +151,11 @@ class VideoGenerator:
 
     def frames(self):
         # Reset incremental render state so frames() is safe to call multiple
-        # times. Discs and lines live on separate overlays so that, once
-        # composited (base -> discs -> lines), every line sits above every disc
-        # exactly as in a full still render.
+        # times. Trapezoids and discs live on separate overlays so that, once
+        # composited (base -> trapezoids -> discs), every disc sits above every
+        # linking band exactly as in a full still render.
+        self._trapezoids_overlay = self._blank_overlay()
         self._discs_overlay = self._blank_overlay()
-        self._lines_overlay = self._blank_overlay()
         self._rendered_event_count = 0
 
         event_count = len(self._timeline)
@@ -241,23 +241,23 @@ class VideoGenerator:
             # Reversing within the batch keeps the "oldest on top" z-order of a
             # full redraw; pasting the existing overlays on top keeps previously
             # drawn events above the new ones.
+            self._trapezoids_overlay = self._extend_overlay(
+                self._trapezoids_overlay,
+                lambda renderer: [
+                    event.draw_trapezoid(renderer) for event in reversed(new_events)
+                ],
+            )
             self._discs_overlay = self._extend_overlay(
                 self._discs_overlay,
                 lambda renderer: [
                     event.draw_disc(renderer) for event in reversed(new_events)
                 ],
             )
-            self._lines_overlay = self._extend_overlay(
-                self._lines_overlay,
-                lambda renderer: [
-                    event.draw_line(renderer) for event in reversed(new_events)
-                ],
-            )
             self._rendered_event_count = event_count
 
         result = self._base_image.copy()
+        result.alpha_composite(self._trapezoids_overlay)
         result.alpha_composite(self._discs_overlay)
-        result.alpha_composite(self._lines_overlay)
         if last_known_zone is not None and event_count > 0:
             loc = eq_display.get_zone_center(last_known_zone)
             circle_renderer = eq_display.MapRenderer.for_overlay(result)

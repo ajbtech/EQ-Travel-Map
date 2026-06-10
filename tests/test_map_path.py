@@ -10,15 +10,11 @@ TEST_CENTERS = {
 }
 
 
-def _patch_geometry(monkeypatch, ribbon_step=0.0):
+def _patch_geometry(monkeypatch):
     monkeypatch.setattr(map_path.eq_display, "MAX_RING_RADIUS", TEST_RADIUS)
     # Disable the minimum-radius floor so the area-proportional maths stays
     # exact; the floor has its own dedicated test below.
     monkeypatch.setattr(map_path.eq_display, "MIN_RING_RADIUS", 0.0)
-    # Default the ribbon spread off so single-trip geometry stays exact; tests
-    # that exercise the fan set their own step and cap.
-    monkeypatch.setattr(map_path.eq_display, "RIBBON_STEP", ribbon_step)
-    monkeypatch.setattr(map_path.eq_display, "MAX_RIBBON_HALF_WIDTH", 1000.0)
     monkeypatch.setattr(
         map_path.eq_display, "get_zone_center", lambda zone: TEST_CENTERS[zone]
     )
@@ -29,25 +25,30 @@ def test_build_map_events_draws_adjacent_transition(monkeypatch):
 
     events = map_path.build_map_events(["Grobb", "Innothule Swamp"])
 
+    # Both zones visited once => full radius 12, so the link spans +/-12 (the
+    # full diameter) at both ends along the perpendicular to the route.
     assert events == [
-        map_path.ZoneVisit((0.0, 0.0), 12.0, 0.0, None, None),
+        map_path.ZoneVisit((0.0, 0.0), 12.0, 0.0, None),
         map_path.ZoneVisit(
             (100.0, 0.0),
             12.0,
             1.0,
-            line_start=(12.0, 0.0),
-            line_end=(88.0, 0.0),
+            trapezoid=(
+                (0.0, 12.0),
+                (100.0, 12.0),
+                (100.0, -12.0),
+                (0.0, -12.0),
+            ),
         ),
     ]
 
 
-def test_build_map_events_skips_line_for_non_adjacent_transition(monkeypatch):
+def test_build_map_events_skips_trapezoid_for_non_adjacent_transition(monkeypatch):
     _patch_geometry(monkeypatch)
 
     events = map_path.build_map_events(["Grobb", "Great Divide"])
 
-    assert events[1].line_start is None
-    assert events[1].line_end is None
+    assert events[1].trapezoid is None
     assert events[1].center == (0.0, 200.0)
 
 
@@ -96,47 +97,48 @@ def test_build_map_events_colours_visits_chronologically(monkeypatch):
     assert [event.percent for event in events] == [0.0, 0.5, 1.0]
 
 
-def test_build_map_events_attaches_line_to_each_visits_ring_radius(monkeypatch):
+def test_build_map_events_trapezoid_meets_each_circle_at_its_ring_radius(monkeypatch):
     _patch_geometry(monkeypatch)
 
-    # Innothule visited once (outer radius 6 => its single ring at radius 6);
-    # Grobb four times (outer radius 12 => first-visit ring at radius 3). The
-    # one trip leaves Innothule's ring and meets Grobb's first-visit ring.
+    # Innothule visited once (its single ring at radius 6); Grobb four times
+    # (first-visit ring at radius 3). The trip's band spans +/-6 at Innothule
+    # (x=100) and +/-3 at Grobb (x=0) -- a trapezoid tapering between the rings.
     events = map_path.build_map_events(
         ["Innothule Swamp", "Grobb", "Grobb", "Grobb", "Grobb"]
     )
 
     first_move = events[1]
-    assert first_move.line_start == (94.0, 0.0)
-    assert first_move.line_end == (3.0, 0.0)
+    assert first_move.trapezoid == (
+        (100.0, 6.0),
+        (0.0, 3.0),
+        (0.0, -3.0),
+        (100.0, -6.0),
+    )
 
 
-def test_build_map_events_fans_repeat_trips_into_a_ribbon(monkeypatch):
-    _patch_geometry(monkeypatch, ribbon_step=10.0)
+def test_build_map_events_trapezoids_nest_outward_as_rings_grow(monkeypatch):
+    _patch_geometry(monkeypatch)
 
-    # Three trips on the Grobb<->Innothule route. Both zones visited twice =>
-    # rings at radius 6 (first visit) and 12 (second). Trips spread perpendicular
-    # to the route (the y axis here) at offsets -10, 0, +10.
+    # Three trips on the Grobb<->Innothule route; both zones visited twice, so
+    # rings sit at radius 6 (first visit) then 12 (second). Each trip's band
+    # reaches its visit's ring radius, so the bands nest outward to the full
+    # diameter (12) instead of stacking on one line.
     events = map_path.build_map_events(
         ["Grobb", "Innothule Swamp", "Grobb", "Innothule Swamp"]
     )
 
-    trips = [event for event in events if event.line_start is not None]
-    offsets = [event.line_start[1] for event in trips]
-    assert offsets == [-10.0, 0.0, 10.0]
-    # Middle trip sits on the route axis: Grobb 2nd-visit ring (12) to
-    # Innothule 1st-visit ring (6).
-    assert trips[1].line_start == (94.0, 0.0)
-    assert trips[1].line_end == (12.0, 0.0)
+    trips = [event for event in events if event.trapezoid is not None]
+    spans = [max(abs(y) for _, y in trip.trapezoid) for trip in trips]
+    assert spans == [6.0, 12.0, 12.0]
 
 
-def test_build_map_events_omits_line_for_same_zone_revisit(monkeypatch):
+def test_build_map_events_omits_trapezoid_for_same_zone_revisit(monkeypatch):
     _patch_geometry(monkeypatch)
 
     events = map_path.build_map_events(["Grobb", "Grobb"])
 
     assert len(events) == 2
-    assert events[1].line_start is None
+    assert events[1].trapezoid is None
 
 
 def test_build_map_events_empty_for_no_known_zones(monkeypatch):

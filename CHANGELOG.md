@@ -11,11 +11,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   Each zone is now drawn as a filled circle whose colour runs from the
   earliest visit's rainbow colour at the centre to the latest at the edge, so
   a zone visited throughout a character's life reads red→violet from the
-  inside out. Travel lines attach to each zone's colour ring, and repeated
-  trips between the same two zones fan out into a ribbon whose thickness grows
-  with how often that route was travelled (drawn on top of the discs so they
-  stay visible). Each zone's circle is also sized by how often it was visited —
-  disc *area*
+  inside out. Zone transitions are drawn as trapezoidal bands beneath the
+  circles: each trip's band meets each circle at that trip's colour ring and
+  spans its full width, so repeated trips nest outward as the rings grow and
+  fill the gap between zones with chronological colour stripes. Each zone's
+  circle is also sized by how often it was visited — disc *area*
   is proportional to its visit count relative to the busiest zone, so the
   most-visited zone fills the maximum radius and the rest scale down. The map
   is now fully deterministic (no RNG), so the same log always renders

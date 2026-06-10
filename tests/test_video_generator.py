@@ -95,11 +95,11 @@ def test_final_frame_map_matches_full_reverse_render():
     frames = list(gen.frames())
 
     reference = eq_display.MapRenderer()
-    # Match the renderer's two-pass order: every disc first, then every line.
+    # Match the renderer's two-pass order: every trapezoid first, then every disc.
+    for event in reversed(gen._all_map_events):
+        event.draw_trapezoid(reference)
     for event in reversed(gen._all_map_events):
         event.draw_disc(reference)
-    for event in reversed(gen._all_map_events):
-        event.draw_line(reference)
     last_zone = "Grobb"
     if gen._all_map_events:
         loc = eq_display.get_zone_center(last_zone)
