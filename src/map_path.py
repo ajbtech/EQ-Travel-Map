@@ -18,8 +18,10 @@ class ZoneVisit:
     *area* is proportional to its visit count relative to the busiest zone, so
     the most-visited zone fills ``MAX_RING_RADIUS`` and the rest shrink from
     there. ``line_start``/``line_end`` carry the connecting line from the
-    previous visit when (and only when) the two zones are graph-adjacent; the
-    line attaches to each circle at the matching visit's ring radius.
+    previous visit when (and only when) the two zones are graph-adjacent. The
+    line attaches to each circle at that visit's ring radius and is offset
+    perpendicular to the route, so repeated trips between the same two zones fan
+    out into a ribbon rather than stacking on one line.
     """
 
     center: tuple[float, float]
@@ -28,10 +30,18 @@ class ZoneVisit:
     line_start: tuple[float, float] | None = None
     line_end: tuple[float, float] | None = None
 
-    def draw(self, renderer):
+    def draw_disc(self, renderer):
+        renderer.draw_disc(self.center, self.radius, percent=self.percent)
+
+    def draw_line(self, renderer):
         if self.line_start is not None:
             renderer.draw_line(self.line_start, self.line_end, percent=self.percent)
-        renderer.draw_disc(self.center, self.radius, percent=self.percent)
+
+    def draw(self, renderer):
+        # Disc first, then the line on top, so the connecting ribbon is never
+        # hidden behind the zone's filled circle.
+        self.draw_disc(renderer)
+        self.draw_line(renderer)
 
 
 def build_map_events(zone_list):
@@ -42,30 +52,61 @@ def build_map_events(zone_list):
 
     zone_total_counts = Counter(known_zone_list)
     max_total = max(zone_total_counts.values())
+    corridor_keys = _corridor_keys(known_zone_list)
+    corridor_totals = Counter(key for key in corridor_keys if key is not None)
+
     zone_visit_counts = {}
+    corridor_seen = Counter()
     draw_events = []
-    last_zone = ""
     last_center = None
-    last_outer_radius = 0.0
+    last_radius = 0.0
 
     for visit_index, zone in enumerate(known_zone_list):
         percent = _visit_percent(visit_index, visit_count)
         zone_visit_counts[zone] = zone_visit_counts.get(zone, 0) + 1
         zone_total = zone_total_counts[zone]
-        outer_radius = _zone_outer_radius(zone_total, max_total)
         radius = _visit_radius(zone_visit_counts[zone], zone_total, max_total)
         center = eq_display.get_zone_center(zone)
 
-        line_start, line_end = _connecting_line(
-            last_zone, zone, last_center, last_outer_radius, center, outer_radius
-        )
+        corridor_key = corridor_keys[visit_index]
+        if corridor_key is None:
+            line_start, line_end = (None, None)
+        else:
+            corridor_seen[corridor_key] += 1
+            trip_index = corridor_seen[corridor_key] - 1
+            line_start, line_end = _fanned_line(
+                last_center,
+                last_radius,
+                center,
+                radius,
+                trip_index,
+                corridor_totals[corridor_key],
+            )
         draw_events.append(ZoneVisit(center, radius, percent, line_start, line_end))
 
-        last_zone = zone
         last_center = center
-        last_outer_radius = outer_radius
+        last_radius = radius
 
     return draw_events
+
+
+def _corridor_keys(known_zone_list):
+    """Per-visit corridor key (the unordered zone pair) for each drawn move.
+
+    Entry *i* is the route this visit's connecting line belongs to, or ``None``
+    when the move emits no line (the first visit, a same-zone revisit, or a
+    non-adjacent jump). Used to count and index the trips on each route so
+    repeated trips can fan out into a ribbon.
+    """
+    keys = []
+    last_zone = ""
+    for zone in known_zone_list:
+        if last_zone != "" and zone_graph.are_adjacent(last_zone, zone):
+            keys.append(frozenset((last_zone, zone)))
+        else:
+            keys.append(None)
+        last_zone = zone
+    return keys
 
 
 def _visit_percent(visit_index, visit_count):
@@ -95,38 +136,77 @@ def _visit_radius(visit_number, total_visits, max_total):
     return outer_radius * visit_number / total_visits
 
 
-def _connecting_line(
-    last_zone, zone, last_center, last_outer_radius, center, outer_radius
-):
-    """Endpoints of the line into *zone*, or ``(None, None)`` when none is drawn.
+def _fanned_line(last_center, last_radius, center, radius, trip_index, trip_total):
+    """Endpoints of one trip's connecting line, or ``(None, None)`` if degenerate.
 
-    A line is drawn only for genuine graph-adjacent moves. It runs rim to rim
-    along the straight line between the two zone centres: it leaves the previous
-    zone's circle at its outer edge and meets this zone's circle at its outer
-    edge, so the two rings are connected cleanly without the line crossing into
-    either disc or diving toward a centre.
+    Each trip leaves the previous zone's ring (at that visit's radius) and meets
+    this zone's ring, along the line between the two centres. Successive trips on
+    the same route are shifted perpendicular to it by :func:`_ribbon_offset`, so
+    repeated trips fan out into a ribbon that widens with the route's traffic
+    instead of stacking on a single line.
     """
     no_line = (None, None)
-    is_first_visit = last_zone == ""
-    if is_first_visit or not zone_graph.are_adjacent(last_zone, zone):
-        return no_line
-
     delta_x = center[0] - last_center[0]
     delta_y = center[1] - last_center[1]
     distance = math.hypot(delta_x, delta_y)
-    centers_coincide = distance == 0
-    circles_overlap = last_outer_radius + outer_radius >= distance
-    if centers_coincide or circles_overlap:
+    if distance == 0:
         return no_line
 
     unit_x = delta_x / distance
     unit_y = delta_y / distance
+    # Clamp ring radii so the two endpoints can never cross past each other on
+    # very close zones.
+    reach = distance * 0.45
+    start_reach = min(last_radius, reach)
+    end_reach = min(radius, reach)
+
+    # A perpendicular fixed to the route (independent of travel direction) keeps
+    # both directions of travel on the same ribbon.
+    perp_x, perp_y = _route_perpendicular(last_center, center)
+    offset = _ribbon_offset(trip_index, trip_total)
+
     start = (
-        last_center[0] + unit_x * last_outer_radius,
-        last_center[1] + unit_y * last_outer_radius,
+        last_center[0] + unit_x * start_reach + perp_x * offset,
+        last_center[1] + unit_y * start_reach + perp_y * offset,
     )
-    end = (center[0] - unit_x * outer_radius, center[1] - unit_y * outer_radius)
+    end = (
+        center[0] - unit_x * end_reach + perp_x * offset,
+        center[1] - unit_y * end_reach + perp_y * offset,
+    )
     return (start, end)
+
+
+def _route_perpendicular(center_a, center_b):
+    """Unit vector perpendicular to a route, fixed regardless of travel direction.
+
+    The two endpoints are ordered canonically before taking the perpendicular so
+    that A->B and B->A trips share one ribbon rather than splaying to opposite
+    sides.
+    """
+    low, high = sorted((center_a, center_b))
+    delta_x = high[0] - low[0]
+    delta_y = high[1] - low[1]
+    distance = math.hypot(delta_x, delta_y)
+    if distance == 0:
+        return (0.0, 0.0)
+    return (-delta_y / distance, delta_x / distance)
+
+
+def _ribbon_offset(trip_index, trip_total):
+    """Perpendicular shift for one trip so a route's trips spread into a ribbon.
+
+    Trips are centred on the route and spaced ``RIBBON_STEP`` apart, but the
+    whole ribbon is capped at ``MAX_RIBBON_HALF_WIDTH`` either side; busier
+    routes pack more trips into that capped width.
+    """
+    if trip_total <= 1:
+        return 0.0
+    step = eq_display.RIBBON_STEP
+    full_width = (trip_total - 1) * step
+    max_width = 2 * eq_display.MAX_RIBBON_HALF_WIDTH
+    if full_width > max_width:
+        step = max_width / (trip_total - 1)
+    return (trip_index - (trip_total - 1) / 2) * step
 
 
 def get_known_zones(zone_list):

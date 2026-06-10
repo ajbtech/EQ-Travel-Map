@@ -67,18 +67,18 @@ def draw_zone_path(my_zone_list, output_path=None):
 
     map_renderer = eq_display.MapRenderer()
 
-    # Draw newest events first so older low-level routes remain visible on top.
+    # Discs first, then every connecting line on top, so the travel ribbons are
+    # never hidden behind a zone's filled circle. Within each pass newest events
+    # are drawn first so older, lower-level routes remain visible on top.
     for draw_event in reversed(draw_events):
-        draw_map_event(map_renderer, draw_event)
+        draw_event.draw_disc(map_renderer)
+    for draw_event in reversed(draw_events):
+        draw_event.draw_line(map_renderer)
 
     if output_path is None:
         map_renderer.display_map()
     else:
         map_renderer.save_map(output_path)
-
-
-def draw_map_event(map_renderer, draw_event):
-    draw_event.draw(map_renderer)
 
 
 def build_arg_parser():

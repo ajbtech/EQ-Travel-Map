@@ -136,6 +136,12 @@ MAX_RING_RADIUS = 18.75
 # than shrinking to a sub-pixel dot.
 MIN_RING_RADIUS = 7.5
 
+# Repeated trips between the same two zones fan out into a ribbon: each trip is
+# offset perpendicular to the route by ``RIBBON_STEP`` px from the last, up to a
+# total half-width of ``MAX_RIBBON_HALF_WIDTH`` px (busier routes look thicker).
+RIBBON_STEP = 3.0
+MAX_RIBBON_HALF_WIDTH = 18.75
+
 
 def make_rainbow(percent):
     for start_stop, end_stop in zip(RAINBOW_COLOR_STOPS, RAINBOW_COLOR_STOPS[1:]):

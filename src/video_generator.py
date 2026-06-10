@@ -150,12 +150,12 @@ class VideoGenerator:
         return self._total_frames
 
     def frames(self):
-        # Reset incremental render state so frames() is safe to call multiple times.
-        self._lines_overlay = Image.new(
-            "RGBA",
-            (eq_display.MAP_PIXEL_WIDTH, eq_display.MAP_PIXEL_HEIGHT),
-            (0, 0, 0, 0),
-        )
+        # Reset incremental render state so frames() is safe to call multiple
+        # times. Discs and lines live on separate overlays so that, once
+        # composited (base -> discs -> lines), every line sits above every disc
+        # exactly as in a full still render.
+        self._discs_overlay = self._blank_overlay()
+        self._lines_overlay = self._blank_overlay()
         self._rendered_event_count = 0
 
         event_count = len(self._timeline)
@@ -219,28 +219,44 @@ class VideoGenerator:
             return event_count
         return int(round((frame_index + 1) * event_count / total))
 
+    @staticmethod
+    def _blank_overlay():
+        return Image.new(
+            "RGBA",
+            (eq_display.MAP_PIXEL_WIDTH, eq_display.MAP_PIXEL_HEIGHT),
+            (0, 0, 0, 0),
+        )
+
+    def _extend_overlay(self, existing_overlay, draw_batch):
+        """Draw a new batch beneath *existing_overlay*, returning the merged layer."""
+        new_layer = self._blank_overlay()
+        draw_batch(eq_display.MapRenderer.for_overlay(new_layer))
+        new_layer.alpha_composite(existing_overlay)
+        return new_layer
+
     def _render_map(self, event_count, last_known_zone=None):
         new_events = self._all_map_events[self._rendered_event_count : event_count]
         if new_events:
-            # Draw new events onto a fresh transparent layer.  Reversing within
-            # the batch keeps the same "oldest on top" z-order as a full redraw:
-            # the earliest of the new events is drawn last and sits on top of the
-            # later ones.
-            new_layer = Image.new(
-                "RGBA",
-                (eq_display.MAP_PIXEL_WIDTH, eq_display.MAP_PIXEL_HEIGHT),
-                (0, 0, 0, 0),
+            # Draw the new batch's discs and lines onto separate fresh layers.
+            # Reversing within the batch keeps the "oldest on top" z-order of a
+            # full redraw; pasting the existing overlays on top keeps previously
+            # drawn events above the new ones.
+            self._discs_overlay = self._extend_overlay(
+                self._discs_overlay,
+                lambda renderer: [
+                    event.draw_disc(renderer) for event in reversed(new_events)
+                ],
             )
-            overlay_renderer = eq_display.MapRenderer.for_overlay(new_layer)
-            for event in reversed(new_events):
-                event.draw(overlay_renderer)
-            # Paste the existing lines on top so all previously drawn events
-            # remain above the new ones, preserving the overall z-order.
-            new_layer.alpha_composite(self._lines_overlay)
-            self._lines_overlay = new_layer
+            self._lines_overlay = self._extend_overlay(
+                self._lines_overlay,
+                lambda renderer: [
+                    event.draw_line(renderer) for event in reversed(new_events)
+                ],
+            )
             self._rendered_event_count = event_count
 
         result = self._base_image.copy()
+        result.alpha_composite(self._discs_overlay)
         result.alpha_composite(self._lines_overlay)
         if last_known_zone is not None and event_count > 0:
             loc = eq_display.get_zone_center(last_known_zone)
