@@ -92,19 +92,19 @@ def test_build_map_events_colours_visits_chronologically(monkeypatch):
     assert [event.percent for event in events] == [0.0, 0.5, 1.0]
 
 
-def test_build_map_events_attaches_line_to_matching_ring_radius(monkeypatch):
+def test_build_map_events_connects_lines_rim_to_rim(monkeypatch):
     _patch_geometry(monkeypatch)
 
-    # Both zones visited twice => equally busy => both full radius 12, with an
-    # inner ring at 6. The third move (back to Grobb) leaves Innothule's inner
-    # ring (radius 6) and arrives at Grobb's outer ring (radius 12).
+    # Innothule visited once (outer radius 6); Grobb four times (outer radius
+    # 12). The move from Innothule to Grobb leaves Innothule's rim and meets
+    # Grobb's rim, regardless of which inner ring the visit falls on.
     events = map_path.build_map_events(
-        ["Grobb", "Innothule Swamp", "Grobb", "Innothule Swamp"]
+        ["Innothule Swamp", "Grobb", "Grobb", "Grobb", "Grobb"]
     )
 
-    return_trip = events[2]
-    assert return_trip.line_start == (94.0, 0.0)
-    assert return_trip.line_end == (12.0, 0.0)
+    first_move = events[1]
+    assert first_move.line_start == (94.0, 0.0)
+    assert first_move.line_end == (12.0, 0.0)
 
 
 def test_build_map_events_omits_line_for_same_zone_revisit(monkeypatch):

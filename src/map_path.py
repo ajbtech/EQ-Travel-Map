@@ -46,24 +46,24 @@ def build_map_events(zone_list):
     draw_events = []
     last_zone = ""
     last_center = None
-    last_radius = 0.0
+    last_outer_radius = 0.0
 
     for visit_index, zone in enumerate(known_zone_list):
         percent = _visit_percent(visit_index, visit_count)
         zone_visit_counts[zone] = zone_visit_counts.get(zone, 0) + 1
-        radius = _visit_radius(
-            zone_visit_counts[zone], zone_total_counts[zone], max_total
-        )
+        zone_total = zone_total_counts[zone]
+        outer_radius = _zone_outer_radius(zone_total, max_total)
+        radius = _visit_radius(zone_visit_counts[zone], zone_total, max_total)
         center = eq_display.get_zone_center(zone)
 
         line_start, line_end = _connecting_line(
-            last_zone, zone, last_center, last_radius, center, radius
+            last_zone, zone, last_center, last_outer_radius, center, outer_radius
         )
         draw_events.append(ZoneVisit(center, radius, percent, line_start, line_end))
 
         last_zone = zone
         last_center = center
-        last_radius = radius
+        last_outer_radius = outer_radius
 
     return draw_events
 
@@ -95,13 +95,16 @@ def _visit_radius(visit_number, total_visits, max_total):
     return outer_radius * visit_number / total_visits
 
 
-def _connecting_line(last_zone, zone, last_center, last_radius, center, radius):
+def _connecting_line(
+    last_zone, zone, last_center, last_outer_radius, center, outer_radius
+):
     """Endpoints of the line into *zone*, or ``(None, None)`` when none is drawn.
 
-    A line is drawn only for genuine graph-adjacent moves. It runs from the
-    previous zone's ring (at that visit's radius) to this zone's ring, along the
-    straight line between the two zone centres, so it meets each circle at the
-    matching colour band.
+    A line is drawn only for genuine graph-adjacent moves. It runs rim to rim
+    along the straight line between the two zone centres: it leaves the previous
+    zone's circle at its outer edge and meets this zone's circle at its outer
+    edge, so the two rings are connected cleanly without the line crossing into
+    either disc or diving toward a centre.
     """
     no_line = (None, None)
     is_first_visit = last_zone == ""
@@ -112,17 +115,17 @@ def _connecting_line(last_zone, zone, last_center, last_radius, center, radius):
     delta_y = center[1] - last_center[1]
     distance = math.hypot(delta_x, delta_y)
     centers_coincide = distance == 0
-    circles_overlap = last_radius + radius >= distance
+    circles_overlap = last_outer_radius + outer_radius >= distance
     if centers_coincide or circles_overlap:
         return no_line
 
     unit_x = delta_x / distance
     unit_y = delta_y / distance
     start = (
-        last_center[0] + unit_x * last_radius,
-        last_center[1] + unit_y * last_radius,
+        last_center[0] + unit_x * last_outer_radius,
+        last_center[1] + unit_y * last_outer_radius,
     )
-    end = (center[0] - unit_x * radius, center[1] - unit_y * radius)
+    end = (center[0] - unit_x * outer_radius, center[1] - unit_y * outer_radius)
     return (start, end)
 
 
