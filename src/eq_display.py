@@ -126,10 +126,15 @@ class MapRenderer:
         self.image.save(output_path, format="PNG")
 
 
-# Outer radius of every zone's per-visit colour ring, in map pixels. Matches
-# the old maximum jitter radius (``MAX_JITTER_SIZE / 2``) so the visual spread
-# of a busy zone is unchanged, while the placement is now deterministic.
+# Outer radius of the busiest zone's colour ring, in map pixels. Matches the
+# old maximum jitter radius (``MAX_JITTER_SIZE / 2``) so the visual spread of a
+# busy zone is unchanged, while the placement is now deterministic. Other zones
+# scale down from here by visit count (see ``map_path``).
 MAX_RING_RADIUS = 18.75
+
+# Floor on a zone's outer radius so rarely-visited zones stay visible rather
+# than shrinking to a sub-pixel dot.
+MIN_RING_RADIUS = 7.5
 
 
 def make_rainbow(percent):

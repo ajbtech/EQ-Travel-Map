@@ -80,9 +80,13 @@ def _zone_outer_radius(total_visits, max_total):
 
     The busiest zone (``total_visits == max_total``) fills ``MAX_RING_RADIUS``;
     a zone visited a quarter as often covers a quarter of the area, i.e. half
-    the radius.
+    the radius. The result is floored at ``MIN_RING_RADIUS`` so rarely-visited
+    zones stay visible.
     """
-    return eq_display.MAX_RING_RADIUS * math.sqrt(total_visits / max_total)
+    area_scaled_radius = eq_display.MAX_RING_RADIUS * math.sqrt(
+        total_visits / max_total
+    )
+    return max(area_scaled_radius, eq_display.MIN_RING_RADIUS)
 
 
 def _visit_radius(visit_number, total_visits, max_total):

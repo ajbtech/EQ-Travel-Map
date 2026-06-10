@@ -12,6 +12,9 @@ TEST_CENTERS = {
 
 def _patch_geometry(monkeypatch):
     monkeypatch.setattr(map_path.eq_display, "MAX_RING_RADIUS", TEST_RADIUS)
+    # Disable the minimum-radius floor so the area-proportional maths stays
+    # exact; the floor has its own dedicated test below.
+    monkeypatch.setattr(map_path.eq_display, "MIN_RING_RADIUS", 0.0)
     monkeypatch.setattr(
         map_path.eq_display, "get_zone_center", lambda zone: TEST_CENTERS[zone]
     )
@@ -60,6 +63,24 @@ def test_build_map_events_outer_radius_is_area_proportional_to_busiest_zone(
     # Grobb's four visits stack as evenly spaced concentric rings out to 12.
     assert grobb_radii == [3.0, 6.0, 9.0, 12.0]
     assert innothule_radii == [6.0]
+
+
+def test_build_map_events_floors_outer_radius_at_minimum(monkeypatch):
+    monkeypatch.setattr(map_path.eq_display, "MAX_RING_RADIUS", TEST_RADIUS)
+    monkeypatch.setattr(map_path.eq_display, "MIN_RING_RADIUS", 5.0)
+    monkeypatch.setattr(
+        map_path.eq_display, "get_zone_center", lambda zone: TEST_CENTERS[zone]
+    )
+
+    # Grobb visited 16x is busiest (radius 12). Innothule's single visit would
+    # area-scale to 12 * sqrt(1/16) = 3.0, below the 5.0 floor, so it is
+    # clamped up to keep the zone visible.
+    events = map_path.build_map_events(["Grobb"] * 16 + ["Innothule Swamp"])
+
+    innothule_radius = next(
+        event.radius for event in events if event.center == (100.0, 0.0)
+    )
+    assert innothule_radius == 5.0
 
 
 def test_build_map_events_colours_visits_chronologically(monkeypatch):
