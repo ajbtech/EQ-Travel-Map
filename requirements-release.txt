@@ -7,7 +7,7 @@
 # Bump these together with a CHANGELOG entry whenever you cut a release.
 pyside6==6.11.1
 shiboken6==6.11.1
-pillow==12.2.0
+pillow==12.3.0
 pyinstaller==6.16.0
 imageio==2.37.3
 imageio-ffmpeg==0.6.0

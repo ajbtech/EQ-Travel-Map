@@ -1,4 +1,4 @@
 pyside6>=6.6
-pillow>=9.0
+pillow>=12.3.0
 imageio[ffmpeg]>=2.33
 numpy>=1.24
