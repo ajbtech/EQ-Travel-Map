@@ -13,6 +13,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   GD loaders, JPEG2000/PDF/EPS denial of service, TGA RLE heap disclosure,
   and command injection in `WindowsViewer`). The developer floor in
   `requirements.txt` and `pyproject.toml` was raised to match the release pin.
+- Added `.github/dependabot.yml` so pip and GitHub Actions updates arrive as
+  weekly grouped pull requests instead of accumulating as unattended alerts.
 
 ### Added
 - "MAKE VIDEO" button on the results window exports an MP4 that replays the

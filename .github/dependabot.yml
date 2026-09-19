@@ -1,0 +1,51 @@
+# Dependabot keeps this project's dependencies patched automatically.
+#
+# The pip entry covers every manifest in the repository root:
+# ``requirements.txt`` and ``pyproject.toml`` (the loose floors developers
+# install from) and ``requirements-release.txt`` (the exact pins the Windows
+# PyInstaller bundle in ``.github/workflows/release.yml`` ships with).
+#
+# Updates are grouped so a routine week arrives as one or two pull requests
+# rather than one per package. Security fixes are left ungrouped by Dependabot
+# so they land on their own and stay easy to review and back out.
+#
+# No ``labels:`` key is set: Dependabot only applies labels that already exist
+# in the repository, and this one has none. Leaving it unset lets Dependabot
+# create and apply its own ``dependencies`` label on the first pull request.
+version: 2
+
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    groups:
+      python-patch-and-minor:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    groups:
+      actions-all:
+        patterns:
+          - "*"
