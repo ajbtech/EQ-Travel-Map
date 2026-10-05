@@ -9,6 +9,6 @@ pyside6==6.11.2
 shiboken6==6.11.2
 pillow==12.3.0
 pyinstaller==6.22.3
-imageio==2.37.4
+imageio==2.38.0
 imageio-ffmpeg==0.6.0
 numpy==2.4.6
